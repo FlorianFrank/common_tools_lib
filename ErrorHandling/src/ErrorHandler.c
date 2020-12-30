@@ -21,7 +21,7 @@
             return "Socket timeout";
          case PIL_ERRNO:
              return "Errno";
-         case PIL_SOCKET_CLOSED:
+         case PIL_INTERFACE_CLOSED:
              return "Socket is closed";
          default:
              return "Unknown error";

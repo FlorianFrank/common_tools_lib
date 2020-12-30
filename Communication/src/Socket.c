@@ -89,7 +89,7 @@ PIL_ERROR_CODE PIL_SOCKET_Close(PIL_SOCKET *socketRet)
 #else // lwip
     udp_remove(socketRet->conn);
 #endif // linux
-    return PIL_SOCKET_CLOSED;
+    return PIL_INTERFACE_CLOSED;
 }
 
 /**

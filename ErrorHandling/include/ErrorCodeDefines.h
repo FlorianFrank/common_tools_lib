@@ -9,20 +9,17 @@
 
 #define MAX_ERROR_MSG_LEN 128
 
-enum PIL_ERROR_CODE
+enum
 {
-    PIL_NO_ERROR,
-    PIL_INVALID_ARGUMENTS,
-    PIL_ERRNO,
+    PIL_NO_ERROR, PIL_INVALID_ARGUMENTS, PIL_ERRNO,
 
     /* Socket errors */
-    PIL_SOCKET_TIMEOUT,
-    PIL_SOCKET_CLOSED
+    PIL_SOCKET_TIMEOUT, PIL_INTERFACE_CLOSED
 
 } typedef PIL_ERROR_CODE;
 
 
-struct PIL_ErrorHandle
+struct
 {
     PIL_ERROR_CODE errorCode;
     uint32_t errnoCode;
