@@ -1,0 +1,14 @@
+//
+// Created by florianfrank on 29.12.20.
+//
+
+#ifndef PLATFORMINDEPENDENTLIB_DATATYPEDEFINES_H
+#define PLATFORMINDEPENDENTLIB_DATATYPEDEFINES_H
+
+#include <stdint.h>
+
+typedef uint8_t PIL_BOOL;
+#define TRUE 1
+#define FALSE 0
+
+#endif //PLATFORMINDEPENDENTLIB_DATATYPEDEFINES_H
