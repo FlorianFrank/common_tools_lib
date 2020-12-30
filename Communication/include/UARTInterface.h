@@ -7,6 +7,8 @@
 
 
 #include <stdint.h>
+#include <DataTypeDefines.h>
+#include "ErrorCodeDefines.h"
 
 #ifdef __WIN32__
 #include <ntdef.h>
@@ -15,27 +17,21 @@ typedef HANDLE FileHandle;
 typedef int FileHandle;
 #endif // WIN32
 
-typedef uint8_t BOOL;
-#define FALSE 0
-#define TRUE 1
 
-struct PIL_UART_Config
+struct
 {
     int m_Baudrate;
     char m_Interface[30];
     FileHandle m_FileHandle;
-    BOOL m_Open;
+    PIL_BOOL m_Open;
+    PIL_ErrorHandle errorHandle;
 } typedef PIL_UART_Config;
 
-    int PIL_UART_CreateUartInterface(PIL_UART_Config *config, const char *interface, int baudrate);
-    BOOL PIL_UART_Open(PIL_UART_Config *config);
-    BOOL PIL_UART_Close(PIL_UART_Config *config);
-    BOOL PIL_UART_ReadData(PIL_UART_Config *config, char* buffer, int *bufferLen);
-    BOOL PIL_UART_WriteData(PIL_UART_Config *config, const char *buffer, const int *write);
-    BOOL PIL_UART_SetComParameters(PIL_UART_Config *config);
-
-    char* GetErrorMessage();
-
-
+    PIL_ERROR_CODE PIL_UART_CreateUartInterface(PIL_UART_Config *config, const char *interface, uint32_t baudrate);
+    PIL_ERROR_CODE PIL_UART_Open(PIL_UART_Config *config, PIL_BOOL nonBlocking);
+    PIL_ERROR_CODE PIL_UART_Close(PIL_UART_Config *config);
+    PIL_ERROR_CODE PIL_UART_ReadData(PIL_UART_Config *config, char* buffer, int *bufferLen);
+    PIL_ERROR_CODE PIL_UART_WriteData(PIL_UART_Config *config, const char *buffer, const int *write);
+    PIL_ERROR_CODE PIL_UART_SetComParameters(PIL_UART_Config *config);
 
 #endif //AUTOMATIC_TESTER_UARTINTERFACE_H

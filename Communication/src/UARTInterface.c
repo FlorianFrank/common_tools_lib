@@ -3,6 +3,7 @@
 //
 
 #include "UARTInterface.h"
+#include "ErrorHandler.h"
 #include "Logging.h"
 #include <string.h>
 #include <stdio.h> // sprintf
@@ -18,22 +19,24 @@
 
 char err[256];
 
-int CreateUartInterface(PIL_UART_Config *config, const char *interface, int baudrate)
+PIL_ERROR_CODE PIL_UART_CreateUartInterface(PIL_UART_Config *config, const char *interface, uint32_t baudrate)
 {
     if(!config)
-        return -1;
+        return PIL_INVALID_ARGUMENTS;
 
     strcpy(config->m_Interface, interface);
     config->m_Baudrate = baudrate;
     config->m_Open = 0;
-    return 0;
+
+    return PIL_NO_ERROR;
 }
 
 
-BOOL PIL_Open(PIL_UART_Config *config, BOOL nonBlocking)
+PIL_ERROR_CODE PIL_UART_Open(PIL_UART_Config *config, PIL_BOOL nonBlocking)
 {
     if(!config)
-        return FALSE;
+        return PIL_INVALID_ARGUMENTS;
+
 #ifdef __WIN32__
     char comBuff[20];
     if (sprintf(comBuff, R"(\\.\%s)", config->m_Interface) == -1)
@@ -51,81 +54,83 @@ BOOL PIL_Open(PIL_UART_Config *config, BOOL nonBlocking)
     LogMessage(DEBUG_LVL, __FILENAME__, __LINE__, "Open file %s successfully", comBuff);
     return true;
 #else // Linux
-    config->m_FileHandle = open(config->m_Interface, O_RDWR | ((nonBlocking) ? O_NONBLOCK : 0));
+    uint32_t flags = (uint32_t)O_RDWR | ((nonBlocking) ? (uint32_t)O_NONBLOCK : (uint16_t)0);
+    config->m_FileHandle = open(config->m_Interface, flags);
     if(config->m_FileHandle < 0)
     {
-        //SetError(errno); TODO
-        return FALSE;
+        PIL_SetLastError(&config->errorHandle, PIL_ERRNO);
+        return PIL_ERRNO;
     }
-    config->m_Open = 1;
-    return TRUE;
+    config->m_Open = TRUE;
+
+    return PIL_NO_ERROR;
 #endif // WIN32
 }
 
-BOOL PIL_UART_Close(PIL_UART_Config *config)
+PIL_ERROR_CODE PIL_UART_Close(PIL_UART_Config *config)
 {
     if(!config)
-        return FALSE;
+        return PIL_INVALID_ARGUMENTS;
 #ifdef __WIN32__
     ::CloseHandle(m_FileHandle);
 #else
     if(close(config->m_FileHandle) == -1)
     {
-      //  SetError(errno); TODO
-        return FALSE;
+        PIL_SetLastError(&config->errorHandle, PIL_ERRNO);
+        return PIL_ERRNO;
     }
 #endif // __WIN32__
-return TRUE;
+return PIL_NO_ERROR;
 }
 
-BOOL PIL_UART_ReadData(PIL_UART_Config *config, char *buffer, int *bufferLen)
+PIL_ERROR_CODE PIL_UART_ReadData(PIL_UART_Config *config, char *buffer, int *bufferLen)
 {
     if(!config)
-        return FALSE;
+        return PIL_INVALID_ARGUMENTS;
 
     if(!config->m_Open)
     {
-    //    SetError(100); // TODO
-        return FALSE;
+        PIL_SetLastError(&config->errorHandle, PIL_INTERFACE_CLOSED);
+        return PIL_INTERFACE_CLOSED;
     }
 #ifdef __WIN32__
-    ::ReadFile(m_FileHandle, buffer, maxBufferLen, reinterpret_cast<LPDWORD>(bufferLen), nullptr);
+    ReadFile(m_FileHandle, buffer, maxBufferLen, (LPDWORD)bufferLen, nullptr);
 #else // Linux
 
     int readRet = read(config->m_FileHandle, buffer, *bufferLen);
     if(readRet < 0)
     {
-        //SetError(errno);
-        return FALSE;
+        PIL_SetLastError(&config->errorHandle, PIL_ERRNO);
+        return PIL_ERRNO;
     }
     *bufferLen = readRet;
 #endif // WIN32
-    return TRUE;
+    return PIL_NO_ERROR;
 }
 
-BOOL PIL_UART_WriteData(PIL_UART_Config *config, const char *buffer, const int *size)
+PIL_ERROR_CODE PIL_UART_WriteData(PIL_UART_Config *config, const char *buffer, const int *buffSize)
 {
     if(!config)
-        return FALSE;
+        return PIL_INVALID_ARGUMENTS;
 #ifdef __WIN32__
     DWORD written;
     ::WriteFile(m_FileHandle, buffer, *write, &written, nullptr);
-    *write = static_cast<int>(written);
+    *write = (int)written;
 #else // Linux
-    int writeRet = write(config->m_FileHandle, buffer, *size);
+    int writeRet = write(config->m_FileHandle, buffer, *buffSize);
     if (writeRet < 0)
     {
-        //SetError(errno); TODO
-        return FALSE;
+        PIL_SetLastError(&config->errorHandle, PIL_ERRNO);
+        return PIL_ERRNO;
     }
 #endif // WIN32
-    return TRUE;
+    return PIL_NO_ERROR;
 }
 
-BOOL PIL_UART_SetComParameters(PIL_UART_Config *config)
+PIL_ERROR_CODE PIL_UART_SetComParameters(PIL_UART_Config *config)
 {
     if(!config)
-        return 0;
+        return PIL_INVALID_ARGUMENTS;
 #ifdef __WIN32__
     DCB commDCB;
     commDCB.DCBlength = sizeof(DCB);
@@ -165,7 +170,7 @@ BOOL PIL_UART_SetComParameters(PIL_UART_Config *config)
     }
     return true;
 #else // Linux
-    int baudrate;
+    int baudrate = 0;
     switch(config->m_Baudrate)
     {
         case(110):
@@ -211,7 +216,7 @@ BOOL PIL_UART_SetComParameters(PIL_UART_Config *config)
                baudrate = 0;
             break;
     }
-    //fcntl(m_hDev, F_SETFL, 0);
+
     struct termios tty;
     memset (&tty, 0, sizeof tty);
     if (tcgetattr (config->m_FileHandle, &tty) != 0)
@@ -266,19 +271,9 @@ BOOL PIL_UART_SetComParameters(PIL_UART_Config *config)
     tcflush(config->m_FileHandle, TCIOFLUSH);
     if (tcsetattr (config->m_FileHandle, TCSANOW, &tty) != 0)
     {
-        return FALSE;
+        PIL_SetLastError(&config->errorHandle, PIL_ERRNO);
+        return PIL_ERRNO;
     }
-    return TRUE;
+    return PIL_NO_ERROR;
 #endif // WIN32
 }
-
-/*char* :GetErrorMessage()
-{
-#ifdef __WIN32__
-    FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, nullptr, GetLastError(),
-                  MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US), err, 255, nullptr);
-    return err;
-#else // __linux__
-
-#endif // __WIN32__
-}*/
