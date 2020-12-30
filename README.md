@@ -6,3 +6,7 @@ Contains C snippets for a platform independet implementation of sockets, uart, e
 
 ### Logging
 Contains a platform independent logging implementation.
+
+## Testing
+
+![Build Platform Independent Lib](https://github.com/FlorianFrank/PIL_Snippets/workflows/Build%20Platform%20Independent%20Lib/badge.svg)
