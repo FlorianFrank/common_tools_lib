@@ -19,7 +19,7 @@ jobs:
     steps:
     - name: install Dependencies
       shell: bash
-      run: sudo apt-get libgtest-dev
+      run: sudo apt-get install libgtest-dev
           
     - uses: actions/checkout@v2
 
