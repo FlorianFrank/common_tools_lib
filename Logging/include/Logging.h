@@ -5,7 +5,7 @@
 #pragma once
 #define LOGGING_ENABLED 1
 
-#include <cstring> // strrchr
+#include <string.h> // strrchr
 
 /** Max size of an message to log. **/
 #define LOG_BUF_SIZE 1024
