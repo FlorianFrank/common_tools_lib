@@ -26,6 +26,7 @@ int CreateUartInterface(PIL_UART_Config *config, const char *interface, int baud
     strcpy(config->m_Interface, interface);
     config->m_Baudrate = baudrate;
     config->m_Open = 0;
+    return 0;
 }
 
 
@@ -74,6 +75,7 @@ BOOL PIL_UART_Close(PIL_UART_Config *config)
         return FALSE;
     }
 #endif // __WIN32__
+return TRUE;
 }
 
 BOOL PIL_UART_ReadData(PIL_UART_Config *config, char *buffer, int *bufferLen)
@@ -86,7 +88,6 @@ BOOL PIL_UART_ReadData(PIL_UART_Config *config, char *buffer, int *bufferLen)
     //    SetError(100); // TODO
         return FALSE;
     }
-    int maxBufferLen = *bufferLen;
 #ifdef __WIN32__
     ::ReadFile(m_FileHandle, buffer, maxBufferLen, reinterpret_cast<LPDWORD>(bufferLen), nullptr);
 #else // Linux
@@ -99,6 +100,7 @@ BOOL PIL_UART_ReadData(PIL_UART_Config *config, char *buffer, int *bufferLen)
     }
     *bufferLen = readRet;
 #endif // WIN32
+    return TRUE;
 }
 
 BOOL PIL_UART_WriteData(PIL_UART_Config *config, const char *buffer, const int *size)
@@ -117,6 +119,7 @@ BOOL PIL_UART_WriteData(PIL_UART_Config *config, const char *buffer, const int *
         return FALSE;
     }
 #endif // WIN32
+    return TRUE;
 }
 
 BOOL PIL_UART_SetComParameters(PIL_UART_Config *config)
@@ -205,7 +208,7 @@ BOOL PIL_UART_SetComParameters(PIL_UART_Config *config)
             //     if (SetCustomBaudrate(m_Baudrate) != -1)
             //       baudrate = B38400;
             // else
-            //   baudrate = 0;
+               baudrate = 0;
             break;
     }
     //fcntl(m_hDev, F_SETFL, 0);
