@@ -379,7 +379,7 @@ PIL_SOCKET_SendTo(PIL_SOCKET *socketRet, const char *destAddr, const uint16_t po
     if (ret < 0)
     {
         PIL_SetLastError(&socketRet->m_ErrorHandle, PIL_ERRNO);
-        return -1;
+        return PIL_ERRNO;
     }
     *bufferLen = ret;
 #else // LWIP

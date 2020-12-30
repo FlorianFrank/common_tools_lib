@@ -47,13 +47,13 @@ struct PIL_SOCKET
     PIL_ErrorHandle m_ErrorHandle;
 } typedef PIL_SOCKET;
 
-enum TransportProtocol
+enum
 {
     UDP = 0,
     TCP = 1
 } typedef TransportProtocol;
 
-enum InternetProtocol
+enum
 {
     IPv4 = 0,
     IPv6 = 1
