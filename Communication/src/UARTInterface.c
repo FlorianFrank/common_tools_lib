@@ -116,7 +116,7 @@ int SetCustomBaudrate(PIL_UART_Config *config)
     serinfo.reserved_char[0] = 0;
     if (ioctl(config->m_FileHandle, TIOCGSERIAL, &serinfo) < 0)
         return -1;
-    serinfo.flags = ASYNC_SPD_CUST | ASYNC_LOW_LATENCY;
+    serinfo.flags = ASYNC_SPD_CUST | ASYNC_LOW_LATENCY; // NOLINT(hicpp-signed-bitwise)
     serinfo.custom_divisor = (serinfo.baud_base + (config->m_Baudrate / 2)) / config->m_Baudrate;
     if (serinfo.custom_divisor < 1)
         serinfo.custom_divisor = 1;
@@ -194,106 +194,125 @@ PIL_ERROR_CODE PIL_UART_SetComParameters(PIL_UART_Config *config)
     }
     return true;
 #else // Linux
-    int baudrate = 0;
+    uint32_t baudRate;
     switch(config->m_Baudrate)
     {
         case(110):
-            baudrate = B110;
+            baudRate = B110;
             break;
         case(300):
-            baudrate = B300;
+            baudRate = B300;
             break;
         case(600):
-            baudrate = B600;
+            baudRate = B600;
             break;
         case(1200):
-            baudrate = B1200;
+            baudRate = B1200;
             break;
         case(2400):
-            baudrate = B2400;
+            baudRate = B2400;
             break;
         case(4800):
-            baudrate = B4800;
+            baudRate = B4800;
             break;
         case(9600):
-            baudrate = B9600;
+            baudRate = B9600;
             break;
         case(19200):
-            baudrate = B19200;
+            baudRate = B19200;
             break;
         case(38400):
-            baudrate = B38400;
+            baudRate = B38400;
             break;
         case(57600):
-            baudrate = B57600;
+            baudRate = B57600;
             break;
         case(115200):
-            baudrate = B115200;
+            baudRate = B115200;
             break;
         case(921600) :
-            baudrate = B921600;
+            baudRate = B921600;
             break;
         default:
+            // Approximate baudRate by clock divider
             if (SetCustomBaudrate(config) != -1)
-                baudrate = B38400;
+                baudRate = B38400;
             else
-                baudrate = 0;
+            {
+                PIL_SetLastErrorMsg(&config->errorHandle, PIL_INVALID_BAUDRATE,
+                                    "Custom baudrate cannot be approximated");
+                return PIL_INVALID_BAUDRATE;
+            }
             break;
     }
 
+    // Retrieve last config
     struct termios tty;
-    memset (&tty, 0, sizeof tty);
+    memset(&tty, 0, sizeof tty);
     if (tcgetattr (config->m_FileHandle, &tty) != 0)
     {
-        return FALSE;
+        PIL_SetLastError(&config->errorHandle, PIL_ERRNO);
+        return PIL_ERRNO;
     }
 
-    speed_t bytesize = CS8;
-
-    /*switch(rs232Params.bytesize)
+    // Set output baudrate
+    if(cfsetospeed (&tty, baudRate) == -1)
     {
-        case 5:
-            bytesize = CS5;
-            break;
-        case 6:
-            bytesize = CS6;
-            break;
-        case 7:
-            bytesize = CS7;
-            break;
-        default:
-            break;
-    }*/
+        PIL_SetLastError(&config->errorHandle, PIL_ERRNO);
+        return PIL_ERRNO;
+    }
 
-    if(cfsetospeed (&tty, baudrate) == -1) printf("a"); // TODO
-
-    if(cfsetispeed (&tty, baudrate) == -1) printf("a"); // TODO
-
-
+    // Set input baudrate
+    if(cfsetispeed (&tty, baudRate) == -1)
+    {
+        PIL_SetLastError(&config->errorHandle, PIL_ERRNO);
+        return PIL_ERRNO;
+    }
 
     //Equal to cfmakeraw function
-    tty.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP
-                     | INLCR | IGNCR | ICRNL | IXON);
+    tty.c_iflag &= (uint32_t) (~((uint32_t) IGNBRK | (uint32_t) BRKINT | (uint32_t) PARMRK | (uint32_t) ISTRIP |
+                                 (uint32_t) INLCR | (uint32_t) IGNCR | (uint32_t) ICRNL | (uint32_t) IXON));
 
-    tty.c_oflag &= ~OPOST;
+    tty.c_oflag &= (uint32_t) (~(uint32_t) OPOST);
 
     // echo off, echo newline off, canonical mode off,
     // extended input processing off, signal chars off
-    tty.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
+    tty.c_lflag &= (uint32_t) (~((uint32_t) ECHO | (uint32_t) ECHONL | (uint32_t) ICANON | (uint32_t) ISIG |
+                                 (uint32_t) IEXTEN));
 
 
     //tty.c_cflag  |= CLOCAL;
 
-    // clear current char size mask, no parity checking,
-    // no output processing, force 8 bit input
-    tty.c_cflag &= ~(CSIZE | PARENB);
-    tty.c_cflag |= bytesize;
+    // Enable parity check and set parity even or odd
+    tty.c_cflag &= (uint32_t) (~((uint32_t) CSIZE | ((config->m_Parity != NoParity) ? ((uint32_t) PARENB) : 0u) |
+                                 ((config->m_Parity == Odd) ? (uint32_t) PARODD : (uint32_t) 0u)));
+    speed_t byteSize = CS8;
+    switch(config->m_ByteSize)
+    {
+        case ByteSize5:
+            byteSize = CS5;
+            break;
+        case ByteSize6:
+            byteSize = CS6;
+            break;
+        case ByteSize7:
+            byteSize = CS7;
+            break;
+        case ByteSize8:
+            byteSize = CS8;
+            break;
+        default:
+            break;
+    }
 
-    tty.c_cc[VMIN]= 0;
-    tty.c_cc[VTIME] = 5;
+    tty.c_cflag |= byteSize;
+
+    // TODO parameter
+    tty.c_cc[VMIN] = 0;  // amount of byte to read until the read function returns
+    tty.c_cc[VTIME] = 5; // Timeout in 10th of a second
 
     tcflush(config->m_FileHandle, TCIOFLUSH);
-    if (tcsetattr (config->m_FileHandle, TCSANOW, &tty) != 0)
+    if (tcsetattr(config->m_FileHandle, TCSANOW, &tty) != 0)
     {
         PIL_SetLastError(&config->errorHandle, PIL_ERRNO);
         return PIL_ERRNO;

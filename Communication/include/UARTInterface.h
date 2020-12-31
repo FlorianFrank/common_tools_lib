@@ -18,13 +18,36 @@ typedef int FileHandle;
 #endif // WIN32
 
 
+
+enum {
+    StopBits5,
+    StopBits8
+} typedef StopBits;
+
+enum {
+    ByteSize5,
+    ByteSize6,
+    ByteSize7,
+    ByteSize8
+} typedef ByteSize;
+
+enum{
+    NoParity,
+    Even,
+    Odd
+} typedef Parity;
+
 struct
 {
-    int m_Baudrate;
-    char m_Interface[30];
     FileHandle m_FileHandle;
+    char m_Interface[30];
+    int m_Baudrate;
+    StopBits m_StopBits;
+    Parity m_Parity;
+    ByteSize m_ByteSize;
     PIL_BOOL m_Open;
     PIL_ErrorHandle errorHandle;
+
 } typedef PIL_UART_Config;
 
     PIL_ERROR_CODE PIL_UART_CreateUartInterface(PIL_UART_Config *config, const char *interface, uint32_t baudrate);
