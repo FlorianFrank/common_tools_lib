@@ -6,6 +6,7 @@ project(PlatformIndependentLib C CXX)
 
 if (DEFINED ALL)
     set(COMMUNICATION 1)
+    set(THREADING 1)
     set(LOGGING 1)
     set(SHARED 1)
     set(SHARED 1)
@@ -30,7 +31,8 @@ endif () # DEFINED LOGGING
 
 if(DEFINED THREADING)
     set(threading "${CMAKE_CURRENT_SOURCE_DIR}/Threading/src/Threading.c"
-                  "${CMAKE_CURRENT_SOURCE_DIR}/Threading/include/Threading.h")
+                  "${CMAKE_CURRENT_SOURCE_DIR}/Threading/include/Threading.h"
+                  "${CMAKE_CURRENT_SOURCE_DIR}/Additional/ThreadingDefines.h")
 endif() # THREADING
 
 set(errorHandling
@@ -42,7 +44,7 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/ErrorHandling/include")
 set(additionalFiles "${CMAKE_CURRENT_SOURCE_DIR}/Additional/DataTypeDefines.h")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/Additional")
 
-set(source_files ${logging} ${communication} ${errorHandling} ${additionalFiles} ${unitTestFiles})
+set(source_files ${logging} ${communication} ${errorHandling} ${additionalFiles} ${unitTestFiles} ${threading})
 
 if (DEFINED SHARED)
     add_library(PIL SHARED ${source_files})
