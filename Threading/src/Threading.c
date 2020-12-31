@@ -65,9 +65,34 @@ PIL_ERROR_CODE PIL_THREADING_RunThread(ThreadHandle *threadHandle, PIL_BOOL loop
     return PIL_NO_ERROR;
 }
 
+PIL_ERROR_CODE PIL_THREADING_Detach(ThreadHandle *threadHandle)
+{
+    if(!threadHandle)
+        return PIL_INVALID_ARGUMENTS;
+
+    int ret = pthread_detach(threadHandle->m_Handle);
+    if(ret != 0)
+    {
+        switch (ret)
+        {
+            case EINVAL:
+                PIL_SetLastError(&threadHandle->m_ErrorHandle, PIL_THREAD_NOT_JOINABLE);
+                return PIL_THREAD_NOT_JOINABLE;
+            case ESRCH:
+                PIL_SetLastError(&threadHandle->m_ErrorHandle, PIL_THREAD_NOT_FOUND);
+                return PIL_THREAD_NOT_FOUND;
+            default:
+                PIL_SetLastError(&threadHandle->m_ErrorHandle, PIL_UNKNOWN_ERROR);
+                return PIL_UNKNOWN_ERROR;
+        }
+    }
+    return PIL_NO_ERROR;
+}
+
 
 PIL_ERROR_CODE PIL_THREADING_JoinThread(ThreadHandle *threadHandle, void **retValue)
 {
+    threadHandle->m_ThreadArgument.m_Running = FALSE;
     int ret = pthread_join(threadHandle->m_Handle, retValue);
     if(ret != 0)
     {
