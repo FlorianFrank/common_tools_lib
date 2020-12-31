@@ -17,6 +17,7 @@ if (DEFINED COMMUNICATION)
     set(communication
             "${CMAKE_CURRENT_SOURCE_DIR}/Communication/src/Socket.c"
             "${CMAKE_CURRENT_SOURCE_DIR}/Communication/include/Socket.h"
+            "Additional/SocketDefines.h"
             "${CMAKE_CURRENT_SOURCE_DIR}/Communication/src/UARTInterface.c")
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/Communication/include")
 endif () # DEFINED COMMUNICATION
