@@ -28,6 +28,11 @@ if (DEFINED LOGGING)
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/Logging/include")
 endif () # DEFINED LOGGING
 
+if(DEFINED THREADING)
+    set(threading "${CMAKE_CURRENT_SOURCE_DIR}/Threading/src/Threading.c"
+                  "${CMAKE_CURRENT_SOURCE_DIR}/Threading/include/Threading.h")
+endif() # THREADING
+
 set(errorHandling
         "${CMAKE_CURRENT_SOURCE_DIR}/ErrorHandling/src/ErrorHandler.c"
         "${CMAKE_CURRENT_SOURCE_DIR}/ErrorHandling/include/ErrorHandler.h"
