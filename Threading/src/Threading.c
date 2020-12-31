@@ -49,6 +49,7 @@ PIL_ERROR_CODE PIL_THREADING_RunThread(ThreadHandle *threadHandle)
             PIL_SetLastError(&threadHandle->m_ErrorHandle, PIL_UNKNOWN_ERROR);
             return PIL_UNKNOWN_ERROR;
     }
+    return PIL_NO_ERROR;
 }
 
 
@@ -74,9 +75,10 @@ PIL_ERROR_CODE PIL_THREADING_JoinThread(ThreadHandle *threadHandle, void **retVa
             PIL_SetLastError(&threadHandle->m_ErrorHandle, PIL_UNKNOWN_ERROR);
             return PIL_UNKNOWN_ERROR;
     }
+    return PIL_NO_ERROR;
 }
 
 PIL_ERROR_CODE PIL_THREADING_AbortThread(ThreadHandle *threadHandle)
 {
-
+    return PIL_NO_ERROR;
 }
