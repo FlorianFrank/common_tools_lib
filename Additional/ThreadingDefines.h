@@ -10,10 +10,18 @@
 
 struct
 {
+    void* (*m_ThreadFunction)(void *);
+    void* m_ThreadArgument;
+    volatile PIL_BOOL m_Running;
+    PIL_BOOL m_Loop;
+} typedef PIL_ThreadArgument;
+
+
+struct
+{
     pthread_t m_Handle;
     uint32_t m_ThreadID;
-    void* (*m_ThreadFunction)(void *);
-    void *m_Argument;
+    PIL_ThreadArgument m_ThreadArgument;
     PIL_BOOL m_Running;
     PIL_ErrorHandle m_ErrorHandle;
 } typedef ThreadHandle;
