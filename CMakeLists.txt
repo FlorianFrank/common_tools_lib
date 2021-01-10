@@ -11,7 +11,7 @@ if (DEFINED ALL)
     set(SHARED 1)
     set(SHARED 1)
     set(STATIC 1)
-    set(UNIT_TESTING 1)
+#    set(UNIT_TESTING 1)
 #    set(STRING 0)
 endif () # DEFINED ALL
 
