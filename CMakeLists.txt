@@ -12,6 +12,7 @@ if (DEFINED ALL)
     set(SHARED 1)
     set(STATIC 1)
     set(UNIT_TESTING 1)
+#    set(STRING 0)
 endif () # DEFINED ALL
 
 if (DEFINED COMMUNICATION)
@@ -35,6 +36,11 @@ if(DEFINED THREADING)
                   "${CMAKE_CURRENT_SOURCE_DIR}/Additional/ThreadingDefines.h")
 endif() # THREADING
 
+if(DEFINED STRING) # TODO if CXX
+    set(string "${CMAKE_CURRENT_SOURCE_DIR}/String/src/String.cpp"
+               "${CMAKE_CURRENT_SOURCE_DIR}/String/include/String.h")
+endif() # STRING
+
 set(errorHandling
         "${CMAKE_CURRENT_SOURCE_DIR}/ErrorHandling/src/ErrorHandler.c"
         "${CMAKE_CURRENT_SOURCE_DIR}/ErrorHandling/include/ErrorHandler.h"
@@ -44,16 +50,17 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/ErrorHandling/include")
 set(additionalFiles "${CMAKE_CURRENT_SOURCE_DIR}/Additional/DataTypeDefines.h")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/Additional")
 
-set(source_files ${logging} ${communication} ${errorHandling} ${additionalFiles} ${unitTestFiles} ${threading})
+set(source_files ${logging} ${communication} ${errorHandling} ${additionalFiles} ${unitTestFiles} ${threading} ${string})
 
 if (DEFINED SHARED)
     add_library(PIL SHARED ${source_files})
+    install(TARGETS PIL DESTINATION "${INSTALL_DIR}")
 endif () # DEFINED SHARED
 
 if (DEFINED STATIC)
     add_library(PIL_Static STATIC ${source_files})
+	install(TARGETS PIL_Static DESTINATION "${INSTALL_DIR}")
 endif () # DEFINED STATIC
-
 
 if (UNIT_TESTING)
     set(socketUnitTest "${CMAKE_CURRENT_SOURCE_DIR}/UnitTesting/SocketUnitTest.cpp")
