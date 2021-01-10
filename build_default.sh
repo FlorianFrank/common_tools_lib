@@ -1,7 +1,7 @@
 #!/bin/bash
 
-mkdir -p $PWD/tmp
-mkdir -p $PWD/bin
+mkdir -p tmp
+mkdir -p bin
 pushd tmp
 cmake .. -DALL=1 -DINSTALL_DIR=$PWD/../bin
 make
