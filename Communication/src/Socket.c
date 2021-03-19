@@ -51,7 +51,7 @@ PIL_SOCKET_Create(PIL_SOCKET *socketRet, TransportProtocol protocol, InternetPro
     socketRet->m_port = port;
 
 #ifndef embedded
-    socketRet->m_socket = socket(socketRet->m_protocol, socketRet->m_IPVersion, 0);
+    socketRet->m_socket = socket(socketRet->m_IPVersion, socketRet->m_protocol, 0);
     if (socketRet->m_socket == -1)
     {
         socketRet->m_IsOpen = 0;
@@ -117,14 +117,16 @@ PIL_ERROR_CODE PIL_SOCKET_Bind(PIL_SOCKET *socketRet, PIL_BOOL reuseSock)
     }
 
     // Set transport protocol (UDP/TCP), IP-version (IPv4, IPv6) and the address of the helperFiles to bound on
-    struct sockaddr_in address = {0};
-    memset(&address, 0, sizeof(address));
+    struct sockaddr_in bindAddr;
 
-    address.sin_family = socketRet->m_IPVersion;
-    address.sin_addr.s_addr = inet_addr(socketRet->m_IPAddress);
-    address.sin_port = htons(socketRet->m_port);
+    bindAddr.sin_family = socketRet->m_IPVersion;
+    if(strcmp(socketRet->m_IPAddress, "127.0.0.1") == 0)
+        bindAddr.sin_addr.s_addr = INADDR_ANY;
+    else
+        bindAddr.sin_addr.s_addr = inet_addr(socketRet->m_IPAddress);
+    bindAddr.sin_port = htons(socketRet->m_port);
 
-    int bindRet = bind(socketRet->m_socket, (struct sockaddr *) &address, sizeof(struct sockaddr));
+    int bindRet = bind(socketRet->m_socket, (struct sockaddr *) &bindAddr,  sizeof(bindAddr));
     if (bindRet != 0)
     {
         PIL_SetLastError(&socketRet->m_ErrorHandle, PIL_ERRNO);
@@ -169,7 +171,7 @@ PIL_ERROR_CODE PIL_SOCKET_Listen(PIL_SOCKET *socketRet, uint32_t sizeQueue)
  * @param ipAddr ipAddress of the new accepted connection.
  * @return 0 if no error occurs else -1.
  */
-PIL_ERROR_CODE PIL_SOCKET_Accept(PIL_SOCKET *socket, char *ipAddr)
+PIL_ERROR_CODE PIL_SOCKET_Accept(PIL_SOCKET *socket, char *ipAddr, PIL_SOCKET *newHandle)
 {
 #ifndef embedded
     if (socket == NULL)
@@ -190,6 +192,9 @@ PIL_ERROR_CODE PIL_SOCKET_Accept(PIL_SOCKET *socket, char *ipAddr)
         PIL_SetLastError(&socket->m_ErrorHandle, PIL_ERRNO);
         return PIL_ERRNO;
     }
+
+    memcpy(newHandle, socket, sizeof(PIL_SOCKET));
+    newHandle->m_socket = acceptRet;
 
     strcpy(ipAddr, inet_ntoa(address.sin_addr));
 #else // our LWIP implementation only supports UDP!
@@ -419,4 +424,34 @@ PIL_BOOL PIL_SOCKET_IsOpen(PIL_SOCKET *socketRet)
     if(!socketRet)
         return FALSE;
     return socketRet->m_IsOpen;
+}
+
+PIL_ERROR_CODE PIL_SOCKET_Setup_ServerSocket(PIL_SOCKET *socket, uint16_t port, void (*receiveCallback)(struct PIL_SOCKET *retHandle, char* ip))
+{
+    if(!receiveCallback)
+        return PIL_INVALID_ARGUMENTS;
+
+    PIL_ERROR_CODE ret = PIL_SOCKET_Create(socket, TCP, IPv4, "127.0.0.1", port);
+    if(ret != PIL_NO_ERROR)
+        return ret;
+
+    ret = PIL_SOCKET_Bind(socket, TRUE);
+    if(ret != PIL_NO_ERROR)
+        return ret;
+
+    ret = PIL_SOCKET_Listen(socket, 10 /* TODO einstellbar */);
+    if(ret != PIL_NO_ERROR)
+        return ret;
+
+    char ipAddr[128]; // TODO größe anpassen
+    PIL_SOCKET retHandle;
+    do {
+        ret = PIL_SOCKET_Accept(socket, ipAddr, &retHandle);
+        if(ret != PIL_NO_ERROR)
+            return ret;
+        receiveCallback(&retHandle, ipAddr);
+    }while(1 /* TODO exit condition */);
+
+
+    return PIL_NO_ERROR;
 }

@@ -20,7 +20,7 @@ PIL_ERROR_CODE PIL_SOCKET_Bind(PIL_SOCKET *socketRet, PIL_BOOL reuseSock);
 
 PIL_ERROR_CODE PIL_SOCKET_Listen(PIL_SOCKET *socketRet, uint32_t sizeQueue);
 
-PIL_ERROR_CODE PIL_SOCKET_Accept(PIL_SOCKET *socketRet, char *ipAddr);
+PIL_ERROR_CODE PIL_SOCKET_Accept(PIL_SOCKET *socket, char *ipAddr, PIL_SOCKET *newHandle);
 
 PIL_ERROR_CODE PIL_SOCKET_Connect(PIL_SOCKET *socketRet, const char *ipAddr, uint16_t port);
 
@@ -37,6 +37,12 @@ PIL_ERROR_CODE PIL_SOCKET_SendTo(PIL_SOCKET *socketRet, const char* destAddr, ui
 const char *PIL_SOCKET_GetSenderIP(PIL_SOCKET *socketRet);
 
 PIL_BOOL PIL_SOCKET_IsOpen(PIL_SOCKET *socketRet);
+
+PIL_ERROR_CODE PIL_SOCKET_Setup_ServerSocket(PIL_SOCKET *socket, uint16_t port, void (*receive)(struct PIL_SOCKET *retHandle, char* ip));
+
+/**
+ * Event based functions require Threading support.
+ */
 
 
 /**
