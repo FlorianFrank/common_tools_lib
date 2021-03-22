@@ -40,6 +40,8 @@ PIL_BOOL PIL_SOCKET_IsOpen(PIL_SOCKET *socketRet);
 
 PIL_ERROR_CODE PIL_SOCKET_Setup_ServerSocket(PIL_SOCKET *socket, uint16_t port, void (*receive)(struct PIL_SOCKET *retHandle, char* ip));
 
+PIL_ERROR_CODE PIL_SOCKET_ConnectWithServer(PIL_SOCKET *socket, const char* ipAddr, uint16_t port);
+
 /**
  * Event based functions require Threading support.
  */

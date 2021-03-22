@@ -54,7 +54,7 @@ PIL_SOCKET_Create(PIL_SOCKET *socketRet, TransportProtocol protocol, InternetPro
     socketRet->m_socket = socket(socketRet->m_IPVersion, socketRet->m_protocol, 0);
     if (socketRet->m_socket == -1)
     {
-        socketRet->m_IsOpen = 0;
+        socketRet->m_IsOpen = FALSE;
         PIL_SetLastError(&socketRet->m_ErrorHandle, PIL_ERRNO);
         return PIL_ERRNO;
     }
@@ -225,7 +225,7 @@ PIL_ERROR_CODE PIL_SOCKET_Connect(PIL_SOCKET *socket, const char *ipAddr, uint16
     struct sockaddr_in address;
     address.sin_family = socket->m_IPVersion;
     address.sin_port = htons(port);
-    address.sin_addr.s_addr = inet_addr(ipAddr);
+    inet_aton(ipAddr, &address.sin_addr);
 
     int connectRet = connect(socket->m_socket, (struct sockaddr *) &address, sizeof(address));
     if (connectRet != 0)
@@ -449,9 +449,23 @@ PIL_ERROR_CODE PIL_SOCKET_Setup_ServerSocket(PIL_SOCKET *socket, uint16_t port, 
         ret = PIL_SOCKET_Accept(socket, ipAddr, &retHandle);
         if(ret != PIL_NO_ERROR)
             return ret;
+        // TODO threading
         receiveCallback(&retHandle, ipAddr);
-    }while(1 /* TODO exit condition */);
+    }while(socket->m_IsOpen);
 
+
+    return PIL_NO_ERROR;
+}
+
+PIL_ERROR_CODE PIL_SOCKET_ConnectWithServer(PIL_SOCKET *socket, const char* ipAddr, uint16_t port)
+{
+    PIL_ERROR_CODE ret = PIL_SOCKET_Create(socket, TCP, IPv4, "127.0.0.1", port);
+    if(ret != PIL_NO_ERROR)
+        return ret;
+
+    ret = PIL_SOCKET_Connect(socket, ipAddr, port);
+    if(ret != PIL_NO_ERROR)
+        return ret;
 
     return PIL_NO_ERROR;
 }
