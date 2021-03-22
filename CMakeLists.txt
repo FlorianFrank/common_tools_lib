@@ -7,6 +7,7 @@ project(PlatformIndependentLib C CXX)
 if (DEFINED ALL)
     set(COMMUNICATION 1)
     set(THREADING 1)
+    set(FILE_HANDLING 1)
     set(LOGGING 1)
     set(SHARED 1)
     set(SHARED 1)
@@ -24,6 +25,14 @@ if (DEFINED COMMUNICATION)
             "${CMAKE_CURRENT_SOURCE_DIR}/Additional/UARTDefines.h")
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/Communication/include")
 endif () # DEFINED COMMUNICATION
+
+if (DEFINED FILE_HANDLING)
+    set(file_handling
+            "${CMAKE_CURRENT_SOURCE_DIR}/FileHandling/src/FileHandler.c"
+            "${CMAKE_CURRENT_SOURCE_DIR}/FileHandling/include/FileHandler.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/Additional/FileHandlingDefines.h"
+            )
+endif() # DEFINED FILE_HANDLING
 
 if (DEFINED LOGGING)
     set(logging "${CMAKE_CURRENT_SOURCE_DIR}/Logging/src/Logging.cpp")
@@ -50,7 +59,7 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/ErrorHandling/include")
 set(additionalFiles "${CMAKE_CURRENT_SOURCE_DIR}/Additional/DataTypeDefines.h")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/Additional")
 
-set(source_files ${logging} ${communication} ${errorHandling} ${additionalFiles} ${unitTestFiles} ${threading} ${string})
+set(source_files ${logging} ${communication} ${file_handling} ${errorHandling} ${additionalFiles} ${unitTestFiles} ${threading} ${string})
 
 if (DEFINED SHARED)
     add_library(PIL SHARED ${source_files})

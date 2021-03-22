@@ -93,7 +93,7 @@ if(logFileStream == nullptr)
         if (ret > 0)
         {
 #ifdef __linux__
-            fprintf(logFileStream, "%s\033[%dm %s\033[%dm %s:%d %s\n",
+            fprintf(logFileStream, "%s\033[%dm %s\033[%dm %s:%ud %s\n",
                     GetCurrentTime(), GetColorCode(level), GetLogLevelStr(level), COLOR_DEFAULT, fileName, lineNumber,
                     &loggingBuffer[160]);
 #else // __WIN32__

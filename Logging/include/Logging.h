@@ -28,7 +28,7 @@ void InitializeLogging(Level level, const char *file);
                 // Helperfunctions
                 const char *GetLogLevelStr(Level level);
 #else // Logging Disabled
-/** Dummy defines when logging is disabled do nothing. */
+/** Dummy Defines when logging is disabled do nothing. */
 #define InitializeLogging(level, file)
 #define LogMessage(level, fileName, lineNumber, message, ...)
 #define CloseLogfile()
