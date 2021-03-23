@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <errno.h>
 #include "../include/FileHandler.h"
 
 /**
@@ -32,8 +33,14 @@ PIL_ERROR_CODE PIL_OpenFile(PIL_FileHandle *fileHandle, const char* fileName, PI
 
 
     fileHandle->fileHandle = fopen(fileName, p);
+
     if(!fileHandle->fileHandle)
+    {
+        fileHandle->errCode = errno;
+        if(fileHandle->errCode == 2)
+            return PIL_NO_SUCH_FILE;
         return PIL_ERRNO;
+    }
 
     fileHandle->errCode = 0;
     fileHandle->isOpen = TRUE;
@@ -91,7 +98,7 @@ PIL_ERROR_CODE PIL_WriteFile(PIL_FileHandle *fileHandle, uint8_t* buffer, uint32
  * @param bufferLen maximum length of the data which can be written into the buffer.
  * @return PIL_NO_ERROR if no error occurs.
  */
-PIL_ERROR_CODE PIL_ReadFile(PIL_FileHandle *fileHandle, uint8_t* buffer, const uint32_t *bufferLen)
+PIL_ERROR_CODE PIL_ReadFile(PIL_FileHandle *fileHandle, uint8_t* buffer, uint32_t *bufferLen)
 {
     if(!fileHandle)
         return PIL_INVALID_ARGUMENTS;
@@ -103,7 +110,7 @@ PIL_ERROR_CODE PIL_ReadFile(PIL_FileHandle *fileHandle, uint8_t* buffer, const u
     size_t ret = fread(buffer, 1, *bufferLen, fileHandle->fileHandle);
     if(ret < sizeToWrite)
     {
-        *buffer = ret;
+        *bufferLen = ret;
         fileHandle->errCode = ferror(fileHandle->fileHandle);
         return PIL_ONLY_PARTIALLY_READ_WRITTEN;
     }
@@ -131,6 +138,30 @@ PIL_ERROR_CODE PIL_WriteDataToFile(const char* fileName, uint8_t* buffer, uint32
 
     ret = PIL_WriteFile(&fileHandle, buffer, &bufferLen);
     if (ret != PIL_NO_ERROR)
+        return ret;
+
+    return PIL_CloseFile(&fileHandle);
+}
+
+/**
+ * @brief This function opens a file, reads from the file and closes the file handle afterwards.
+ * @param fileName path and name of the file to read.
+ * @param buffer buffer containing the read data.
+ * @param bufferLen
+ * @return
+ */
+PIL_ERROR_CODE PIL_ReadDataFromFile(const char* fileName, uint8_t* buffer, uint32_t* bufferLen)
+{
+    if(!fileName || !buffer || !bufferLen || *bufferLen < 1)
+        return PIL_INVALID_ARGUMENTS;
+
+    PIL_FileHandle fileHandle;
+    PIL_ERROR_CODE ret = PIL_OpenFile(&fileHandle, fileName, READ, NONE);
+    if(ret != PIL_NO_ERROR)
+        return ret;
+
+    ret = PIL_ReadFile(&fileHandle, buffer, bufferLen);
+    if(ret != PIL_NO_ERROR)
         return ret;
 
     return PIL_CloseFile(&fileHandle);
