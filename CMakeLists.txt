@@ -32,6 +32,7 @@ if (DEFINED FILE_HANDLING)
             "${CMAKE_CURRENT_SOURCE_DIR}/FileHandling/include/FileHandler.h"
             "${CMAKE_CURRENT_SOURCE_DIR}/Additional/FileHandlingDefines.h"
             )
+    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/FileHandling/include")
 endif() # DEFINED FILE_HANDLING
 
 if (DEFINED LOGGING)
@@ -43,6 +44,8 @@ if(DEFINED THREADING)
     set(threading "${CMAKE_CURRENT_SOURCE_DIR}/Threading/src/Threading.c"
                   "${CMAKE_CURRENT_SOURCE_DIR}/Threading/include/Threading.h"
                   "${CMAKE_CURRENT_SOURCE_DIR}/Additional/ThreadingDefines.h")
+    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/Threading/include")
+
 endif() # THREADING
 
 if(DEFINED STRING) # TODO if CXX
@@ -70,10 +73,3 @@ if (DEFINED STATIC)
     add_library(PIL_Static STATIC ${source_files})
 	install(TARGETS PIL_Static DESTINATION "${INSTALL_DIR}")
 endif () # DEFINED STATIC
-
-if (UNIT_TESTING)
-    set(socketUnitTest "${CMAKE_CURRENT_SOURCE_DIR}/UnitTesting/SocketUnitTest.cpp")
-    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/UnitTesting")
-    add_executable(SocketUnitTest ${socketUnitTest})
-    target_link_libraries(SocketUnitTest PIL gtest pthread)
-endif () # UNIT_TESTING
