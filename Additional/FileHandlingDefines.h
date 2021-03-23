@@ -7,24 +7,25 @@
 #include <stdio.h> // TODO noch entfernen
 #include "DataTypeDefines.h"
 
-typedef enum FilePermissions
+typedef enum PIL_FilePermissions
 {
     READ = 0,
     WRITE = 1,
     READ_WRITE = 2,
-}  FilePermissions;
+}  PIL_FilePermissions;
 
-typedef enum FileMode
+typedef enum PIL_FileMode
 {
     NONE = 0,
     CREATE_APPEND = 1,
     CREATE_TRUNCATE = 2
-} FileMode;
+} PIL_FileMode;
 
-struct FileHandle
+struct PIL_FileHandle
 {
   FILE* fileHandle;
   PIL_BOOL isOpen;
-} typedef FileHandle;
+  int errCode;
+} typedef PIL_FileHandle;
 
 #endif //PLATFORMINDEPENDENTLIB_FILEHANDLINGDEFINES_H
