@@ -5,7 +5,7 @@
 #include <arpa/inet.h> // htons, inet_addr, inet_ntoa
 #include <string.h> // memset
 #include <unistd.h> // close
-
+#include "Threading.h"
 #if embedded
 #include <lwip/tcpip.h>
 #include <lwip/udp.h>
@@ -16,6 +16,7 @@
 
 #include <sys/select.h> // fd_set, timeval, select
 #include <ErrorHandler.h>
+#include <malloc.h>
 
 #endif // __linux__
 
@@ -426,6 +427,26 @@ PIL_BOOL PIL_SOCKET_IsOpen(PIL_SOCKET *socketRet)
     return socketRet->m_IsOpen;
 }
 
+struct ThreadArg{
+    struct PIL_SOCKET *socket;
+    void (*receiveCallback)(struct PIL_SOCKET *retHandle, char* ip);
+} typedef ThreadArg;
+
+void* AcceptThreadFunction(void* value)
+{
+    ThreadArg *arg = value;
+    char ipAddr[128]; // TODO größe anpassen
+    PIL_SOCKET retHandle;
+    do {
+        int ret = PIL_SOCKET_Accept(arg->socket, ipAddr, &retHandle);
+        if(ret != PIL_NO_ERROR)
+            return NULL;
+        // TODO threading
+        arg->receiveCallback(&retHandle, ipAddr);
+    }while(arg->socket->m_IsOpen);
+    return NULL;
+}
+
 PIL_ERROR_CODE PIL_SOCKET_Setup_ServerSocket(PIL_SOCKET *socket, uint16_t port, void (*receiveCallback)(struct PIL_SOCKET *retHandle, char* ip))
 {
     if(!receiveCallback)
@@ -443,16 +464,12 @@ PIL_ERROR_CODE PIL_SOCKET_Setup_ServerSocket(PIL_SOCKET *socket, uint16_t port, 
     if(ret != PIL_NO_ERROR)
         return ret;
 
-    char ipAddr[128]; // TODO größe anpassen
-    PIL_SOCKET retHandle;
-    do {
-        ret = PIL_SOCKET_Accept(socket, ipAddr, &retHandle);
-        if(ret != PIL_NO_ERROR)
-            return ret;
-        // TODO threading
-        receiveCallback(&retHandle, ipAddr);
-    }while(socket->m_IsOpen);
-
+    ThreadHandle handle;
+    ThreadArg *arg = malloc(sizeof(struct ThreadArg));
+    arg->socket = socket;
+    arg->receiveCallback = receiveCallback;
+    PIL_THREADING_CreateThread(&handle, AcceptThreadFunction, arg);
+    PIL_THREADING_RunThread(&handle, FALSE);
 
     return PIL_NO_ERROR;
 }
