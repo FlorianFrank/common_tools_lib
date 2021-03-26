@@ -428,7 +428,7 @@ PIL_BOOL PIL_SOCKET_IsOpen(PIL_SOCKET *socketRet)
 }
 
 struct ThreadArg{
-    struct PIL_SOCKET *socket;
+    struct PIL_SOCKET socket;
     void (*receiveCallback)(struct PIL_SOCKET *retHandle, char* ip);
 } typedef ThreadArg;
 
@@ -438,12 +438,13 @@ void* AcceptThreadFunction(void* value)
     char ipAddr[128]; // TODO größe anpassen
     PIL_SOCKET retHandle;
     do {
-        int ret = PIL_SOCKET_Accept(arg->socket, ipAddr, &retHandle);
+        int ret = PIL_SOCKET_Accept(&arg->socket, ipAddr, &retHandle);
         if(ret != PIL_NO_ERROR)
             return NULL;
         // TODO threading
+
         arg->receiveCallback(&retHandle, ipAddr);
-    }while(arg->socket->m_IsOpen);
+    }while(arg->socket.m_IsOpen);
     return NULL;
 }
 
@@ -466,11 +467,11 @@ PIL_ERROR_CODE PIL_SOCKET_Setup_ServerSocket(PIL_SOCKET *socket, uint16_t port, 
 
     ThreadHandle handle;
     ThreadArg *arg = malloc(sizeof(struct ThreadArg));
-    arg->socket = socket;
+    arg->socket = *socket;
     arg->receiveCallback = receiveCallback;
     PIL_THREADING_CreateThread(&handle, AcceptThreadFunction, arg);
     PIL_THREADING_RunThread(&handle, FALSE);
-
+    usleep(1000);
     return PIL_NO_ERROR;
 }
 
