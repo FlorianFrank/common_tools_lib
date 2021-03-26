@@ -12,6 +12,7 @@ PIL_ERROR_CODE PIL_OpenFile(PIL_FileHandle *fileHandle, const char* fileName, PI
 PIL_ERROR_CODE PIL_CloseFile(PIL_FileHandle *fileHandle);
 PIL_ERROR_CODE PIL_WriteFile(PIL_FileHandle *fileHandle, uint8_t* buffer, uint32_t *bufferLen);
 PIL_ERROR_CODE PIL_ReadFile(PIL_FileHandle *fileHandle, uint8_t* buffer, uint32_t *bufferLen);
+PIL_ERROR_CODE PIL_ListFilesInDirectory(const char *path, uint8_t filter, PIL_FileListElem *listOfFiles, PIL_BOOL recursive);
 
 PIL_ERROR_CODE PIL_WriteDataToFile(const char* fileName, uint8_t* buffer, uint32_t bufferLen, PIL_FileMode mode);
 PIL_ERROR_CODE PIL_ReadDataFromFile(const char* fileName, uint8_t* buffer, uint32_t *bufferLen);

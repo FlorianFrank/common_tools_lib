@@ -1,6 +1,10 @@
+#include "../include/FileHandler.h"
+
 #include <stdio.h>
 #include <errno.h>
-#include "../include/FileHandler.h"
+#include <malloc.h>
+#include "dirent.h"
+
 
 /**
  * @brief This function opens a file for reading and writing
@@ -165,4 +169,98 @@ PIL_ERROR_CODE PIL_ReadDataFromFile(const char* fileName, uint8_t* buffer, uint3
         return ret;
 
     return PIL_CloseFile(&fileHandle);
+}
+
+PIL_ERROR_CODE
+PIL_ListFilesInDirectory(const char *path, uint8_t filter, PIL_FileListElem *listOfFiles, PIL_BOOL recursive)
+{
+    if(!path || !listOfFiles)
+        return PIL_INVALID_ARGUMENTS;
+
+    DIR *directory;
+    struct dirent *dir;
+    directory = opendir(path);
+    if(!directory)
+        return PIL_NO_ERROR;
+
+    PIL_FileListElem *currentElem = listOfFiles;
+    currentElem->previous = NULL;
+    currentElem->next = NULL;
+
+    while((dir = readdir(directory)) != NULL)
+    {
+        PIL_FileHandle *handle = malloc(sizeof(PIL_FileHandle));
+        handle->isOpen = FALSE;
+        handle->type = DT_UNKNOWN;
+
+        int ret = sprintf(handle->path, "%s%s", path, dir->d_name);
+        if(ret < 0)
+        {
+            handle->errCode = errno;
+            return PIL_ERRNO;
+        }
+
+        PIL_BOOL addToList = FALSE;
+        switch (dir->d_type)
+        {
+            case DT_DIR:
+                if ((DIRECTORIES & filter) >= 1)
+                {
+                    handle->type = DIRECTORIES;
+                    addToList = TRUE;
+                }
+                break;
+            case DT_REG:
+                if((REGULAR_FILES & filter) >= 1)
+                {
+                    handle->type = DIRECTORIES;
+                    addToList = TRUE;
+                }
+                break;
+            case DT_FIFO:
+                if((FIFO & filter) >= 1)
+                {
+                    handle->type = FIFO;
+                    addToList = TRUE;
+                }
+                break;
+            case DT_SOCK:
+                if((SOCKETS & filter) >= 1)
+                {
+                    handle->type = SOCKETS;
+                    addToList = TRUE;
+                }
+                break;
+            case DT_CHR:
+                if((CHARACTER_DEVICE & filter) >= 1)
+                {
+                    handle->type = CHARACTER_DEVICE;
+                    addToList = TRUE;
+                }
+                break;
+            case DT_LNK:
+                if((SYMBOLIC_LINKS & filter) >= 1)
+                {
+                    handle->type = SYMBOLIC_LINKS;
+                    addToList = TRUE;
+                }
+                break;
+            default:
+                handle->type = UNKNOWN;
+                addToList = TRUE;
+        }
+        if(addToList)
+        {
+            currentElem->handle = handle;
+
+            currentElem->next = malloc(sizeof(PIL_FileListElem));
+            currentElem->next->previous = currentElem;
+            currentElem->next->next = NULL;
+            currentElem = currentElem->next;
+        }else
+            free(handle);
+    }
+
+
+    return PIL_NO_ERROR;
 }
