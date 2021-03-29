@@ -16,6 +16,7 @@
 #endif // !embedded
 
 #include <stdint.h>
+#include "ThreadingDefines.h"
 
 struct PIL_SOCKET
 {
@@ -41,7 +42,8 @@ struct PIL_SOCKET
 #else // LWIP
     ip_addr_t m_SrcAddr;
 #endif // !embedded
-    int m_IsOpen;
+    ThreadHandle *m_threadHandle;
+    volatile int m_IsOpen;
     PIL_ErrorHandle m_ErrorHandle;
 } typedef PIL_SOCKET;
 
@@ -57,6 +59,7 @@ enum
     IPv6 = 1
 } typedef InternetProtocol;
 
+#define DEFAULT_QUEUE_SIZE 10
 
 
 

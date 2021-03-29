@@ -36,7 +36,10 @@ PIL_SOCKET_Create(PIL_SOCKET *socketRet, TransportProtocol protocol, InternetPro
                   const uint16_t port)
 {
     if (!socketRet)
+    {
         return PIL_INVALID_ARGUMENTS;
+    }
+    socketRet->m_threadHandle = NULL;
 
     if (!ipAddress)
     {
@@ -79,7 +82,7 @@ PIL_ERROR_CODE PIL_SOCKET_Close(PIL_SOCKET *socketRet)
 #ifndef embedded
     if (socketRet->m_IsOpen)
     {
-        socketRet->m_IsOpen = 0;
+        socketRet->m_IsOpen = FALSE;
         if (close(socketRet->m_socket) != 0)
         {
             PIL_SetLastError(&socketRet->m_ErrorHandle, PIL_ERRNO);
@@ -90,6 +93,13 @@ PIL_ERROR_CODE PIL_SOCKET_Close(PIL_SOCKET *socketRet)
 #else // lwip
     udp_remove(socketRet->conn);
 #endif // linux
+
+    if(socketRet->m_threadHandle)
+    {
+        PIL_THREADING_JoinThread(socketRet->m_threadHandle, NULL);
+        free(socketRet);
+    }
+
     return PIL_INTERFACE_CLOSED;
 }
 
@@ -461,17 +471,17 @@ PIL_ERROR_CODE PIL_SOCKET_Setup_ServerSocket(PIL_SOCKET *socket, uint16_t port, 
     if(ret != PIL_NO_ERROR)
         return ret;
 
-    ret = PIL_SOCKET_Listen(socket, 10 /* TODO einstellbar */);
+    ret = PIL_SOCKET_Listen(socket, DEFAULT_QUEUE_SIZE);
     if(ret != PIL_NO_ERROR)
         return ret;
 
-    ThreadHandle handle;
     ThreadArg *arg = malloc(sizeof(struct ThreadArg));
     arg->socket = *socket;
     arg->receiveCallback = receiveCallback;
-    PIL_THREADING_CreateThread(&handle, AcceptThreadFunction, arg);
-    PIL_THREADING_RunThread(&handle, FALSE);
-    usleep(1000);
+
+    socket->m_threadHandle = malloc(sizeof(ThreadHandle));
+    PIL_THREADING_CreateThread(socket->m_threadHandle, AcceptThreadFunction, arg);
+    PIL_THREADING_RunThread(socket->m_threadHandle, FALSE);
     return PIL_NO_ERROR;
 }
 
