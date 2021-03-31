@@ -23,6 +23,20 @@
              return "Errno";
          case PIL_INTERFACE_CLOSED:
              return "Socket is closed";
+         case PIL_INVALID_BAUDRATE:
+             return "Baudrate not supported";
+         case PIL_INSUFFICIENT_RESOURCES:
+             return "Insufficient resources";
+         case PIL_DEADLOCK_DETECTED:
+             return "Deadlock detected";
+         case PIL_THREAD_NOT_JOINABLE:
+             return "Thread not joinable";
+         case PIL_THREAD_NOT_FOUND:
+             return "Thread not found";
+         case PIL_ONLY_PARTIALLY_READ_WRITTEN:
+             return "File only partially written";
+         case PIL_NO_SUCH_FILE:
+             return "No such file or directory";
          default:
              return "Unknown error";
      }
