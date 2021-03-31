@@ -43,7 +43,8 @@ struct PIL_SOCKET
     ip_addr_t m_SrcAddr;
 #endif // !embedded
     ThreadHandle *m_threadHandle;
-    volatile int m_IsOpen;
+    volatile PIL_BOOL m_IsOpen;
+    PIL_BOOL m_IsConnected;
     PIL_ErrorHandle m_ErrorHandle;
 } typedef PIL_SOCKET;
 

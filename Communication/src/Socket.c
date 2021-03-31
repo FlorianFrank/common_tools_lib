@@ -35,11 +35,14 @@ PIL_ERROR_CODE
 PIL_SOCKET_Create(PIL_SOCKET *socketRet, TransportProtocol protocol, InternetProtocol ipVersion, const char *ipAddress,
                   const uint16_t port)
 {
+
     if (!socketRet)
     {
         return PIL_INVALID_ARGUMENTS;
     }
     socketRet->m_threadHandle = NULL;
+    socketRet->m_IsConnected = FALSE;
+    socketRet->m_IsOpen = FALSE;
 
     if (!ipAddress)
     {
@@ -65,7 +68,7 @@ PIL_SOCKET_Create(PIL_SOCKET *socketRet, TransportProtocol protocol, InternetPro
 #else // lwip
     socketRet->conn = udp_new();
 #endif // linux
-    socketRet->m_IsOpen = 1;
+    socketRet->m_IsOpen = TRUE;
     return PIL_NO_ERROR;
 }
 
@@ -277,7 +280,7 @@ PIL_ERROR_CODE PIL_SOCKET_WaitTillDataAvail(PIL_SOCKET *socketRet, uint32_t time
 #endif // !embedded
 }
 
-PIL_ERROR_CODE PIL_SOCKET_Receive(PIL_SOCKET *socketRet, uint8_t *buffer, uint16_t *bufferLen)
+PIL_ERROR_CODE PIL_SOCKET_Receive(PIL_SOCKET *socketRet, uint8_t *buffer, uint32_t *bufferLen)
 {
     if (!socketRet)
         return PIL_INVALID_ARGUMENTS;
@@ -349,7 +352,13 @@ PIL_ERROR_CODE PIL_SOCKET_ReceiveFrom(PIL_SOCKET *socketRet, uint8_t *buffer, ui
 PIL_ERROR_CODE PIL_SOCKET_Send(PIL_SOCKET *socketRet, uint8_t *buffer, uint32_t *bufferLen)
 {
     if (!socketRet)
-        return -1;
+        return PIL_INVALID_ARGUMENTS;
+
+    if(!socketRet->m_IsOpen)
+        return PIL_INTERFACE_CLOSED;
+
+    if(socketRet->m_protocol == TCP && !socketRet->m_IsConnected)
+        return PIL_INTERFACE_CLOSED;
 
 #ifndef embedded
     //  socklen_t senderAddrLen = sizeof(socketRet->m_SrcAddr);
@@ -357,7 +366,7 @@ PIL_ERROR_CODE PIL_SOCKET_Send(PIL_SOCKET *socketRet, uint8_t *buffer, uint32_t 
     if (ret < 0)
     {
         PIL_SetLastError(&socketRet->m_ErrorHandle, PIL_ERRNO);
-        return -1;
+        return PIL_ERRNO;
     }
     *bufferLen = ret;
 #else // LWIP
