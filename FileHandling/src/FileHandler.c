@@ -76,7 +76,7 @@ PIL_ERROR_CODE PIL_CloseFile(PIL_FileHandle *fileHandle)
  * @param bufferLen number of byte to write. Also returns the number actually written.
  * @return PIL_NO_ERROR if no error occurs.
  */
-PIL_ERROR_CODE PIL_WriteFile(PIL_FileHandle *fileHandle, uint8_t* buffer, uint32_t *bufferLen)
+PIL_ERROR_CODE PIL_WriteFile(PIL_FileHandle *fileHandle, uint8_t* buffer, uint32_t *bufferLen, PIL_BOOL flush)
 {
     if(!fileHandle)
         return PIL_INVALID_ARGUMENTS;
@@ -90,6 +90,13 @@ PIL_ERROR_CODE PIL_WriteFile(PIL_FileHandle *fileHandle, uint8_t* buffer, uint32
         *bufferLen = ret;
         fileHandle->errCode = ferror(fileHandle->fileHandle);
         return PIL_ONLY_PARTIALLY_READ_WRITTEN;
+    }
+
+    if(flush)
+    {
+        ret = fflush(fileHandle->fileHandle);
+        if(ret != 0)
+            return PIL_ERRNO;
     }
 
     return PIL_NO_ERROR;
@@ -140,7 +147,7 @@ PIL_ERROR_CODE PIL_WriteDataToFile(const char* fileName, uint8_t* buffer, uint32
     if(ret != PIL_NO_ERROR)
         return ret;
 
-    ret = PIL_WriteFile(&fileHandle, buffer, &bufferLen);
+    ret = PIL_WriteFile(&fileHandle, buffer, &bufferLen, TRUE);
     if (ret != PIL_NO_ERROR)
         return ret;
 
