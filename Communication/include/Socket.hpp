@@ -1,0 +1,15 @@
+//
+// Created by florianfrank on 04.05.21.
+//
+
+#ifndef PLATFORMINDEPENDENTLIB_SOCKET_HPP
+#define PLATFORMINDEPENDENTLIB_SOCKET_HPP
+
+
+class Socket
+{
+
+};
+
+
+#endif //PLATFORMINDEPENDENTLIB_SOCKET_HPP
