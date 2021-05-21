@@ -13,6 +13,7 @@ if (DEFINED ALL)
     set(SHARED 1)
     set(SHARED 1)
     set(STATIC 1)
+    add_definitions(-DCXX)
 #    set(UNIT_TESTING 1)
 #    set(STRING 0)
 endif () # DEFINED ALL
@@ -58,7 +59,7 @@ if (DEFINED LOGGING)
 endif () # DEFINED LOGGING
 
 if(DEFINED THREADING)
-
+    add_definitions(-DPIL_THREADING)
     set(threading_headers                   
     		"${CMAKE_CURRENT_SOURCE_DIR}/Threading/include/Threading.h"
                "${CMAKE_CURRENT_SOURCE_DIR}/Additional/ThreadingDefines.h")
@@ -115,8 +116,7 @@ if (UNIT_TESTING)
     target_link_libraries(SocketUnitTest PIL gtest pthread)
 endif () # UNIT_TESTING
 
-#add_executable(TEST2 UnitTesting/SocketTest.c)
-#target_link_libraries(TEST2 PIL gtest pthread)
+
 
 
 ### CPack Config ###
