@@ -117,7 +117,8 @@ if (UNIT_TESTING)
 endif () # UNIT_TESTING
 
 
-
+add_executable(SOCkET_UNIT_TEST "UnitTesting/SocketUnitTest.cpp")
+target_link_libraries(SOCkET_UNIT_TEST gtest_main gtest pthread PIL)
 
 ### CPack Config ###
 SET(CPACK_PACKAGE_NAME "PILLib")
