@@ -7,7 +7,6 @@
 #include <string.h> // memset
 #include <unistd.h> // close
 #include "Threading.h"
-#include "../include/Socket.hpp"
 
 #if embedded
 #include <lwip/tcpip.h>
@@ -20,7 +19,6 @@
 #include <sys/select.h> // fd_set, timeval, select
 #include <ErrorHandler.h>
 #include <malloc.h>
-#include <Socket.hpp>
 
 
 #endif // __linux__
@@ -287,6 +285,14 @@ PIL_ERROR_CODE PIL_SOCKET_WaitTillDataAvail(PIL_SOCKET *socketRet, uint32_t time
 #endif // !embedded
 }
 
+/**
+ * @brief Blocking receive function. Receives data on the provided socket.
+ * @param socketRet socket on which data should be received.
+ * @param buffer buffer in which the incomming data should be stored.
+ * @param bufferLen the maximum number of the buffer must be passed to this function.
+ *        Afterwards, it contains the amount of data which was received.
+ * @return
+ */
 PIL_ERROR_CODE PIL_SOCKET_Receive(PIL_SOCKET *socketRet, uint8_t *buffer, uint32_t *bufferLen)
 {
     if (!socketRet)
@@ -339,6 +345,13 @@ void* PIL_ReceiveThreadFunction(void *handle)
     return NULL;
 }
 
+#ifdef PIL_THREADING
+/**
+ * @brief
+ * @param socketRet
+ * @param callback
+ * @return
+ */
 PIL_ERROR_CODE PIL_SOCKET_RegisterCallbackFunction(PIL_SOCKET *socketRet, void (*callback)(uint8_t *, uint32_t))
 {
     if(!socketRet || !callback)
@@ -370,6 +383,7 @@ PIL_ERROR_CODE PIL_SOCKET_RegisterCallbackFunction(PIL_SOCKET *socketRet, void (
         return PIL_NO_ERROR;
 }
 
+
 /**
  * @brief This function unregisters the previously created callback function.
  * @param socketRet socket for which the callback was registered.
@@ -396,6 +410,9 @@ PIL_ERROR_CODE PIL_SOCKET_UnregisterCallbackFunction(PIL_SOCKET *socketRet)
         }
     return PIL_NO_ERROR;
 }
+
+#endif // THREADING
+
 
 
 /**

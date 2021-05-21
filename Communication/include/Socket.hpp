@@ -23,13 +23,14 @@ public:
     void WaitTillDataAvailable(int timeOut);
     void Connect(std::string &ipAddr, int port);
     void Receive(uint8_t *buffer, uint32_t *bufferLen);
-    void ReceiveFrom(uint8_t *buffer, int *bufferLen, std::string &ipAddr, int port);
+    void ReceiveFrom(uint8_t *buffer, int *bufferLen, char *ipAddr, int port);
     void Send(uint8_t *buffer, int *len);
     void SendTo(std::string &destAddr, int port, uint8_t* buffer, int *bufferLen);
     std::string GetSenderIP();
     PIL_BOOL IsOpen();
-    void CreateServerSocket(int port, void (*receiveCallback)(struct PIL_SOCKET *retHandle, char* ip));
-    void ConnectWithServer(std::string &ipAddr, int port);
+    void CreateServerSocket(int port, void (*receiveCallback)(PIL_SOCKET retHandle, char* ip));
+    void ConnectWithServer(std::string &ipAddr, int srcPort, int destPort,
+                           void (*receiveCallback)(struct PIL_SOCKET *retHandle, char *ip));
 
 private:
     PIL_SOCKET m_SocketRet{};

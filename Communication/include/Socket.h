@@ -28,14 +28,6 @@ PIL_ERROR_CODE PIL_SOCKET_WaitTillDataAvail(PIL_SOCKET *socketRet, uint32_t time
 
 PIL_ERROR_CODE PIL_SOCKET_Receive(PIL_SOCKET *socketRet , uint8_t *buffer, uint32_t *bufferLen);
 
-PIL_ERROR_CODE PIL_SOCKET_RegisterCallbackFunction(PIL_SOCKET *socketRet, void (*callback)(uint8_t *buffer,
-                                                                                           uint32_t len));
-
-PIL_ERROR_CODE PIL_SOCKET_RegisterCallbackFunction(PIL_SOCKET *socketRet, void (*callback)(uint8_t *buffer,
-                                                                                           uint32_t len));
-
-PIL_ERROR_CODE PIL_SOCKET_UnregisterCallbackFunction(PIL_SOCKET *socketRet);
-
 PIL_ERROR_CODE PIL_SOCKET_ReceiveFrom(PIL_SOCKET *socketRet , uint8_t *buffer, uint16_t *bufferLen, char *ipAddr, int *port);
 
 PIL_ERROR_CODE PIL_SOCKET_Send(PIL_SOCKET *socketRet, uint8_t *buffer, uint32_t *bufferLen);
@@ -54,6 +46,13 @@ PIL_ERROR_CODE PIL_SOCKET_ConnectToServer(PIL_SOCKET *socket, const char *ipAddr
 /**
  * Event based functions require Threading support.
  */
+#ifdef PIL_THREADING
+PIL_ERROR_CODE PIL_SOCKET_RegisterCallbackFunction(PIL_SOCKET *socketRet, void (*callback)(uint8_t *buffer,
+                                                                                           uint32_t len));
+PIL_ERROR_CODE PIL_SOCKET_UnregisterCallbackFunction(PIL_SOCKET *socketRet);
+#endif // PIL_THREADING
+
+
 
 
 /**
