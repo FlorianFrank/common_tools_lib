@@ -10,6 +10,8 @@ extern "C"
 #include "Socket.h"
 }
 
+#include "Socket.hpp"
+
 bool acceptFlag = true;
 std::string loram = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut "
                     "labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores "
@@ -45,10 +47,8 @@ TEST(SocketTest_C, SimpleSocketTest)
     acceptFlag = false;
 
     PIL_SOCKET clientSocket;
-    ret = PIL_SOCKET_ConnectToServer(&clientSocket, "127.0.0.1", 15000, 14000, NULL);
+    ret = PIL_SOCKET_ConnectToServer(&clientSocket, "127.0.0.1", 15000, 14000, receiveHandler);
     EXPECT_EQ(ret,PIL_NO_ERROR);
-
-    PIL_SOCKET_RegisterCallbackFunction(&clientSocket,receiveHandler);
 
     usleep(100000);
     EXPECT_EQ(acceptFlag, true);
@@ -61,6 +61,20 @@ TEST(SocketTest_C, SimpleSocketTest)
     ret = PIL_SOCKET_Close(&srvSocket);
     //Nonce nonce;
     EXPECT_EQ(ret, PIL_NO_ERROR);
+}
+
+TEST(SocketTest_CPP, SimpleSocketTest)
+{
+    PIL::Socket srvSock(TCP, IPv4, "localhost", 14000);
+    bool ret = srvSock.CreateServerSocket(CallbackAccept);
+    EXPECT_EQ(ret, true);
+
+    PIL::Socket clientSock(TCP, IPv4, "localhost", 14001);
+    ret = clientSock.ConnectToServer("127.0.0.1", 14000, receiveHandler);
+    EXPECT_EQ(ret, true);
+    usleep(1000);
+    EXPECT_EQ(acceptFlag, true);
+    EXPECT_STREQ(loram.c_str(), recvBuff);
 }
 
 /**

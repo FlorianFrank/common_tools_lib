@@ -111,7 +111,7 @@ namespace PIL
         return m_LastError == PIL_NO_ERROR ? true : false;
     }
 
-    bool Socket::ConnectWithServer(std::string &ipAddr, int destPort, void (*receiveCallback)(PIL_SOCKET *, char *))
+    bool Socket::ConnectToServer(std::string ipAddr, int destPort, void (*receiveCallback)(uint8_t *, uint32_t))
     {
         m_LastError = PIL_SOCKET_ConnectToServer(&m_SocketRet, ipAddr.c_str(), m_Port, destPort, receiveCallback);
         return m_LastError == PIL_NO_ERROR ? true : false;

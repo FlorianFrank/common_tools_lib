@@ -56,7 +56,7 @@ namespace PIL
 
         bool CreateServerSocket(void (*receiveCallback)(PIL_SOCKET, char *));
 
-        bool ConnectWithServer(std::string &ipAddr, int destPort, void (*receiveCallback)(PIL_SOCKET *, char *));
+        bool ConnectToServer(std::string ipAddr, int destPort, void (*receiveCallback)(uint8_t *, uint32_t));
 
     private:
         int m_Port;
