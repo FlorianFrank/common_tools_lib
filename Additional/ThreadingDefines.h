@@ -7,6 +7,7 @@
 
 #include <pthread.h>
 #include "DataTypeDefines.h"
+#include "ErrorCodeDefines.h"
 
 struct
 {
