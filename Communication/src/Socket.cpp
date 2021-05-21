@@ -13,136 +13,110 @@ extern "C" {
 
 #include <string>
 
-PIL_Socket::PIL_Socket(TransportProtocol transportProtocol, InternetProtocol internetProtocol, std::string &address,
-                       int port)
+namespace PIL
 {
-    PIL_ERROR_CODE ret = PIL_SOCKET_Create(&m_SocketRet, transportProtocol, internetProtocol, address.c_str(), port);
-    if (ret != PIL_NO_ERROR)
+
+    Socket::Socket(TransportProtocol transportProtocol, InternetProtocol internetProtocol,
+                           const std::string &address, int port) : m_TransportProtocol(transportProtocol),
+                                                                   m_InternetProtocol(internetProtocol),
+                                                                   m_IPAddrress(address), m_Port(port)
     {
-        // ERROR Handling
-    }
-}
-
-PIL_Socket::~PIL_Socket()
-{
-    PIL_ERROR_CODE ret = PIL_SOCKET_Close(&m_SocketRet);
-    if (ret != PIL_NO_ERROR)
-    {}
-    // Exception
-}
-
-void PIL_Socket::Bind(PIL_BOOL reuse)
-{
-    PIL_ERROR_CODE ret = PIL_SOCKET_Bind(&m_SocketRet, reuse);
-    if (ret != PIL_NO_ERROR)
-    {
-        // Exception
-    }
-}
-
-void PIL_Socket::Listen(int queueSize)
-{
-    PIL_ERROR_CODE ret = PIL_SOCKET_Listen(&m_SocketRet, queueSize);
-    if (ret != PIL_NO_ERROR)
-    {
-        // Exception
-    }
-}
-
-void PIL_Socket::Accept(char *ipAddr)
-{
-
-    // TODO add to list
-    //PIL_ERROR_CODE ret = PIL_SOCKET_Accept(&m_SocketRet, ipAddr, PIL_SOCKET *newHandle);
-}
-
-void PIL_Socket::WaitTillDataAvailable(int timeOut)
-{
-    PIL_ERROR_CODE ret = PIL_SOCKET_WaitTillDataAvail(&m_SocketRet, timeOut);
-    if (ret != PIL_NO_ERROR)
-    {
-        // TODO error handling
+        m_LastError = PIL_SOCKET_Create(&m_SocketRet, transportProtocol, internetProtocol, address.c_str(), port);
     }
 
-}
-
-void PIL_Socket::Connect(std::string &ipAddr, int port)
-{
-    PIL_ERROR_CODE ret = PIL_SOCKET_Connect(&m_SocketRet, ipAddr.c_str(), port);
-    if (ret != PIL_NO_ERROR)
+    Socket::~Socket()
     {
-
-    }
-}
-
-void PIL_Socket::Receive(uint8_t *buffer, uint32_t *bufferLen)
-{
-    PIL_ERROR_CODE ret = PIL_SOCKET_Receive(&m_SocketRet, buffer, bufferLen);
-    if (ret != PIL_NO_ERROR)
-    {
-
-    }
-}
-
-void PIL_Socket::ReceiveFrom(uint8_t *buffer, int *bufferLen, char *ipAddr, int port)
-{
-    // TODO
-    PIL_ERROR_CODE ret = PIL_SOCKET_ReceiveFrom(&m_SocketRet, buffer, reinterpret_cast<uint16_t *>(bufferLen),
-                                                ipAddr, &port);
-    if (ret != PIL_NO_ERROR)
-    {
-        // Error handling
-    }
-}
-
-void PIL_Socket::Send(uint8_t *buffer, int *len)
-{
-    PIL_ERROR_CODE ret = PIL_SOCKET_Send(&m_SocketRet, buffer, reinterpret_cast<uint32_t *>(len));
-    if (ret != PIL_NO_ERROR)
-    {
-        //
+        PIL_SOCKET_Close(&m_SocketRet);
     }
 
-}
-
-void PIL_Socket::SendTo(std::string &destAddr, int port, uint8_t *buffer, int *bufferLen)
-{
-    PIL_ERROR_CODE ret = PIL_SOCKET_SendTo(&m_SocketRet, destAddr.c_str(), port, buffer,
-                                           reinterpret_cast<uint32_t *>(bufferLen));
-    if (ret != PIL_NO_ERROR)
+    bool Socket::Bind(PIL_BOOL reuse)
     {
-        // Ret
-    }
-}
-
-std::string PIL_Socket::GetSenderIP()
-{
-    return PIL_SOCKET_GetSenderIP(&m_SocketRet);
-}
-
-PIL_BOOL PIL_Socket::IsOpen()
-{
-    return PIL_SOCKET_IsOpen(&m_SocketRet);
-}
-
-void PIL_Socket::CreateServerSocket(int port, void (*receiveCallback)(PIL_SOCKET, char *))
-{
-    PIL_ERROR_CODE ret = PIL_SOCKET_Setup_ServerSocket(&m_SocketRet, port, receiveCallback);
-    if (ret != PIL_NO_ERROR)
-    {
-        // Return
+        m_LastError = PIL_SOCKET_Bind(&m_SocketRet, reuse);
+        return m_LastError == PIL_NO_ERROR ? true : false;
     }
 
-}
-
-void PIL_Socket::ConnectWithServer(std::string &ipAddr, int srcPort, int destPort,
-                                   void (*receiveCallback)(struct PIL_SOCKET *retHandle, char *ip))
-{
-    PIL_ERROR_CODE ret = PIL_SOCKET_ConnectToServer(&m_SocketRet, ipAddr.c_str(), srcPort, destPort, receiveCallback);
-    if (ret != PIL_NO_ERROR)
+    bool Socket::Listen(int queueSize)
     {
-        // Return
+        m_LastError = PIL_SOCKET_Listen(&m_SocketRet, queueSize);
+        return m_LastError == PIL_NO_ERROR ? true : false;
     }
+
+    void Socket::Accept(char *ipAddr)
+    {
+        PIL_SOCKET sock;
+        m_LastError = PIL_SOCKET_Accept(&m_SocketRet, ipAddr, &sock);
+        m_SocketList.push_back(sock);
+    }
+
+    WaitRetValue Socket::WaitTillDataAvailable(int timeOut)
+    {
+        m_LastError = PIL_SOCKET_WaitTillDataAvail(&m_SocketRet, timeOut);
+        switch (m_LastError)
+        {
+            case PIL_NO_ERROR:
+                return SUCCESS;
+            case PIL_SOCKET_TIMEOUT:
+                return TIMEOUT;
+            default:
+                return ERROR;
+        }
+    }
+
+    bool Socket::Connect(std::string &ipAddr, int port)
+    {
+        m_LastError = PIL_SOCKET_Connect(&m_SocketRet, ipAddr.c_str(), port);
+        return m_LastError == PIL_NO_ERROR ? true : false;
+    }
+
+    bool Socket::Receive(uint8_t *buffer, uint32_t *bufferLen)
+    {
+        m_LastError = PIL_SOCKET_Receive(&m_SocketRet, buffer, bufferLen);
+        return m_LastError == PIL_NO_ERROR ? true : false;
+    }
+
+    bool Socket::ReceiveFrom(uint8_t *buffer, int *bufferLen, char *ipAddr, int port)
+    {
+        m_LastError = PIL_SOCKET_ReceiveFrom(&m_SocketRet, buffer, reinterpret_cast<uint16_t *>(bufferLen), ipAddr,
+                                             &port);
+        return m_LastError == PIL_NO_ERROR ? true : false;
+
+    }
+
+    bool Socket::Send(uint8_t *buffer, int *len)
+    {
+        m_LastError = PIL_SOCKET_Send(&m_SocketRet, buffer, reinterpret_cast<uint32_t *>(len));
+        return m_LastError == PIL_NO_ERROR ? true : false;
+    }
+
+    bool Socket::SendTo(std::string &destAddr, int port, uint8_t *buffer, int *bufferLen)
+    {
+        m_LastError = PIL_SOCKET_SendTo(&m_SocketRet, destAddr.c_str(), port, buffer,
+                                        reinterpret_cast<uint32_t *>(bufferLen));
+        return m_LastError == PIL_NO_ERROR ? true : false;
+    }
+
+    std::string Socket::GetSenderIP()
+    {
+        return PIL_SOCKET_GetSenderIP(&m_SocketRet);
+    }
+
+    PIL_BOOL Socket::IsOpen()
+    {
+        return PIL_SOCKET_IsOpen(&m_SocketRet);
+    }
+
+    bool Socket::CreateServerSocket(void (*receiveCallback)(PIL_SOCKET, char *))
+    {
+        m_LastError = PIL_SOCKET_Setup_ServerSocket(&m_SocketRet, m_Port, receiveCallback);
+        return m_LastError == PIL_NO_ERROR ? true : false;
+    }
+
+    bool Socket::ConnectWithServer(std::string &ipAddr, int destPort, void (*receiveCallback)(PIL_SOCKET *, char *))
+    {
+        m_LastError = PIL_SOCKET_ConnectToServer(&m_SocketRet, ipAddr.c_str(), m_Port, destPort, receiveCallback);
+        return m_LastError == PIL_NO_ERROR ? true : false;
+    }
+
 }
 }
 #endif // CXX
