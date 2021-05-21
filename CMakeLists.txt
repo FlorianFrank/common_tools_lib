@@ -13,6 +13,7 @@ if (DEFINED ALL)
     set(SHARED 1)
     set(SHARED 1)
     set(STATIC 1)
+    set(CXX 1)
     add_definitions(-DCXX)
 #    set(UNIT_TESTING 1)
 #    set(STRING 0)
@@ -20,13 +21,21 @@ endif () # DEFINED ALL
 
 if (DEFINED COMMUNICATION)
 
-    set(communication_headers             
+    if(DEFINED CXX)
+    set(communication_headers_cxx
+            "${CMAKE_CURRENT_SOURCE_DIR}/Communication/include/Socket.hpp")
+
+        set(communication_cxx "${CMAKE_CURRENT_SOURCE_DIR}/Communication/src/Socket.cpp")
+    endif() # DEFINED CXX
+
+    set(communication_headers "${communication_headers_cxx}"
     	"${CMAKE_CURRENT_SOURCE_DIR}/Communication/include/Socket.h"
     	"${CMAKE_CURRENT_SOURCE_DIR}/Communication/include/UARTInterface.h"
-	"${CMAKE_CURRENT_SOURCE_DIR}/Additional/UARTDefines.h"
+	    "${CMAKE_CURRENT_SOURCE_DIR}/Additional/UARTDefines.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/Additional/SocketDefines.h")
 
-    set(communication
+
+    set(communication ${communication_cxx}
             "${CMAKE_CURRENT_SOURCE_DIR}/Communication/src/Socket.c"
             "${CMAKE_CURRENT_SOURCE_DIR}/Communication/src/UARTInterface.c"
             "${communication_headers}")
