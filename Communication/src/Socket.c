@@ -85,6 +85,11 @@ PIL_ERROR_CODE PIL_SOCKET_Close(PIL_SOCKET *socketRet)
     if (!socketRet)
         return -1;
 
+    if(socketRet->m_callbackActive == TRUE)
+    {
+        PIL_SOCKET_UnregisterCallbackFunction(socketRet);
+    }
+
 #ifndef embedded
     if (socketRet->m_IsOpen)
     {
