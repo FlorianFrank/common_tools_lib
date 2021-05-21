@@ -116,9 +116,14 @@ if (UNIT_TESTING)
     target_link_libraries(SocketUnitTest PIL gtest pthread)
 endif () # UNIT_TESTING
 
+add_executable(SOCKET_UNIT_TEST "UnitTesting/SocketUnitTest.cpp")
+target_link_libraries(SOCKET_UNIT_TEST gtest_main gtest pthread PIL)
 
-add_executable(SOCkET_UNIT_TEST "UnitTesting/SocketUnitTest.cpp")
-target_link_libraries(SOCkET_UNIT_TEST gtest_main gtest pthread PIL)
+enable_testing()
+include(GoogleTest)
+gtest_discover_tests("SOCKET_UNIT_TEST")
+
+
 
 ### CPack Config ###
 SET(CPACK_PACKAGE_NAME "PILLib")
