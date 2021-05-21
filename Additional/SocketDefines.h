@@ -18,6 +18,9 @@
 #include <stdint.h>
 #include "ThreadingDefines.h"
 
+
+struct ReceiveThreadCallbackArg typedef ReceiveThreadCallbackArg;
+
 struct PIL_SOCKET
 {
 #ifndef embedded // Linux
@@ -42,10 +45,15 @@ struct PIL_SOCKET
 #else // LWIP
     ip_addr_t m_SrcAddr;
 #endif // !embedded
-    ThreadHandle *m_threadHandle;
+    ThreadHandle *m_AcceptThreadHandle;
     volatile PIL_BOOL m_IsOpen;
     PIL_BOOL m_IsConnected;
     PIL_ErrorHandle m_ErrorHandle;
+
+    ThreadHandle *m_callbackThreadHandle;
+    ReceiveThreadCallbackArg *m_callbackThreadArg;
+    PIL_BOOL m_callbackActive;
+
 } typedef PIL_SOCKET;
 
 enum
@@ -60,7 +68,20 @@ enum
     IPv6 = 1
 } typedef InternetProtocol;
 
+struct ThreadArg{
+    struct PIL_SOCKET socket;
+    void (*receiveCallback)(struct PIL_SOCKET retHandle, char* ip);
+} typedef ThreadArg;
+
+struct ReceiveThreadCallbackArg {
+    PIL_SOCKET *socket;
+    void (*receiveCallback)(uint8_t* buffer, uint32_t len);
+} typedef ReceiveThreadCallbackArg;
+
 #define DEFAULT_QUEUE_SIZE 10
+#define DEFAULT_TIMEOUT_MS 500
+#define DEFAULT_SOCK_BUFF_SIZE 4096
+#define MAX_IP_LEN 39 // Max size of an IP-address in textual representation (e.g. 0000:0000:0000:0000:0000:0000:0000:0000)
 
 
 
