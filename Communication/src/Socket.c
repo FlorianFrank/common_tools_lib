@@ -625,7 +625,7 @@ PIL_ERROR_CODE PIL_SOCKET_Setup_ServerSocket(PIL_SOCKET *socket, uint16_t port, 
 }
 
 PIL_ERROR_CODE PIL_SOCKET_ConnectToServer(PIL_SOCKET *socket, const char *ipAddr, uint16_t srcPort, uint16_t destPort,
-                                          void (*receiveCallback)(struct PIL_SOCKET *retHandle, char *ip))
+                                          void (*receiveCallback)(uint8_t*, uint32_t))
 {
     PIL_ERROR_CODE ret = PIL_SOCKET_Create(socket, TCP, IPv4, "127.0.0.1", srcPort);
     if(ret != PIL_NO_ERROR)
@@ -634,8 +634,8 @@ PIL_ERROR_CODE PIL_SOCKET_ConnectToServer(PIL_SOCKET *socket, const char *ipAddr
     ret = PIL_SOCKET_Connect(socket, ipAddr, destPort);
     if(ret != PIL_NO_ERROR)
         return ret;
-
-    return PIL_NO_ERROR;
+    
+    return PIL_SOCKET_RegisterCallbackFunction(socket, receiveCallback);
 }
 
 
