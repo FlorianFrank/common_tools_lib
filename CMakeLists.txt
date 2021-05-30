@@ -20,7 +20,7 @@ if (DEFINED ALL)
 endif () # DEFINED ALL
 
 if (DEFINED COMMUNICATION)
-
+	message("HALLO")
     if(DEFINED CXX)
     set(communication_headers_cxx
             "${CMAKE_CURRENT_SOURCE_DIR}/Communication/include/Socket.hpp")
@@ -39,21 +39,21 @@ if (DEFINED COMMUNICATION)
             "${CMAKE_CURRENT_SOURCE_DIR}/Communication/src/Socket.c"
             "${CMAKE_CURRENT_SOURCE_DIR}/Communication/src/UARTInterface.c"
             "${communication_headers}")
-            
+
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/Communication/include")
-    
+
 endif () # DEFINED COMMUNICATION
 
 if (DEFINED FILE_HANDLING)
 
-    set(file_handling_headers 
+    set(file_handling_headers
              "${CMAKE_CURRENT_SOURCE_DIR}/FileHandling/include/FileHandler.h"
             "${CMAKE_CURRENT_SOURCE_DIR}/Additional/FileHandlingDefines.h")
 
     set(file_handling
             "${CMAKE_CURRENT_SOURCE_DIR}/FileHandling/src/FileHandler.c"
             "${file_handling_headers}")
-            
+
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/FileHandling/include")
 endif() # DEFINED FILE_HANDLING
 
@@ -62,20 +62,26 @@ if (DEFINED LOGGING)
     set(logging_headers "${CMAKE_CURRENT_SOURCE_DIR}/Logging/include/Logging.h")
 
     set(logging 
-    	"${CMAKE_CURRENT_SOURCE_DIR}/Logging/src/Logging.cpp"
+    	"${CMAKE_CURRENT_SOURCE_DIR}/Logging/src/Logging.cpp""${threading_headers_cxx}"
     	"${logging_headers}")
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/Logging/include")
 endif () # DEFINED LOGGING
 
 if(DEFINED THREADING)
     add_definitions(-DPIL_THREADING)
-    set(threading_headers                   
+
+    set(threading_headers_cxx "${CMAKE_CURRENT_SOURCE_DIR}/Threading/include/Threading.hpp")
+    set(threading_cxx "${CMAKE_CURRENT_SOURCE_DIR}/Threading/src/Threading.cpp")
+
+    set(threading_headers
     		"${CMAKE_CURRENT_SOURCE_DIR}/Threading/include/Threading.h"
-               "${CMAKE_CURRENT_SOURCE_DIR}/Additional/ThreadingDefines.h")
+            "${CMAKE_CURRENT_SOURCE_DIR}/Additional/ThreadingDefines.h"
+            "${threading_headers_cxx}")
 
     set(threading 
     	"${CMAKE_CURRENT_SOURCE_DIR}/Threading/src/Threading.c"
-    	"${threading_headers}")
+    	"${threading_headers}"
+        "${threading_cxx}")
     	
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/Threading/include")
 
@@ -132,7 +138,28 @@ enable_testing()
 include(GoogleTest)
 gtest_discover_tests("SOCKET_UNIT_TEST")
 
+option(BUILD_DOC "Build documentation" ON)
 
+# check if Doxygen is installed
+find_package(Doxygen)
+if (DOXYGEN_FOUND)
+    # set input and output files
+    set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
+    set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+
+    # request to configure the file
+    configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
+    message("Doxygen build started")
+
+add_custom_target( doc_doxygen ALL
+        COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Generating API documentation with Doxygen"
+        VERBATIM )
+
+else (DOXYGEN_FOUND)
+    message("Doxygen need to be installed to generate the doxygen documentation")
+endif (DOXYGEN_FOUND)
 
 ### CPack Config ###
 SET(CPACK_PACKAGE_NAME "PILLib")
