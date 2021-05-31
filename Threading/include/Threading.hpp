@@ -7,7 +7,10 @@
 
 #include "ErrorHandler.hpp"
 
-struct ThreadHandle;
+extern "C" {
+#include "Threading.h"
+};
+
 
 namespace PIL
 {

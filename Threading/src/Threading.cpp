@@ -6,9 +6,6 @@
 
 #include "Threading.hpp"
 
-extern "C" {
-#include "Threading.h"
-};
 
 PIL::Threading::Threading(void *(*threadFunction)(void *), void *argument) : ErrorHandler(),
 m_ThreadFunction(threadFunction), m_argument(argument)
