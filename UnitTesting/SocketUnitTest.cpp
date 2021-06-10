@@ -5,9 +5,8 @@
 #include <gtest/gtest.h> // google test
 #include <string>
 
-extern "C"
-{
-#include "Socket.h"
+extern "C" {
+#include <Socket.h>
 }
 
 #include "Socket.hpp"
@@ -65,11 +64,11 @@ TEST(SocketTest_C, SimpleSocketTest)
 
 TEST(SocketTest_CPP, SimpleSocketTest)
 {
-    PIL::Socket srvSock(TCP, IPv4, "localhost", 14000);
+    PIL::Socket srvSock(TCP, IPv4, "localhost", 14002);
     bool ret = srvSock.CreateServerSocket(CallbackAccept);
     EXPECT_EQ(ret, true);
 
-    PIL::Socket clientSock(TCP, IPv4, "localhost", 14001);
+    PIL::Socket clientSock(TCP, IPv4, "localhost", 14003);
     ret = clientSock.ConnectToServer("127.0.0.1", 14000, receiveHandler);
     EXPECT_EQ(ret, true);
     usleep(1000);
