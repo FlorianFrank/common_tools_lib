@@ -83,7 +83,7 @@ PIL_SOCKET_Create(PIL_SOCKET *socketRet, TransportProtocol protocol, InternetPro
 PIL_ERROR_CODE PIL_SOCKET_Close(PIL_SOCKET *socketRet)
 {
     if (!socketRet)
-        return -1;
+        return PIL_INVALID_ARGUMENTS;
 
     if(socketRet->m_callbackActive == TRUE)
     {
@@ -108,10 +108,11 @@ PIL_ERROR_CODE PIL_SOCKET_Close(PIL_SOCKET *socketRet)
     if(socketRet->m_AcceptThreadHandle)
     {
         PIL_THREADING_JoinThread(socketRet->m_AcceptThreadHandle, NULL);
-        free(socketRet);
     }
 
-    return PIL_INTERFACE_CLOSED;
+    PIL_ERROR_CODE ret =  (close(socketRet->m_socket) == 0) ?  PIL_NO_ERROR : PIL_ERRNO;
+    free(socketRet);
+    return ret;
 }
 
 /**
