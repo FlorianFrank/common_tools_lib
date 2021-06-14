@@ -25,6 +25,12 @@ PIL_ERROR_CODE PIL_UART_CreateUartInterface(PIL_UART_Config *config, const char 
 
     strcpy(config->m_Interface, interface);
     config->m_Baudrate = baudrate;
+
+    // Set default parameters
+    config->m_StopBits = StopBits8;
+    config->m_Parity = NoParity;
+    config->m_ByteSize = ByteSize8;
+
     config->m_Open = 0;
 
     return PIL_NO_ERROR;
@@ -61,8 +67,7 @@ PIL_ERROR_CODE PIL_UART_Open(PIL_UART_Config *config, PIL_BOOL nonBlocking)
         return PIL_ERRNO;
     }
     config->m_Open = TRUE;
-
-    return PIL_NO_ERROR;
+    return PIL_UART_SetComParameters(config);
 #endif // WIN32
 }
 
@@ -111,20 +116,20 @@ PIL_ERROR_CODE PIL_UART_ReadData(PIL_UART_Config *config, char *buffer, int *buf
 #if defined(__linux__)
 int SetCustomBaudrate(PIL_UART_Config *config)
 {
-    struct serial_struct serinfo;
+    struct serial_struct serialInfo;
     /* Custom divisor */
-    serinfo.reserved_char[0] = 0;
-    if (ioctl(config->m_FileHandle, TIOCGSERIAL, &serinfo) < 0)
+    serialInfo.reserved_char[0] = 0;
+    if (ioctl(config->m_FileHandle, TIOCGSERIAL, &serialInfo) < 0)
         return -1;
-    serinfo.flags = ASYNC_SPD_CUST | ASYNC_LOW_LATENCY; // NOLINT(hicpp-signed-bitwise)
-    serinfo.custom_divisor = (serinfo.baud_base + (config->m_Baudrate / 2)) / config->m_Baudrate;
-    if (serinfo.custom_divisor < 1)
-        serinfo.custom_divisor = 1;
-    if (ioctl(config->m_FileHandle, TIOCSSERIAL, &serinfo) < 0)
+    serialInfo.flags = ASYNC_SPD_CUST | ASYNC_LOW_LATENCY; // NOLINT(hicpp-signed-bitwise)
+    serialInfo.custom_divisor = (serialInfo.baud_base + (config->m_Baudrate / 2)) / config->m_Baudrate;
+    if (serialInfo.custom_divisor < 1)
+        serialInfo.custom_divisor = 1;
+    if (ioctl(config->m_FileHandle, TIOCSSERIAL, &serialInfo) < 0)
         return -1;
-    if (serinfo.custom_divisor * config->m_Baudrate != serinfo.baud_base) {
-        //printf("actual baudrate is %d / %d = %f", serinfo.baud_base, serinfo.custom_divisor,
-        //	(float)serinfo.baud_base / serinfo.custom_divisor);
+    if (serialInfo.custom_divisor * config->m_Baudrate != serialInfo.baud_base) {
+        //printf("actual baudrate is %d / %d = %f", serialInfo.baud_base, serialInfo.custom_divisor,
+        //	(float)serialInfo.baud_base / serialInfo.custom_divisor);
         return 0;
 
     }
@@ -281,7 +286,6 @@ PIL_ERROR_CODE PIL_UART_SetComParameters(PIL_UART_Config *config)
                                  (uint32_t) IEXTEN));
 
 
-    //tty.c_cflag  |= CLOCAL;
 
     // Enable parity check and set parity even or odd
     tty.c_cflag &= (uint32_t) (~((uint32_t) CSIZE | ((config->m_Parity != NoParity) ? ((uint32_t) PARENB) : 0u) |
