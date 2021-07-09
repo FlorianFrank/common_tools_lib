@@ -20,6 +20,13 @@
 #include <winbase.h>
 #endif // WIN32
 
+/**
+ * @brief Creates a UART handle, sets the default parameters as well as the interface.
+ * @param config UART handle which is returned.
+ * @param interface Interface to open, for example, /dev/ttyUSB0 or COM3.
+ * @param baudrate Baudrate to set, e.g. 9600.
+ * @return PIL_NO_ERROR if function was successful.
+ */
 PIL_ERROR_CODE PIL_UART_CreateUartInterface(PIL_UART_Config *config, const char *interface, uint32_t baudrate)
 {
     if(!config)
@@ -39,6 +46,12 @@ PIL_ERROR_CODE PIL_UART_CreateUartInterface(PIL_UART_Config *config, const char 
 }
 
 
+/**
+ * @brief Opens the UART interface which must be specified by the PIL_UART_CreateUartInterface function.
+ * @param config configuration file previously returned by calling PIL_UART_CreateUartInterface.
+ * @param nonBlocking if true, interface is opened in none blocking mode, else in blocking mode.
+ * @return PIL_NO_ERROR if function was successful.
+ */
 PIL_ERROR_CODE PIL_UART_Open(PIL_UART_Config *config, PIL_BOOL nonBlocking)
 {
     if(!config)
@@ -73,6 +86,11 @@ PIL_ERROR_CODE PIL_UART_Open(PIL_UART_Config *config, PIL_BOOL nonBlocking)
 #endif // WIN32
 }
 
+/**
+ * @brief Closes the UART interface.
+ * @param config handle corresponding to the interface to close.
+ * @return PIL_NO_ERROR if function was successful.
+ */
 PIL_ERROR_CODE PIL_UART_Close(PIL_UART_Config *config)
 {
     if(!config)
@@ -89,6 +107,13 @@ PIL_ERROR_CODE PIL_UART_Close(PIL_UART_Config *config)
 return PIL_NO_ERROR;
 }
 
+/**
+ * @brief Read data from an opened UART interface.
+ * @param config handle corresponding to the opened UART interface.
+ * @param buffer buffer to store the received data.
+ * @param bufferLen input: pointer to the max buffer length. Output: actually read data.
+ * @return PIL_NO_ERROR if function was successful.
+ */
 PIL_ERROR_CODE PIL_UART_ReadData(PIL_UART_Config *config, char *buffer, int *bufferLen)
 {
     if(!config || !bufferLen || *bufferLen <= 0)
@@ -117,6 +142,11 @@ PIL_ERROR_CODE PIL_UART_ReadData(PIL_UART_Config *config, char *buffer, int *buf
 
 
 #if defined(__linux__)
+/**
+ * @brief Function to approximate a baudrate not predefined. Baudrates up to a deviation of 2% are accepted.
+ * @param config handle corresponding to the opened UART interface and containing the baudrate to set.
+ * @return PIL_NO_ERROR if function was successful.
+ */
 int SetCustomBaudrate(PIL_UART_Config *config)
 {
     struct serial_struct serialInfo;
@@ -140,6 +170,13 @@ int SetCustomBaudrate(PIL_UART_Config *config)
 }
 #endif
 
+/**
+ * @brief Function to write data via an opened UART interface.
+ * @param config handle corresponding to the opened UART interface and containing the baudrate to set.
+ * @param buffer Buffer to send.
+ * @param buffSize input: pointer to buffer size to send. Output:  size actually written.
+ * @return PIL_NO_ERROR if function was successful.
+ */
 PIL_ERROR_CODE PIL_UART_WriteData(PIL_UART_Config *config, const char *buffer, const int *buffSize)
 {
     if(!config)
@@ -159,6 +196,11 @@ PIL_ERROR_CODE PIL_UART_WriteData(PIL_UART_Config *config, const char *buffer, c
     return PIL_NO_ERROR;
 }
 
+/**
+ * @brief Sets parameters like the baudrate, stopbits, bytesize and parity bit of the uart interface.
+ * @param config config file identifying the interface and contains the parameters.
+ * @return PIL_NO_ERROR if no error occures.
+ */
 PIL_ERROR_CODE PIL_UART_SetComParameters(PIL_UART_Config *config)
 {
     if(!config)
@@ -337,9 +379,9 @@ PIL_ERROR_CODE PIL_UART_SetComParameters(PIL_UART_Config *config)
 
 /**
  * @brief Function waits until data is available without using busy waiting.
- * @param config Handle used .
- * @param timeoutMS
- * @return
+ * @param config Config file to identify the UART interface.
+ * @param timeoutMS timeout in milliseconds.
+ * @return PIL_NO_ERROR if no error occures.
  */
 PIL_ERROR_CODE PIL_UART_WaitForDataAvail(PIL_UART_Config *config, uint32_t timeoutMS)
 {
@@ -365,6 +407,4 @@ PIL_ERROR_CODE PIL_UART_WaitForDataAvail(PIL_UART_Config *config, uint32_t timeo
 #else
     return 0;
 #endif // !embedded
-
-    return PIL_ERRNO;
 }
