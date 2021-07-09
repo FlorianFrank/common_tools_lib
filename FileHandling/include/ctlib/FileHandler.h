@@ -5,8 +5,8 @@
 #ifndef PLATFORMINDEPENDENTLIB_FILEHANDLER_H
 #define PLATFORMINDEPENDENTLIB_FILEHANDLER_H
 
-#include "ErrorCodeDefines.h"
-#include "FileHandlingDefines.h"
+#include "ctlib/ErrorCodeDefines.h"
+#include "ctlib/FileHandlingDefines.h"
 
 PIL_ERROR_CODE PIL_OpenFile(PIL_FileHandle *fileHandle, const char* fileName, PIL_FilePermissions permission, PIL_FileMode fileMode);
 PIL_ERROR_CODE PIL_CloseFile(PIL_FileHandle *fileHandle);

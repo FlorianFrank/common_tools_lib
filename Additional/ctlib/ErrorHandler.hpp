@@ -5,12 +5,12 @@
 #ifndef PLATFORMINDEPENDENTLIB_WRAPPERCLASS_H
 #define PLATFORMINDEPENDENTLIB_WRAPPERCLASS_H
 
-#include "ErrorHandler.h"
+#include "ctlib/ErrorHandler.h"
 
 class ErrorHandler
 {
 public:
-    ErrorHandler(){}
+    ErrorHandler()= default;
 
 protected:
     PIL_ERROR_CODE m_LastError;

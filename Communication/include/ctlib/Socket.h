@@ -1,14 +1,15 @@
 /**
- * @file File contains a wrapper class Socked, which wraps the platform dependent implementation of sockets.
- * @addtogroup ASOACryptMiddleware
+ * @file Platform independent implementation of sockets written in C.
+ * @addtogroup Communication
+ * @addtogroup Sockets
  */
 
 #ifndef PIL_SOCKET_H
 #define PIL_SOCKET_H
 
-#include "DataTypeDefines.h"
-#include "ErrorCodeDefines.h"
-#include "SocketDefines.h"
+#include "ctlib/DataTypeDefines.h"
+#include "ctlib/ErrorCodeDefines.h"
+#include "ctlib/SocketDefines.h"
 
 
 PIL_ERROR_CODE PIL_SOCKET_Create(PIL_SOCKET *socketRet, TransportProtocol protocol,
@@ -56,8 +57,8 @@ PIL_ERROR_CODE PIL_SOCKET_UnregisterCallbackFunction(PIL_SOCKET *socketRet);
 
 
 /**
-* @}
-* @}
+ * @}
+ * @}
 */
 
 #endif //PIL_SOCKET_H

@@ -6,8 +6,8 @@
 #define PLATFORMINDEPENDENTLIB_UARTDEFINES_H
 
 #include <stdint.h>
-#include <DataTypeDefines.h>
-#include "ErrorCodeDefines.h"
+#include <ctlib/DataTypeDefines.h>
+#include "ctlib/ErrorCodeDefines.h"
 
 #ifdef __WIN32__
 #include <ntdef.h>
@@ -19,8 +19,8 @@ typedef int FileHandle;
 
 
 enum {
-    StopBits5,
-    StopBits8
+    StopBits1,
+    StopBits2
 } typedef StopBits;
 
 enum {

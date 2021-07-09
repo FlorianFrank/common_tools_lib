@@ -2,9 +2,9 @@
 // Created by frank55 on 10.11.2020.
 //
 
-#include "UARTInterface.h"
-#include "ErrorHandler.h"
-#include "Logging.h"
+#include "ctlib/UARTInterface.h"
+#include "ctlib/ErrorHandler.h"
+#include "ctlib/Logging.h"
 #include <string.h>
 #include <stdio.h> // sprintf
 #include <fcntl.h>
@@ -12,6 +12,8 @@
 #include <termios.h>
 #include <sys/ioctl.h>
 #include <linux/serial_core.h>
+#include <sys/select.h>
+
 #ifdef __WIN32__
 #include <fileapi.h>
 #include "windows.h"
@@ -27,7 +29,7 @@ PIL_ERROR_CODE PIL_UART_CreateUartInterface(PIL_UART_Config *config, const char 
     config->m_Baudrate = baudrate;
 
     // Set default parameters
-    config->m_StopBits = StopBits8;
+    config->m_StopBits = StopBits1;
     config->m_Parity = NoParity;
     config->m_ByteSize = ByteSize8;
 
@@ -89,7 +91,7 @@ return PIL_NO_ERROR;
 
 PIL_ERROR_CODE PIL_UART_ReadData(PIL_UART_Config *config, char *buffer, int *bufferLen)
 {
-    if(!config)
+    if(!config || !bufferLen || *bufferLen <= 0)
         return PIL_INVALID_ARGUMENTS;
 
     if(!config->m_Open)
@@ -111,6 +113,7 @@ PIL_ERROR_CODE PIL_UART_ReadData(PIL_UART_Config *config, char *buffer, int *buf
 #endif // WIN32
     return PIL_NO_ERROR;
 }
+
 
 
 #if defined(__linux__)
@@ -238,6 +241,12 @@ PIL_ERROR_CODE PIL_UART_SetComParameters(PIL_UART_Config *config)
         case(921600) :
             baudRate = B921600;
             break;
+        case(2000000):
+            baudRate = B2000000;
+            break;
+        case(4000000):
+            baudRate = B4000000;
+            break;
         default:
             // Approximate baudRate by clock divider
             if (SetCustomBaudrate(config) != -1)
@@ -283,7 +292,8 @@ PIL_ERROR_CODE PIL_UART_SetComParameters(PIL_UART_Config *config)
     // echo off, echo newline off, canonical mode off,
     // extended input processing off, signal chars off
     tty.c_lflag &= (uint32_t) (~((uint32_t) ECHO | (uint32_t) ECHONL | (uint32_t) ICANON | (uint32_t) ISIG |
-                                 (uint32_t) IEXTEN));
+                                 (uint32_t) IEXTEN) | ((config->m_StopBits == StopBits2) ? CSTOPB : 0)
+                                         );
 
 
 
@@ -323,4 +333,38 @@ PIL_ERROR_CODE PIL_UART_SetComParameters(PIL_UART_Config *config)
     }
     return PIL_NO_ERROR;
 #endif // WIN32
+}
+
+/**
+ * @brief Function waits until data is available without using busy waiting.
+ * @param config Handle used .
+ * @param timeoutMS
+ * @return
+ */
+PIL_ERROR_CODE PIL_UART_WaitForDataAvail(PIL_UART_Config *config, uint32_t timeoutMS)
+{
+#ifndef embedded
+    if (!config)
+        return PIL_INVALID_ARGUMENTS;
+
+    fd_set readFD = {0};
+    struct timeval timeout = {0};
+
+    // set select write handle to zero
+    FD_ZERO(&readFD);
+    FD_SET(config->m_FileHandle, &readFD);
+
+    timeout.tv_usec = (timeoutMS % 1000) * 1000;
+    timeout.tv_sec = (timeoutMS - (timeoutMS % 1000)) / 1000;
+    int ret = select(config->m_FileHandle + 1, &readFD, NULL, NULL, &timeout);
+    if (ret == -1)
+        return PIL_ERRNO;
+    if(ret == 0)
+        return PIL_TIMEOUT;
+    return PIL_NO_ERROR;
+#else
+    return 0;
+#endif // !embedded
+
+    return PIL_ERRNO;
 }

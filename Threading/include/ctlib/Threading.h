@@ -5,8 +5,8 @@
 #ifndef PLATFORMINDEPENDENTLIB_THREADING_H
 #define PLATFORMINDEPENDENTLIB_THREADING_H
 
-#include "ErrorCodeDefines.h"
-#include "ThreadingDefines.h"
+#include "ctlib/ErrorCodeDefines.h"
+#include "ctlib/ThreadingDefines.h"
 
 
 PIL_ERROR_CODE PIL_THREADING_CreateThread(ThreadHandle *threadHandle, void* (*functionPtr)(void*), void* argument);

@@ -3,13 +3,15 @@
 // Created by florianfrank on 29.12.20.
 //
 
-#include <DataTypeDefines.h>
+#include <ctlib/DataTypeDefines.h>
 #include <memory.h>
 #include <stdio.h>
-#include "../include/ErrorHandler.h"
+#include "ctlib/ErrorHandler.h"
 #include "errno.h"
 
- const char *PIL_ErrorCodeToString(PIL_ERROR_CODE errorCode)
+char errMsgBuff[512];
+
+ const char* PIL_ErrorCodeToString(PIL_ERROR_CODE errorCode)
  {
      switch (errorCode)
      {
@@ -17,10 +19,13 @@
              return "Success";
          case PIL_INVALID_ARGUMENTS:
              return "Invalid arguments";
-         case PIL_SOCKET_TIMEOUT:
+         case PIL_TIMEOUT:
             return "Socket timeout";
          case PIL_ERRNO:
-             return "Errno";
+         {
+             sprintf(errMsgBuff, "Errno %d (%s)", errno, strerror(errno));
+             return errMsgBuff;
+         }
          case PIL_INTERFACE_CLOSED:
              return "Socket is closed";
          case PIL_INVALID_BAUDRATE:
@@ -93,3 +98,4 @@
 
     return TRUE;
  }
+

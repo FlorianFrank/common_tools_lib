@@ -5,7 +5,7 @@
 #ifndef PLATFORMINDEPENDENTLIB_THREADING_HPP
 #define PLATFORMINDEPENDENTLIB_THREADING_HPP
 
-#include "ErrorHandler.hpp"
+#include "ctlib/ErrorHandler.hpp"
 
 extern "C" {
 #include "Threading.h"

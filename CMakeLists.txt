@@ -5,7 +5,7 @@ set(CMAKE_C_FLAGS "-Wall -pedantic -Werror -g3 ${CMAKE_C_FLAGS}")
 project(PlatformIndependentLib C CXX)
 
 if (DEFINED ALL)
-    set(INSTALL_DIR "/usr/local")
+    set(INSTALL_DIR "/usr")
     set(COMMUNICATION 1)
     set(THREADING 1)
     set(FILE_HANDLING 1)
@@ -13,6 +13,7 @@ if (DEFINED ALL)
     set(SHARED 1)
     set(SHARED 1)
     set(STATIC 1)
+    set(CSV 1)
     set(CXX 1)
     add_definitions(-DCXX)
 #    set(UNIT_TESTING 1)
@@ -23,16 +24,16 @@ if (DEFINED COMMUNICATION)
 	message("HALLO")
     if(DEFINED CXX)
     set(communication_headers_cxx
-            "${CMAKE_CURRENT_SOURCE_DIR}/Communication/include/Socket.hpp")
+            "Communication/include/ctlib/Socket.hpp")
 
         set(communication_cxx "${CMAKE_CURRENT_SOURCE_DIR}/Communication/src/Socket.cpp")
     endif() # DEFINED CXX
 
     set(communication_headers "${communication_headers_cxx}"
-    	"${CMAKE_CURRENT_SOURCE_DIR}/Communication/include/Socket.h"
-    	"${CMAKE_CURRENT_SOURCE_DIR}/Communication/include/UARTInterface.h"
-	    "${CMAKE_CURRENT_SOURCE_DIR}/Additional/UARTDefines.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/Additional/SocketDefines.h")
+    	"Communication/include/ctlib/Socket.h"
+    	"Communication/include/ctlib/UARTInterface.h"
+	    "Additional/ctlib/UARTDefines.h"
+        "Additional/ctlib/SocketDefines.h")
 
 
     set(communication ${communication_cxx}
@@ -47,8 +48,8 @@ endif () # DEFINED COMMUNICATION
 if (DEFINED FILE_HANDLING)
 
     set(file_handling_headers
-             "${CMAKE_CURRENT_SOURCE_DIR}/FileHandling/include/FileHandler.h"
-            "${CMAKE_CURRENT_SOURCE_DIR}/Additional/FileHandlingDefines.h")
+             "FileHandling/include/ctlib/FileHandler.h"
+            "Additional/ctlib/FileHandlingDefines.h")
 
     set(file_handling
             "${CMAKE_CURRENT_SOURCE_DIR}/FileHandling/src/FileHandler.c"
@@ -59,10 +60,10 @@ endif() # DEFINED FILE_HANDLING
 
 if (DEFINED LOGGING)
 
-    set(logging_headers "${CMAKE_CURRENT_SOURCE_DIR}/Logging/include/Logging.h")
+    set(logging_headers "Logging/include/ctlib/Logging.h")
 
     set(logging 
-    	"${CMAKE_CURRENT_SOURCE_DIR}/Logging/src/Logging.cpp""${threading_headers_cxx}"
+    	"${CMAKE_CURRENT_SOURCE_DIR}/Logging/src/Logging.cpp" "${threading_headers_cxx}"
     	"${logging_headers}")
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/Logging/include")
 endif () # DEFINED LOGGING
@@ -70,12 +71,12 @@ endif () # DEFINED LOGGING
 if(DEFINED THREADING)
     add_definitions(-DPIL_THREADING)
 
-    set(threading_headers_cxx "${CMAKE_CURRENT_SOURCE_DIR}/Threading/include/Threading.hpp")
+    set(threading_headers_cxx "Threading/include/ctlib/Threading.hpp")
     set(threading_cxx "${CMAKE_CURRENT_SOURCE_DIR}/Threading/src/Threading.cpp")
 
     set(threading_headers
-    		"${CMAKE_CURRENT_SOURCE_DIR}/Threading/include/Threading.h"
-            "${CMAKE_CURRENT_SOURCE_DIR}/Additional/ThreadingDefines.h"
+    		"Threading/include/ctlib/Threading.h"
+            "Additional/ctlib/ThreadingDefines.h"
             "${threading_headers_cxx}")
 
     set(threading 
@@ -89,37 +90,44 @@ endif() # THREADING
 
 if(DEFINED STRING) # TODO if CXX
     set(string "${CMAKE_CURRENT_SOURCE_DIR}/String/src/String.cpp"
-               "${CMAKE_CURRENT_SOURCE_DIR}/String/include/String.h")
+               "String/include/ctlib/String.h")
 endif() # STRING
 
+if(DEFINED CSV)
+    set(csv "${CMAKE_CURRENT_SOURCE_DIR}/Protocols/src/CSVHandler.c"
+            "Protocols/include/ctlib/CSVHandler.h")
+    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/Protocols/include")
+endif()
 
-set(errorHandling_headers 
-        "${CMAKE_CURRENT_SOURCE_DIR}/ErrorHandling/include/ErrorHandler.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/ErrorHandling/include/ErrorCodeDefines.h")
+set(errorHandling_headers
+        "ErrorHandling/include/ctlib/ErrorHandler.h"
+        "ErrorHandling/include/ctlib/ErrorCodeDefines.h")
+
+
 
 set(errorHandling
         "${CMAKE_CURRENT_SOURCE_DIR}/ErrorHandling/src/ErrorHandler.c"
         ${errorHandling_headers})
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/ErrorHandling/include")
 
-set(additional_headers "${CMAKE_CURRENT_SOURCE_DIR}/Additional/DataTypeDefines.h")
+set(additional_headers "Additional/ctlib/DataTypeDefines.h")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/Additional")
 
-set(source_files ${logging} ${communication} ${file_handling} ${errorHandling} ${additional_headers} ${unitTestFiles} ${threading} ${string})
+set(source_files ${logging} ${communication} ${file_handling} ${errorHandling} ${additional_headers} ${unitTestFiles} ${threading} ${string} ${csv})
 
 if (DEFINED SHARED)
-    add_library(PIL SHARED ${source_files})
-    set_target_properties(PIL PROPERTIES PUBLIC_HEADER 
+    add_library(common_tools_lib SHARED ${source_files})
+    set_target_properties(common_tools_lib PROPERTIES PUBLIC_HEADER
     	"${errorHandling_headers};${communication_headers};${file_handling_headers};${logging_headers};${threading_headers};${additional_headers}")
 
-	INSTALL(TARGETS PIL 
+	INSTALL(TARGETS common_tools_lib
 	        LIBRARY DESTINATION "${INSTALL_DIR}/lib"
 	        PUBLIC_HEADER DESTINATION "${INSTALL_DIR}/include"
 )
 endif () # DEFINED SHARED
 
 if (DEFINED STATIC)
-    add_library(PIL_Static STATIC ${source_files})
+    add_library(common_tools_lib_static STATIC ${source_files})
 #	install(TARGETS PIL_Static DESTINATION "${CMAKE_")
 
 endif () # DEFINED STATIC
@@ -128,11 +136,11 @@ if (UNIT_TESTING)
     set(socketUnitTest "${CMAKE_CURRENT_SOURCE_DIR}/UnitTesting/SocketUnitTest.cpp")
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/UnitTesting")
     add_executable(SocketUnitTest ${socketUnitTest})
-    target_link_libraries(SocketUnitTest PIL gtest pthread)
+    target_link_libraries(SocketUnitTest common_tools_lib gtest pthread)
 endif () # UNIT_TESTING
 
 add_executable(SOCKET_UNIT_TEST "UnitTesting/SocketUnitTest.cpp")
-target_link_libraries(SOCKET_UNIT_TEST gtest_main gtest pthread PIL)
+target_link_libraries(SOCKET_UNIT_TEST gtest_main gtest pthread common_tools_lib)
 
 enable_testing()
 include(GoogleTest)
@@ -162,7 +170,7 @@ else (DOXYGEN_FOUND)
 endif (DOXYGEN_FOUND)
 
 ### CPack Config ###
-SET(CPACK_PACKAGE_NAME "PILLib")
+SET(CPACK_PACKAGE_NAME "common_tools_lib")
 SET(CPACK_PACKAGE_VERSION_MAJOR 1)
 SET(CPACK_PACKAGE_VERSION_MINOR 0)
 SET(CPACK_PACKAGE_VERSION_PATCH 0)
@@ -174,3 +182,6 @@ SET(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
 SET(CPACK_PACKAGE_VERSION_PATCH 0)
 
 INCLUDE(CPack)
+
+add_executable(CSV_Test UnitTesting/CSV_Test.c)
+target_link_libraries(CSV_Test common_tools_lib pthread)

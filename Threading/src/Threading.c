@@ -1,10 +1,10 @@
 //
 // Created by florianfrank on 31.12.20.
 //
-#include <ErrorHandler.h>
+#include <ctlib/ErrorHandler.h>
 
 #include <asm/errno.h>
-#include "../include/Threading.h"
+#include "ctlib/Threading.h"
 
 int lastThreadCtr = 0;
 

@@ -1,4 +1,4 @@
-#include "Socket.h"
+#include "ctlib/Socket.h"
 #include "assert.h"
 
 // TODO Linux windows
@@ -6,7 +6,7 @@
 #include <arpa/inet.h> // htons, inet_addr, inet_ntoa
 #include <string.h> // memset
 #include <unistd.h> // close
-#include "Threading.h"
+#include "ctlib/Threading.h"
 
 #if embedded
 #include <lwip/tcpip.h>
@@ -17,7 +17,7 @@
 #ifdef __linux__
 
 #include <sys/select.h> // fd_set, timeval, select
-#include <ErrorHandler.h>
+#include <ctlib/ErrorHandler.h>
 #include <malloc.h>
 
 
@@ -284,7 +284,7 @@ PIL_ERROR_CODE PIL_SOCKET_WaitTillDataAvail(PIL_SOCKET *socketRet, uint32_t time
     if (ret == -1)
         return PIL_SetLastError(&socketRet->m_ErrorHandle, PIL_ERRNO);
     if(ret == 0)
-        return PIL_SOCKET_TIMEOUT;
+        return PIL_TIMEOUT;
     return PIL_NO_ERROR;
 #else
     return 0;
@@ -333,7 +333,7 @@ void* PIL_ReceiveThreadFunction(void *handle)
     while(arg->socket->m_callbackActive)
     {
         PIL_ERROR_CODE  ret = PIL_SOCKET_WaitTillDataAvail(arg->socket, DEFAULT_TIMEOUT_MS);
-        if(ret != PIL_NO_ERROR && ret != PIL_SOCKET_TIMEOUT)
+        if(ret != PIL_NO_ERROR && ret != PIL_TIMEOUT)
         {
             PIL_SetLastError(&arg->socket->m_ErrorHandle, ret);
             return NULL;

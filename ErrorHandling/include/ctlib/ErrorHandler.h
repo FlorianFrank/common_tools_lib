@@ -5,11 +5,11 @@
 #ifndef PLATFORMINDEPENDENTLIB_ERRORHANDLER_H
 #define PLATFORMINDEPENDENTLIB_ERRORHANDLER_H
 
-#include <ErrorCodeDefines.h>
-#include <DataTypeDefines.h>
+#include <ctlib/ErrorCodeDefines.h>
+#include <ctlib/DataTypeDefines.h>
 #include <stdint.h>
 
-const char *PIL_ErrorCodeToString(PIL_ERROR_CODE errorCode);
+const char* PIL_ErrorCodeToString(PIL_ERROR_CODE errorCode);
 
 PIL_BOOL PIL_SetLastError(PIL_ErrorHandle *socketStruct, PIL_ERROR_CODE errorCode);
 

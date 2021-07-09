@@ -4,7 +4,7 @@
 #ifdef CXX
 
 
-#include "Threading.hpp"
+#include "ctlib/Threading.hpp"
 
 
 PIL::Threading::Threading(void *(*threadFunction)(void *), void *argument) : ErrorHandler(),

@@ -5,10 +5,10 @@
 
 extern "C++" {
 
-#include <Socket.hpp>
+#include <ctlib/Socket.hpp>
 
 extern "C" {
-#include "Socket.h"
+#include "ctlib/Socket.h"
 }
 
 #include <string>
@@ -55,7 +55,7 @@ namespace PIL
         {
             case PIL_NO_ERROR:
                 return SUCCESS;
-            case PIL_SOCKET_TIMEOUT:
+            case PIL_TIMEOUT:
                 return TIMEOUT;
             default:
                 return ERROR;

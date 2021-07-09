@@ -1,6 +1,3 @@
-//
-// Created by florianfrank on 04.05.21.
-//
 #ifdef CXX
 #pragma once
 #include <string>
@@ -8,7 +5,7 @@
 
 extern "C"
 {
-    #include "SocketDefines.h"
+    #include "ctlib/SocketDefines.h"
 }
 
 enum WaitRetValue {
