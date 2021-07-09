@@ -183,5 +183,5 @@ SET(CPACK_PACKAGE_VERSION_PATCH 0)
 
 INCLUDE(CPack)
 
-add_executable(CSV_Test UnitTesting/CSV_Test.c)
-target_link_libraries(CSV_Test common_tools_lib pthread)
+#add_executable(CSV_Test UnitTesting/CSV_Test.c)
+#target_link_libraries(CSV_Test common_tools_lib pthread)
