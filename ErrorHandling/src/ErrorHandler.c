@@ -59,15 +59,15 @@ char errMsgBuff[512];
         return FALSE;
     }
 
-    const char *errCodeStr = PIL_ErrorCodeToString(socketStruct->errorCode);
-    if(socketStruct->errorCode == PIL_ERRNO)
+    const char *errCodeStr = PIL_ErrorCodeToString(socketStruct->m_ErrorCode);
+    if(socketStruct->m_ErrorCode == PIL_ERRNO)
     {
-        sprintf(errorStr, "%s: %s", errCodeStr, strerror(socketStruct->errnoCode));
+        sprintf(errorStr, "%s: %s", errCodeStr, strerror(socketStruct->m_ErrnoCode));
         return TRUE;
     }
-    if(strcmp(socketStruct->errorMessage, "") != 0)
+    if(strcmp(socketStruct->m_ErrorMessage, "") != 0)
     {
-        sprintf(errorStr, "%s: %s", errCodeStr, socketStruct->errorMessage);
+        sprintf(errorStr, "%s: %s", errCodeStr, socketStruct->m_ErrorMessage);
         return TRUE;
     }
     strcpy(errorStr, errCodeStr);
@@ -76,12 +76,12 @@ char errMsgBuff[512];
 
  PIL_BOOL PIL_SetLastError(PIL_ErrorHandle *errStruct, PIL_ERROR_CODE errorCode)
  {
-     errStruct->errorCode = errorCode;
+     errStruct->m_ErrorCode = errorCode;
     if(errorCode == PIL_ERRNO)
     {
-        errStruct->errnoCode = errno;
+        errStruct->m_ErrnoCode = errno;
     }
-    strcpy(errStruct->errorMessage, "");
+    strcpy(errStruct->m_ErrorMessage, "");
      return TRUE;
  }
 
@@ -93,8 +93,8 @@ char errMsgBuff[512];
     if(strlen(errorMessage) > MAX_ERROR_MSG_LEN)
         return FALSE;
 
-    strcpy(errStruct->errorMessage, errorMessage);
-     errStruct->errorCode = errorCode;
+    strcpy(errStruct->m_ErrorMessage, errorMessage);
+     errStruct->m_ErrorCode = errorCode;
 
     return TRUE;
  }
