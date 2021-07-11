@@ -21,10 +21,15 @@ jobs:
       with:
           node-version: ${{ matrix.node }}
 
-    - name: install Dependencies
+    - name: install Dependencies Linux
       if: matrix.os == 'ubuntu-latest'
       run: sudo apt-get install libgtest-dev && cd /usr/src/gtest && sudo cmake CMakeLists.txt && sudo make && sudo ln -s /usr/lib/libgtest.a /usr/local/lib/libgtest.a && sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/libgtest_main.a
-          
+
+    - name: install Dependencies MAC
+      if: matrix.os == 'macos-latest'
+      run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" && brew install cmake && git clone https://github.com/google/googletest && cd googletest && mkdir build && cd build && cmake .. && make && make install
+
+
     - uses: actions/checkout@v2
 
     - name: Create Build Environment
