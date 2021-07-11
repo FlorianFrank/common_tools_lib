@@ -16,7 +16,6 @@ jobs:
     strategy:
       matrix:
         os: [ macos-latest, windows-latest, ubuntu-latest ]
-        node: [ 10, 12, 14 ]
     steps:
     - run: echo ${{matrix.TARGET}}
     - uses: actions/setup-node@v2
