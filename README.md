@@ -1,6 +1,12 @@
 # common tools lib
 This repository is a collection of useful platform independent wrapper and helper files.
 
+Installation on debian based operating systems:
+```shell
+./build_<architecture>.sh
+dpkg -i common_tools_lib*.deb
+```
+
 ### Communication
 Contains C snippets for a platform independet implementation of sockets, uart, etc.
 
@@ -48,3 +54,5 @@ Contains a platform independent logging implementation.
 ## Testing
 
 ![Build Platform Independent Lib](https://github.com/FlorianFrank/PIL_Snippets/workflows/Build%20Platform%20Independent%20Lib/badge.svg)
+![Build Platform Independent Lib](https://github.com/FlorianFrank/PIL_Snippets/workflows/Build%20Platform%20Independent%20Lib/badge.svg)
+
