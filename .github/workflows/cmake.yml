@@ -27,7 +27,7 @@ jobs:
 
     - name: install Dependencies MAC
       if: matrix.os == 'macos-latest'
-      run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" && brew install cmake && git clone https://github.com/google/googletest && cd googletest && mkdir build && cd build && cmake .. && make && make install
+      run: brew install cmake && git clone https://github.com/google/googletest && cd googletest && mkdir build && cd build && cmake .. && make && make install
 
 
     - uses: actions/checkout@v2
