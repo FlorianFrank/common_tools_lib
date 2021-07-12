@@ -141,7 +141,8 @@ const char *GetCurrentTime()
     size_t size = strftime(timeStr, 80, "%H:%M:%S", localtime(&time.tv_sec));
     if (size > 0)
         sprintf(loggingBuffer, "%s:%li", timeStr, time.tv_usec);
-#else // WIN32
+#endif // WIN32
+#ifdef __WIN32__
     time_t ltime;
     ::time( &ltime );
     _localtime64_s( &today, &ltime );
