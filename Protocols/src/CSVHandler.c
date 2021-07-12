@@ -4,7 +4,7 @@
 #include "ctlib/CSVHandler.h"
 #include "ctlib/FileHandler.h"
 
-#include <malloc.h>
+#include <stdlib.h>
 #include <string.h>
 
 PIL_ERROR_CODE
