@@ -25,9 +25,9 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: sudo apt-get install libgtest-dev && cd /usr/src/gtest && sudo cmake CMakeLists.txt && sudo make && sudo ln -s /usr/lib/libgtest.a /usr/local/lib/libgtest.a && sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/libgtest_main.a
 
-   # - name: install Dependencies MAC
-    #  if: matrix.os == 'macos-latest'
-     # run: brew install cmake #&& xcode-select --install && sudo brew install googletest
+    - name: install Dependencies Mac
+      if: matrix.os == 'macos-latest'
+      run: brew install gtest #&& xcode-select --install && sudo brew install googletest
 
 
     - uses: actions/checkout@v2
