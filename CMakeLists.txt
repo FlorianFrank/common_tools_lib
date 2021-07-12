@@ -151,6 +151,7 @@ gtest_discover_tests("SOCKET_UNIT_TEST")
 option(BUILD_DOC "Build documentation" OFF)
 
 # check if Doxygen is installed
+if(DEFINED BUILD_DOCUMENTATION)
 find_package(Doxygen)
 if (DOXYGEN_FOUND)
     # set input and output files
@@ -170,8 +171,10 @@ add_custom_target( doc_doxygen ALL
 else (DOXYGEN_FOUND)
     message("Doxygen need to be installed to generate the doxygen documentation")
 endif (DOXYGEN_FOUND)
+endif() # DEFINED BUILD_DOCUMENTATION
 
-### CPack Config ###
+
+    ### CPack Config ###
 SET(CPACK_PACKAGE_NAME "common_tools_lib")
 SET(CPACK_PACKAGE_VERSION_MAJOR 1)
 SET(CPACK_PACKAGE_VERSION_MINOR 0)
