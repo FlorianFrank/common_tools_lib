@@ -3,7 +3,7 @@
 #include "ctlib/Logging.h"
 
 #include <cstdarg> // va_start, va_end
-#include <malloc.h> // malloc
+#include <stdlib.h>
 #include <cerrno> // errno
 #include <cstdio>
 #include <sys/time.h>
