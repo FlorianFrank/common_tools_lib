@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.0)
 
 set(CMAKE_C_FLAGS "-Wall -pedantic -Werror -g3 ${CMAKE_C_FLAGS}")
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(PlatformIndependentLib C CXX)
 
@@ -146,7 +148,7 @@ enable_testing()
 include(GoogleTest)
 gtest_discover_tests("SOCKET_UNIT_TEST")
 
-option(BUILD_DOC "Build documentation" ON)
+option(BUILD_DOC "Build documentation" OFF)
 
 # check if Doxygen is installed
 find_package(Doxygen)
