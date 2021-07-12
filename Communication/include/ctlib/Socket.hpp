@@ -62,7 +62,7 @@ namespace PIL
         InternetProtocol m_InternetProtocol;
         PIL_ERROR_CODE m_LastError;
 
-        PIL_SOCKET m_SocketRet = { 0 };
+        PIL_SOCKET m_SocketRet;
         std::vector<PIL_SOCKET> m_SocketList;
         // TODO ring buffer
     };
