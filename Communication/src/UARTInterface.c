@@ -11,8 +11,11 @@
 #include <unistd.h>
 #include <termios.h>
 #include <sys/ioctl.h>
-#include <linux/serial_core.h>
 #include <sys/select.h>
+
+#ifdef __linux__
+#include <linux/serial_core.h>
+#endif // __linux__
 
 #ifdef __WIN32__
 #include <fileapi.h>
