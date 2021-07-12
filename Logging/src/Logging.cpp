@@ -128,13 +128,13 @@ void CloseLogfile()
  */
 const char *GetCurrentTime()
 {
-    struct timeval time { 0 };
+    struct timeval time = { 0 };
     gettimeofday(&time, nullptr);
 
     char timeStr[80];
 
     // WIN
-    struct tm today{};
+    struct tm today = { 0 };
 
     // WIN
 #ifdef __linux__
