@@ -3,7 +3,7 @@
 //
 #include <ctlib/ErrorHandler.h>
 
-#include <asm/errno.h>
+#include <errno.h>
 #include "ctlib/Threading.h"
 
 int lastThreadCtr = 0;
