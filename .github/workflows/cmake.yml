@@ -28,10 +28,8 @@ jobs:
     - name: install Dependencies Mac
       if: matrix.os == 'macos-latest'
       run: |
-        git clone https://github.com/google/googletest
-        cmake googletest
-        make
-        sudo make install
+        brew update
+        brew glog gflags gtest
 
 
     - uses: actions/checkout@v2
