@@ -144,14 +144,14 @@ PIL_ERROR_CODE PIL_UART_ReadData(PIL_UART_Config *config, char *buffer, int *buf
 
 
 
-#if defined(__linux__)
 /**
- * @brief Function to approximate a baudrate not predefined. Baudrates up to a deviation of 2% are accepted.
+ * @brief Function to approximate a baudrate not predefined. Baudrates up to a deviation of 2% are accepted. (Only supported on linux!)
  * @param config handle corresponding to the opened UART interface and containing the baudrate to set.
  * @return PIL_NO_ERROR if function was successful.
  */
 int SetCustomBaudrate(PIL_UART_Config *config)
 {
+#if defined(__linux__)
     struct serial_struct serialInfo;
     /* Custom divisor */
     serialInfo.reserved_char[0] = 0;
@@ -169,9 +169,9 @@ int SetCustomBaudrate(PIL_UART_Config *config)
         return 0;
 
     }
+#endif // ifdef __linux__
     return -1;
 }
-#endif
 
 /**
  * @brief Function to write data via an opened UART interface.
@@ -283,15 +283,21 @@ PIL_ERROR_CODE PIL_UART_SetComParameters(PIL_UART_Config *config)
         case(115200):
             baudRate = B115200;
             break;
+#ifdef B921600
         case(921600) :
             baudRate = B921600;
             break;
+#endif // ifdef B921600
+#ifdef B2000000
         case(2000000):
             baudRate = B2000000;
             break;
+#endif // B2000000
+#ifdef B4000000
         case(4000000):
             baudRate = B4000000;
             break;
+#endif // B4000000
         default:
             // Approximate baudRate by clock divider
             if (SetCustomBaudrate(config) != -1)
