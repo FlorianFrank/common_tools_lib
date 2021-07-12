@@ -27,7 +27,10 @@ jobs:
 
     - name: install Dependencies Mac
       if: matrix.os == 'macos-latest'
-      run: git clone https://github.com/google/googletest && cd googletest && mkdir build &&  cd build && cmake .. && make && sudo make install && cd ../..
+      run: |
+        git clone https://github.com/google/googletest
+        cmake googletest
+        make && sudo make install
 
 
     - uses: actions/checkout@v2
