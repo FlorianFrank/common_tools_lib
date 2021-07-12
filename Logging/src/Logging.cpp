@@ -128,7 +128,7 @@ void CloseLogfile()
  */
 const char *GetCurrentTime()
 {
-    struct timeval time{};
+    struct timeval time { 0 };
     gettimeofday(&time, nullptr);
 
     char timeStr[80];
