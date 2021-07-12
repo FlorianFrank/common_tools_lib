@@ -27,7 +27,7 @@ jobs:
 
     - name: install Dependencies MAC
       if: matrix.os == 'macos-latest'
-      run: brew install cmake && sudo brew install googletest
+      run: brew install cmake && xcode-select install && sudo brew install googletest
 
 
     - uses: actions/checkout@v2
