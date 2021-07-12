@@ -1,12 +1,16 @@
 #include "ctlib/Socket.h"
-#include "assert.h"
+#include "ctlib/Threading.h"
+#include "ctlib/ErrorHandler.h"
 
-// TODO Linux windows
+#include <stdlib.h> // malloc
+#include "assert.h"
 #include <sys/socket.h> // helperFiles, recvfrom, sendto
 #include <arpa/inet.h> // htons, inet_addr, inet_ntoa
 #include <string.h> // memset
 #include <unistd.h> // close
-#include "ctlib/Threading.h"
+
+
+
 
 #if embedded
 #include <lwip/tcpip.h>
@@ -17,7 +21,6 @@
 #ifdef __linux__
 
 #include <sys/select.h> // fd_set, timeval, select
-#include <ctlib/ErrorHandler.h>
 #include <malloc.h>
 
 
