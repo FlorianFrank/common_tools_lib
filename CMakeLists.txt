@@ -137,6 +137,11 @@ endif () # DEFINED STATIC
 if (UNIT_TESTING)
     set(socketUnitTest "${CMAKE_CURRENT_SOURCE_DIR}/UnitTesting/SocketUnitTest.cpp")
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/UnitTesting")
+
+    if(DEFINED APPLE)
+        include_directories("/usr/local/include")
+    endif() # APPLE
+
     add_executable(SocketUnitTest ${socketUnitTest})
     target_link_libraries(SocketUnitTest common_tools_lib gtest pthread)
 endif () # UNIT_TESTING
