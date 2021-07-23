@@ -24,7 +24,6 @@ if (DEFINED ALL)
 endif () # DEFINED ALL
 
 if (DEFINED COMMUNICATION)
-	message("HALLO")
     if(DEFINED CXX)
     set(communication_headers_cxx
             "Communication/include/ctlib/Socket.hpp")
@@ -136,27 +135,18 @@ if (DEFINED STATIC)
 endif () # DEFINED STATIC
 
 if (UNIT_TESTING)
-    set(socketUnitTest "${CMAKE_CURRENT_SOURCE_DIR}/UnitTesting/SocketUnitTest.cpp")
-    include_directories("${CMAKE_CURRENT_SOURCE_DIR}/UnitTesting")
-
     if(DEFINED APPLE)
         include_directories("/usr/local/include")
         link_directories("/usr/local/lib")
     endif() # APPLE
 
-    add_executable(SocketUnitTest ${socketUnitTest})
-    target_link_libraries(SocketUnitTest common_tools_lib gtest pthread)
-
+    add_executable(SOCKET_UNIT_TEST "UnitTesting/SocketUnitTest.cpp")
+    target_link_libraries(SOCKET_UNIT_TEST gtest_main gtest pthread common_tools_lib)
 
     enable_testing()
     include(GoogleTest)
     gtest_discover_tests("SOCKET_UNIT_TEST")
 endif () # UNIT_TESTING
-
-add_executable(SOCKET_UNIT_TEST "UnitTesting/SocketUnitTest.cpp")
-target_link_libraries(SOCKET_UNIT_TEST gtest_main gtest pthread common_tools_lib)
-
-
 
 option(BUILD_DOC "Build documentation" OFF)
 
