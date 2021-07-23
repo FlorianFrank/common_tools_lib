@@ -29,31 +29,31 @@ namespace PIL
 
         ~Socket();
 
-        bool Bind(PIL_BOOL reuse);
+        PIL_ERROR_CODE Bind(PIL_BOOL reuse);
 
-        bool Listen(int queueSize);
+        PIL_ERROR_CODE Listen(int queueSize);
 
-        void Accept(char *ipAddr);
+        PIL_ERROR_CODE Accept(char *ipAddr);
 
         WaitRetValue WaitTillDataAvailable(int timeOut);
 
-        bool Connect(std::string &ipAddr, int port);
+        PIL_ERROR_CODE Connect(std::string &ipAddr, int port);
 
-        bool Receive(uint8_t *buffer, uint32_t *bufferLen);
+        PIL_ERROR_CODE Receive(uint8_t *buffer, uint32_t *bufferLen);
 
-        bool ReceiveFrom(uint8_t *buffer, int *bufferLen, char *ipAddr, int port);
+        PIL_ERROR_CODE ReceiveFrom(uint8_t *buffer, int *bufferLen, char *ipAddr, int port);
 
-        bool Send(uint8_t *buffer, int *len);
+        PIL_ERROR_CODE Send(uint8_t *buffer, int *len);
 
-        bool SendTo(std::string &destAddr, int port, uint8_t *buffer, int *bufferLen);
+        PIL_ERROR_CODE SendTo(std::string &destAddr, int port, uint8_t *buffer, int *bufferLen);
 
         std::string GetSenderIP();
 
         PIL_BOOL IsOpen();
 
-        bool CreateServerSocket(void (*receiveCallback)(PIL_SOCKET, char *));
+        PIL_ERROR_CODE  CreateServerSocket(void (*receiveCallback)(PIL_SOCKET, char *));
 
-        bool ConnectToServer(std::string ipAddr, int destPort, void (*receiveCallback)(uint8_t *, uint32_t));
+        PIL_ERROR_CODE  ConnectToServer(std::string ipAddr, int destPort, void (*receiveCallback)(uint8_t *, uint32_t));
 
     private:
         int m_Port;
