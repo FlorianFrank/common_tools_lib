@@ -47,7 +47,7 @@ TEST(SocketTest_C, SimpleSocketTest)
 
     PIL_SOCKET clientSocket;
     ret = PIL_SOCKET_ConnectToServer(&clientSocket, "127.0.0.1", 15000, 14000, receiveHandler);
-    EXPECT_EQ(ret,PIL_NO_ERROR);
+    EXPECT_EQ(ret, PIL_NO_ERROR);
 
     usleep(100000);
     EXPECT_EQ(acceptFlag, true);
@@ -69,7 +69,7 @@ TEST(SocketTest_CPP, SimpleSocketTest)
     EXPECT_EQ(ret, PIL_NO_ERROR);
 
     PIL::Socket clientSock(TCP, IPv4, "localhost", 14003);
-    ret = clientSock.ConnectToServer("127.0.0.1", 14000, receiveHandler);
+    ret = clientSock.ConnectToServer("127.0.0.1", 14002, receiveHandler);
     EXPECT_EQ(ret, PIL_NO_ERROR);
 //    usleep(1000);
   //  EXPECT_EQ(acceptFlag, true);
