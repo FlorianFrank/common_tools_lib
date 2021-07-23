@@ -48,6 +48,7 @@ namespace PIL
         if(m_LastError != PIL_NO_ERROR)
             return m_LastError;
         m_SocketList.push_back(sock);
+        return m_LastError;
     }
 
     WaitRetValue Socket::WaitTillDataAvailable(int timeOut)
