@@ -1,4 +1,4 @@
-# common tools lib
+# Common Tools Lib
 This repository is a collection of useful platform independent wrapper and helper files.
 
 Installation on debian based operating systems:
