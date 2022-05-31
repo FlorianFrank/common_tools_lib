@@ -29,6 +29,8 @@ namespace PIL
 
         ~Socket();
 
+        PIL_ERROR_CODE Close();
+
         PIL_ERROR_CODE Bind(PIL_BOOL reuse);
 
         PIL_ERROR_CODE Listen(int queueSize);
@@ -54,6 +56,8 @@ namespace PIL
         PIL_ERROR_CODE  CreateServerSocket(void (*receiveCallback)(PIL_SOCKET, char *));
 
         PIL_ERROR_CODE  ConnectToServer(std::string ipAddr, int destPort, void (*receiveCallback)(uint8_t *, uint32_t));
+
+        inline PIL_ERROR_CODE GetLastError() { return m_LastError; };
 
     private:
         int m_Port;

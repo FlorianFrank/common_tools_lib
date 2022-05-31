@@ -26,8 +26,15 @@ namespace PIL
 
     Socket::~Socket()
     {
-        PIL_SOCKET_Close(&m_SocketRet);
+        Close();
     }
+
+    PIL_ERROR_CODE Socket::Close()
+    {
+        m_LastError = PIL_SOCKET_Close(&m_SocketRet);
+        return m_LastError;
+    }
+
 
     PIL_ERROR_CODE Socket::Bind(PIL_BOOL reuse)
     {
@@ -119,7 +126,6 @@ namespace PIL
         m_LastError = PIL_SOCKET_ConnectToServer(&m_SocketRet, ipAddr.c_str(), m_Port, destPort, receiveCallback);
         return m_LastError;
     }
-
 }
 }
 #endif // CXX
