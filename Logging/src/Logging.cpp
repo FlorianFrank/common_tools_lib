@@ -1,199 +1,29 @@
-#if 1
+//
+// Created by florianfrank on 31.05.22.
+//
 
-#include "ctlib/Logging.h"
+#include "ctlib/Logging.hpp"
+#include "ctlib/ErrorCodeDefines.h"
+#include <stdarg.h>
 
-#include <cstdarg> // va_start, va_end
-#include <stdlib.h>
-#include <cerrno> // errno
-#include <cstdio>
-#include <sys/time.h>
-
-#if defined(__linux__) || defined(__WIN32__)
-#include "pthread.h" // mutex
-/** Mutex to provide mutual exclution when log function is called by different threads. */
-pthread_mutex_t logMutex;
-
-// Color codes for different log levels
-#define COLOR_DEFAULT   39 // black
-#define COLOR_ERROR     31 // red
-#define COLOR_WARNING   33 // yellow
-#define COLOR_DEBUG     34 // blue
-#endif // __linux__
-
-
-/** Initialization of variables. */
-Level logLevel;
-FILE *logFileStream = nullptr;
-char *loggingBuffer;
-
-const char *GetCurrentTime();
-#ifdef __linux__
-int GetColorCode(Level level);
-#endif // __linux__
-
-
-/**
- * @brief Set log level. Only messages, with that log level or higher are logged.
- * Additionally the log file is set. If the logfile is set to null, print to stdout.
- * @param level every message of that level or with a higher level is printed.
- * @param file path and filename of the logfile, if file is null, log to stdout.
- */
-void InitializeLogging(const Level level, const char *file)
+PIL::Logging::Logging(Level logLevel, std::string &fileName)
 {
-    logLevel = level;
-
-    if (file != nullptr)
-    {
-        // Define logfile
-        logFileStream = fopen(file, "ab+");
-        if(logFileStream == nullptr)
-        {
-            printf("Error could not open logfile %s (Error %s)\n",
-                    file, strerror(errno));
-        }
-    } else
-        // Log to std::out if file is null
-        logFileStream = stdout;
-
-    loggingBuffer = (char*)malloc(LOG_BUF_SIZE * sizeof(char));
-#if __linux__
-    if(pthread_mutex_init(&logMutex, NULL) != 0)
-        printf("Error could not initialize logMutex\n");
-#endif // __linux__
+    InitializeLogging(logLevel, fileName.c_str());
 }
 
-/**
- * @brief Log to output stream. (Either to file or to stdout, depending on the initialization)
- * LogFile has format HH:MM:SS:microseconds LogLevel FileName:LineNumber Message
- * @param level Level of the message.
- * @param fileName Name of the file, from which the logging function is called. Simply set #__FILENAME__
- * @param lineNumber Line number from which the function is called. Simply use #_LINE_
- * @param message Message to send.
- * @param ... Additional parameters, which are send with the message in a printf style.
- */
-void LogMessage(const Level level, const char *fileName,
-                         unsigned int lineNumber, const char *message, ...)
+PIL::Logging::~Logging()
 {
-if(logFileStream == nullptr)
-{
-    printf("Logging enabled but not initialized!\n");
-    return;
+    CloseLogfile();
 }
- //   Threading::AutoMutex am(&mutex);
-#if defined( __linux__) || defined(__WIN32__)
-    if(pthread_mutex_lock(&logMutex) != 0)
-        printf("Error while calling pthread_mutex_lock\n");
-#endif // __linux__
+
+void PIL::Logging::CloseLogFile()
+{
+    ::CloseLogfile();
+}
+
+void PIL::Logging::LogMessage(Level level, std::string &fileName, unsigned int lineNumber, std::string &message, ...)
+{
     va_list vaList;
     va_start(vaList, message);
-    if (level >= logLevel)
-    {
-        int ret = vsprintf(&loggingBuffer[160], message, vaList);
-        va_end(vaList);
-        if (ret > 0)
-        {
-#ifdef __linux__
-            fprintf(logFileStream, "%s\033[%dm %s\033[%dm %s:%ud %s\n",
-                    GetCurrentTime(), GetColorCode(level), GetLogLevelStr(level), COLOR_DEFAULT, fileName, lineNumber,
-                    &loggingBuffer[160]);
-#else // __WIN32__
-            fprintf(logFileStream, "%s %s %s:%d %s\r\n",
-                    GetCurrentTime(), GetLogLevelStr(level), fileName, lineNumber,
-                    &loggingBuffer[160]);
-#endif // __linux__
-            fflush(stdout);
-
-        }
-    }
-#if defined(__linux__) || defined(__WIN32__)
-    if(pthread_mutex_unlock(&logMutex) != 0)
-        printf("Error while calling pthread_mutex_unlock\n");
-#endif // __linux__
+    ::LogMessage(level, fileName.c_str(), lineNumber, message.c_str(), vaList);
 }
-
-
-/**
- * @brief This function closes the file stream if opened.
- */
-void CloseLogfile()
-{
-    if(logFileStream != stdout && logFileStream != nullptr)
-        fclose(logFileStream);
-    free(loggingBuffer);
-}
-
-/**
- * Return current time as string in format HH:MM:SS:microseconds.
- * @return string containing the time.
- */
-const char *GetCurrentTime()
-{
-    struct timeval time = { 0 };
-    gettimeofday(&time, nullptr);
-
-    char timeStr[80];
-
-    // WIN
-    struct tm today = { 0 };
-
-    // WIN
-#ifdef __linux__
-    size_t size = strftime(timeStr, 80, "%H:%M:%S", localtime(&time.tv_sec));
-    if (size > 0)
-        sprintf(loggingBuffer, "%s:%li", timeStr, time.tv_usec);
-#endif // WIN32
-#ifdef __WIN32__
-    time_t ltime;
-    ::time( &ltime );
-    _localtime64_s( &today, &ltime );
-    size_t size = strftime( timeStr, 80,
-              "%H:%M:%S", &today );
-    if (size > 0)
-        sprintf(&loggingBuffer[80], "%s", timeStr);
-#endif // __linux__
-
-    return &loggingBuffer[80];
-}
-
-/**
- * @brief Return loglevel to string.
- * @param level Loglevel to convert to a string.
- * @return loglevel as string.
- */
-const char *GetLogLevelStr(Level level)
-{
-    switch (level)
-    {
-        case (DEBUG_LVL):
-            return "DEBUG";
-        case (ERROR_LVL):
-            return "ERROR";
-        case (WARNING_LVL):
-            return "WARNING";
-        case (NONE_LVL): default:
-            return "NONE";
-    }
-}
-
-#ifdef __linux__
-/**
- * @brief Return Color code depending on the Log level (Debug: blue, Error: red, Warning: yellow)
- * @param level loglevel to which the color code corresponds.
- * @return color code.
- */
-int GetColorCode(Level level)
-{
-    switch (level)
-    {
-        case (DEBUG_LVL):
-            return COLOR_DEBUG;
-        case (ERROR_LVL):
-            return COLOR_ERROR;
-        case (WARNING_LVL):
-            return COLOR_WARNING;
-        case (NONE_LVL): default:
-            return COLOR_DEFAULT;
-    }
-}
-#endif // __linux__
-#endif // LOGGING_ENABLES

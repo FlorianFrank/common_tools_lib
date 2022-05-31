@@ -18,15 +18,25 @@
 #endif // __WIN32__
 
 /** Enum storing the loglevel, to indicate the type of message. */
-typedef enum{ DEBUG_LVL = 0, ERROR_LVL, WARNING_LVL, NONE_LVL}  Level;
+typedef enum
+{
+    INFO_LVL = 0
+    DEBUG_LVL,
+    ERROR_LVL,
+    WARNING_LVL,
+    NONE_LVL
+} Level;
 #ifdef LOGGING_ENABLED
-void InitializeLogging(Level level, const char *file);
-                void CloseLogfile();
-                void LogMessage(Level level, const char *fileName, unsigned int lineNumber,
-                const char *message, ...);
 
-                // Helperfunctions
-                const char *GetLogLevelStr(Level level);
+void InitializeLogging(Level level, const char *file);
+
+void CloseLogfile();
+
+void LogMessage(Level level, const char *fileName, unsigned int lineNumber, const char *message, ...);
+
+// Helperfunctions
+const char *GetLogLevelStr(Level level);
+
 #else // Logging Disabled
 /** Dummy Defines when logging is disabled do nothing. */
 #define InitializeLogging(level, file)
