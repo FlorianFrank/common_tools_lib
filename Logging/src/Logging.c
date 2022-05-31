@@ -18,6 +18,7 @@ pthread_mutex_t logMutex;
 
 // Color codes for different log levels
 #define COLOR_DEFAULT   39 // black
+#define COLOR_INFO      32 // black
 #define COLOR_ERROR     31 // red
 #define COLOR_WARNING   33 // yellow
 #define COLOR_DEBUG     34 // blue
@@ -65,6 +66,13 @@ void InitializeLogging(const Level level, const char *file)
 #endif // __linux__
 }
 
+void LogMessageVA(Level level, const char *fileName, unsigned int lineNumber, const char *message, va_list vaList)
+{
+    char buffer[512];
+    vsprintf(buffer, message, vaList);
+    LogMessage(level, fileName, lineNumber, buffer);
+}
+
 /**
  * @brief Log to output stream. (Either to file or to stdout, depending on the initialization)
  * LogFile has format HH:MM:SS:microseconds LogLevel FileName:LineNumber Message
@@ -96,7 +104,7 @@ if(logFileStream == NULL)
         if (ret > 0)
         {
 #ifdef __linux__
-            fprintf(logFileStream, "%s\033[%dm %s\033[%dm %s:%ud %s\n",
+            fprintf(logFileStream, "%s\033[%dm %s\033[%dm %s:%u %s\n",
                     GetCurrentTime(), GetColorCode(level), GetLogLevelStr(level), COLOR_DEFAULT, fileName, lineNumber,
                     &loggingBuffer[160]);
 #else // __WIN32__
@@ -190,6 +198,8 @@ int GetColorCode(Level level)
 {
     switch (level)
     {
+        case (INFO_LVL):
+            return COLOR_INFO;
         case (DEBUG_LVL):
             return COLOR_DEBUG;
         case (ERROR_LVL):

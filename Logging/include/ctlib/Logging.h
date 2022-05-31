@@ -6,6 +6,7 @@
 #define LOGGING_ENABLED 1
 
 #include <string.h> // strrchr
+#include <stdarg.h>
 
 /** Max size of an message to log. **/
 #define LOG_BUF_SIZE 1024
@@ -33,6 +34,7 @@ void InitializeLogging(Level level, const char *file);
 void CloseLogfile();
 
 void LogMessage(Level level, const char *fileName, unsigned int lineNumber, const char *message, ...);
+void LogMessageVA(Level level, const char *fileName, unsigned int lineNumber, const char *message, va_list vaList);
 
 // Helperfunctions
 const char *GetLogLevelStr(Level level);

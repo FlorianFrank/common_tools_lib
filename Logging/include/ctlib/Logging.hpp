@@ -12,7 +12,7 @@ extern "C" {
 namespace PIL {
     class Logging {
     public:
-        Logging(Level logLevel, std::string &fileName);
+        Logging(Level logLevel, std::string *fileName);
         ~Logging();
 
         void CloseLogFile();

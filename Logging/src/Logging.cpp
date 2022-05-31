@@ -6,9 +6,12 @@
 #include "ctlib/ErrorCodeDefines.h"
 #include <stdarg.h>
 
-PIL::Logging::Logging(Level logLevel, std::string &fileName)
+PIL::Logging::Logging(Level logLevel, std::string *fileName)
 {
-    InitializeLogging(logLevel, fileName.c_str());
+    if(fileName)
+        InitializeLogging(logLevel, fileName->c_str());
+    else
+        InitializeLogging(logLevel, nullptr);
 }
 
 PIL::Logging::~Logging()
@@ -25,5 +28,6 @@ void PIL::Logging::LogMessage(Level level, const char* fileName, unsigned int li
 {
     va_list vaList;
     va_start(vaList, message);
-    ::LogMessage(level, fileName, lineNumber, message, vaList);
+    ::LogMessageVA(level, fileName, lineNumber, message, vaList);
+    va_end(vaList);
 }
