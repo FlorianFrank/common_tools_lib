@@ -20,7 +20,7 @@
 /** Enum storing the loglevel, to indicate the type of message. */
 typedef enum
 {
-    INFO_LVL = 0
+    INFO_LVL = 0,
     DEBUG_LVL,
     ERROR_LVL,
     WARNING_LVL,

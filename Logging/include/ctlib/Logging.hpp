@@ -17,7 +17,7 @@ namespace PIL {
 
         void CloseLogFile();
 
-        void LogMessage(Level level, std::string &fileName, unsigned int lineNumber, std::string& message, ...);
+        void LogMessage(Level level, const char* fileName, unsigned int lineNumber, const char* message, ...);
 
     };
 }

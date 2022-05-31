@@ -21,9 +21,9 @@ void PIL::Logging::CloseLogFile()
     ::CloseLogfile();
 }
 
-void PIL::Logging::LogMessage(Level level, std::string &fileName, unsigned int lineNumber, std::string &message, ...)
+void PIL::Logging::LogMessage(Level level, const char* fileName, unsigned int lineNumber, const char* message, ...)
 {
     va_list vaList;
     va_start(vaList, message);
-    ::LogMessage(level, fileName.c_str(), lineNumber, message.c_str(), vaList);
+    ::LogMessage(level, fileName, lineNumber, message, vaList);
 }
