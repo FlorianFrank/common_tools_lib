@@ -8,23 +8,23 @@ project(PlatformIndependentLib C CXX)
 
 if (DEFINED ALL)
     set(INSTALL_DIR "/usr")
-    set(COMMUNICATION 1)
-    set(THREADING 1)
-    set(FILE_HANDLING 1)
-    set(LOGGING 1)
-    set(SHARED 1)
-    set(SHARED 1)
-    set(STATIC 1)
-    set(UNIT_TESTING 1)
-    set(CSV 1)
-    set(CXX 1)
-    add_definitions(-DCXX)
-#    set(UNIT_TESTING 1)
-#    set(STRING 0)
+    option(PIL_COMMUNICATION "Enable UART and socket communication" ON)
+    option(PIL_THREADING     "Enable multithreading support"        ON)
+    set(PIL_FILE_HANDLING    "Enable file handling support"         ON)
+    set(PIL_LOGGING          "Enable logging support"               ON)
+    set(PIL_SHARED           "Build shared library"                 ON)
+    set(PIL_STATIC           "Build static library"                 ON)
+    set(PIL_UNIT_TESTING     "Enable Unit testing"                  ON)
+    set(PIL_CSV              "Enable CSV file support"              ON)
+    set(PIL_CXX              "Enable C++ support"                   ON)
 endif () # DEFINED ALL
 
-if (DEFINED COMMUNICATION)
-    if(DEFINED CXX)
+if(PIL_CXX)
+    add_definitions(-DCXX)
+endif()
+
+if (DEFINED PIL_COMMUNICATION)
+    if(DEFINED PIL_CXX)
     set(communication_headers_cxx
             "Communication/include/ctlib/Socket.hpp")
 
@@ -47,7 +47,7 @@ if (DEFINED COMMUNICATION)
 
 endif () # DEFINED COMMUNICATION
 
-if (DEFINED FILE_HANDLING)
+if (DEFINED PIL_FILE_HANDLING)
 
     set(file_handling_headers
              "FileHandling/include/ctlib/FileHandler.h"
@@ -60,8 +60,8 @@ if (DEFINED FILE_HANDLING)
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/FileHandling/include")
 endif() # DEFINED FILE_HANDLING
 
-if (DEFINED LOGGING)
-
+if (DEFINED PIL_LOGGING)
+    add_definitions(-DPIL_LOGGING=1)
     set(logging_headers "Logging/include/ctlib/Logging.h")
 
     set(logging 
@@ -70,7 +70,7 @@ if (DEFINED LOGGING)
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/Logging/include")
 endif () # DEFINED LOGGING
 
-if(DEFINED THREADING)
+if(DEFINED PIL_THREADING)
     add_definitions(-DPIL_THREADING)
 
     set(threading_headers_cxx "Threading/include/ctlib/Threading.hpp")
@@ -90,12 +90,12 @@ if(DEFINED THREADING)
 
 endif() # THREADING
 
-if(DEFINED STRING) # TODO if CXX
+if(DEFINED PIL_STRING) # TODO if CXX
     set(string "${CMAKE_CURRENT_SOURCE_DIR}/String/src/String.cpp"
                "String/include/ctlib/String.h")
 endif() # STRING
 
-if(DEFINED CSV)
+if(DEFINED PIL_CSV)
     set(csv "${CMAKE_CURRENT_SOURCE_DIR}/Protocols/src/CSVHandler.c"
             "Protocols/include/ctlib/CSVHandler.h")
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/Protocols/include")
@@ -117,7 +117,7 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/Additional")
 
 set(source_files ${logging} ${communication} ${file_handling} ${errorHandling} ${additional_headers} ${unitTestFiles} ${threading} ${string} ${csv})
 
-if (DEFINED SHARED)
+if (DEFINED PIL_SHARED)
     add_library(common_tools_lib SHARED ${source_files})
     set_target_properties(common_tools_lib PROPERTIES PUBLIC_HEADER
     	"${errorHandling_headers};${communication_headers};${file_handling_headers};${logging_headers};${threading_headers};${additional_headers}")
@@ -128,7 +128,7 @@ if (DEFINED SHARED)
 )
 endif () # DEFINED SHARED
 
-if (DEFINED STATIC)
+if (DEFINED PIL_STATIC)
     add_library(common_tools_lib_static STATIC ${source_files})
 #	install(TARGETS PIL_Static DESTINATION "${CMAKE_")
 
@@ -151,7 +151,7 @@ endif () # UNIT_TESTING
 option(BUILD_DOC "Build documentation" OFF)
 
 # check if Doxygen is installed
-if(DEFINED BUILD_DOCUMENTATION)
+if(DEFINED PIL_BUILD_DOCUMENTATION)
 find_package(Doxygen)
 if (DOXYGEN_FOUND)
     # set input and output files

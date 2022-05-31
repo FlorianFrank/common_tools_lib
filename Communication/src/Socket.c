@@ -1,5 +1,7 @@
 #include "ctlib/Socket.h"
+#if PIL_THREADING
 #include "ctlib/Threading.h"
+#endif // PIL_THREADING
 #include "ctlib/ErrorHandler.h"
 
 #include <stdlib.h> // malloc
@@ -8,8 +10,6 @@
 #include <arpa/inet.h> // htons, inet_addr, inet_ntoa
 #include <string.h> // memset
 #include <unistd.h> // close
-
-
 
 
 #if embedded

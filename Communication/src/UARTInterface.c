@@ -4,7 +4,9 @@
 
 #include "ctlib/UARTInterface.h"
 #include "ctlib/ErrorHandler.h"
+#if PIL_LOGGING
 #include "ctlib/Logging.h"
+#endif // PIL_LOGGING
 #include <string.h>
 #include <stdio.h> // sprintf
 #include <fcntl.h>
