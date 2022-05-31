@@ -20,9 +20,7 @@ if (DEFINED ALL)
 endif () # DEFINED ALL
 
 if(PIL_CXX)
-    add_definitions(-DCXX)
 endif()
-
 if (DEFINED PIL_COMMUNICATION)
     if(DEFINED PIL_CXX)
     set(communication_headers_cxx
@@ -63,10 +61,15 @@ endif() # DEFINED FILE_HANDLING
 if (DEFINED PIL_LOGGING)
     add_definitions(-DPIL_LOGGING=1)
     set(logging_headers "Logging/include/ctlib/Logging.h")
+    if(PIL_CXX)
+        set(logging_cxx "${CMAKE_CURRENT_SOURCE_DIR}/Logging/src/Logging.cpp")
+    endif()
 
-    set(logging 
-    	"${CMAKE_CURRENT_SOURCE_DIR}/Logging/src/Logging.cpp" "${threading_headers_cxx}"
+    set(logging
+        "${logging_cxx}"
+    	"${CMAKE_CURRENT_SOURCE_DIR}/Logging/src/Logging.c" "${threading_headers_cxx}"
     	"${logging_headers}")
+
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/Logging/include")
 endif () # DEFINED LOGGING
 
@@ -74,18 +77,20 @@ if(DEFINED PIL_THREADING)
     add_definitions(-DPIL_THREADING)
 
     set(threading_headers_cxx "Threading/include/ctlib/Threading.hpp")
-    set(threading_cxx "${CMAKE_CURRENT_SOURCE_DIR}/Threading/src/Threading.cpp")
+    if(PIL_CXX)
+        set(threading_cxx "${CMAKE_CURRENT_SOURCE_DIR}/Threading/src/Threading.cpp")
+    endif()
 
     set(threading_headers
     		"Threading/include/ctlib/Threading.h"
             "Additional/ctlib/ThreadingDefines.h"
             "${threading_headers_cxx}")
 
-    set(threading 
+    set(threading
     	"${CMAKE_CURRENT_SOURCE_DIR}/Threading/src/Threading.c"
     	"${threading_headers}"
         "${threading_cxx}")
-    	
+
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/Threading/include")
 
 endif() # THREADING
