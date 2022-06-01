@@ -4,6 +4,7 @@
 #include <ctlib/ErrorHandler.h>
 
 #include <errno.h>
+#include <pthread.h>
 #include "ctlib/Threading.h"
 
 int lastThreadCtr = 0;
