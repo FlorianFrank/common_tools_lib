@@ -26,6 +26,10 @@
 #include <lwip/igmp.h>
 #endif // embedded
 
+#if __WIN32__
+    struct WSAData wsa;
+#endif
+
 #ifdef __linux__
 
 #include <sys/select.h> // fd_set, timeval, select
@@ -49,6 +53,10 @@ PIL_ERROR_CODE
 PIL_SOCKET_Create(PIL_SOCKET *socketRet, TransportProtocol protocol, InternetProtocol ipVersion, const char *ipAddress,
                   uint16_t port)
 {
+#ifdef __WIN32__
+    if(WSAStartup(MAKEWORD(2,2), &wsa) != 0)
+        printf("HALLO");
+#endif
 
     if (!socketRet)
     {
@@ -76,6 +84,12 @@ PIL_SOCKET_Create(PIL_SOCKET *socketRet, TransportProtocol protocol, InternetPro
     if (socketRet->m_socket == -1)
     {
         socketRet->m_IsOpen = FALSE;
+#ifdef __WIN32__
+        socketRet->m_ErrorHandle.m_ErrnoCode = WSAGetLastError();
+#else
+        socketRet->m_ErrorHandle.m_ErrnoCode = errno;
+#endif
+
         PIL_SetLastError(&socketRet->m_ErrorHandle, PIL_ERRNO);
         return PIL_ERRNO;
     }

@@ -6,7 +6,11 @@
 #define PLATFORMINDEPENDENTLIB_SOCKETDEFINES_H
 
 #include <stdint.h>
+#ifdef __WIN32__
+
+#else
 #include <zconf.h>
+#endif // __WIN32__
 
 #ifndef embedded
 
