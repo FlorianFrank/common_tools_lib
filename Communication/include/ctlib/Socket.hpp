@@ -9,9 +9,10 @@ extern "C"
 }
 
 enum WaitRetValue {
-    SUCCESS,
-    TIMEOUT,
-    ERROR
+    PIL_SOCK_SUCCESS,
+    PIL_SOCK_TIMEOUT,
+    PIL_SOCK_ERROR
+
 };
 
 namespace PIL

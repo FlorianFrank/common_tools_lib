@@ -64,11 +64,11 @@ namespace PIL
         switch (m_LastError)
         {
             case PIL_NO_ERROR:
-                return SUCCESS;
+                return PIL_SOCK_SUCCESS;
             case PIL_TIMEOUT:
-                return TIMEOUT;
+                return PIL_SOCK_TIMEOUT;
             default:
-                return ERROR;
+                return PIL_SOCK_ERROR;
         }
     }
 
