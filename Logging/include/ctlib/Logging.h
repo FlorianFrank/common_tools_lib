@@ -38,6 +38,7 @@ void LogMessageVA(Level level, const char *fileName, unsigned int lineNumber, co
 
 // Helperfunctions
 const char *GetLogLevelStr(Level level);
+const char *GetActualTime();
 
 #else // Logging Disabled
 /** Dummy Defines when logging is disabled do nothing. */

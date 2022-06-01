@@ -12,6 +12,10 @@
 #include "pthread.h" // mutex
 #include "ctlib/Logging.h"
 
+#if defined(__WIN32__)
+#include <windows.h>
+#endif
+
 
 /** Mutex to provide mutual exclution when log function is called by different threads. */
 pthread_mutex_t logMutex;
@@ -30,7 +34,6 @@ Level logLevel;
 FILE *logFileStream = NULL;
 char *loggingBuffer;
 
-const char *GetCurrentTime();
 #ifdef __linux__
 int GetColorCode(Level level);
 #endif // __linux__
@@ -105,11 +108,11 @@ if(logFileStream == NULL)
         {
 #ifdef __linux__
             fprintf(logFileStream, "%s\033[%dm %s\033[%dm %s:%u %s\n",
-                    GetCurrentTime(), GetColorCode(level), GetLogLevelStr(level), COLOR_DEFAULT, fileName, lineNumber,
+                    GetActualTime(), GetColorCode(level), GetLogLevelStr(level), COLOR_DEFAULT, fileName, lineNumber,
                     &loggingBuffer[160]);
 #else // __WIN32__
             fprintf(logFileStream, "%s %s %s:%d %s\r\n",
-                    GetCurrentTime(), GetLogLevelStr(level), fileName, lineNumber,
+                    GetActualTime(), GetLogLevelStr(level), fileName, lineNumber,
                     &loggingBuffer[160]);
 #endif // __linux__
             fflush(stdout);
@@ -137,30 +140,21 @@ void CloseLogfile()
  * Return current time as string in format HH:MM:SS:microseconds.
  * @return string containing the time.
  */
-const char *GetCurrentTime()
+const char *GetActualTime()
 {
+#ifdef __linux__
     struct timeval time = { 0 };
     gettimeofday(&time, NULL);
 
     char timeStr[80];
-
-    // WIN
-    //struct tm today = { 0 };
-
-    // WIN
-#ifdef __linux__
     size_t size = strftime(timeStr, 80, "%H:%M:%S", localtime(&time.tv_sec));
     if (size > 0)
         sprintf(loggingBuffer, "%s:%li", timeStr, time.tv_usec);
 #endif // WIN32
 #ifdef __WIN32__
-    time_t ltime;
-    ::time( &ltime );
-    _localtime64_s( &today, &ltime );
-    size_t size = strftime( timeStr, 80,
-              "%H:%M:%S", &today );
-    if (size > 0)
-        sprintf(&loggingBuffer[80], "%s", timeStr);
+    SYSTEMTIME t;
+    GetSystemTime(&t);
+    sprintf(&loggingBuffer[80], "%d:%d:%d", t.wHour, t.wMinute, t.wSecond); // TODO error handling
 #endif // __linux__
 
     return &loggingBuffer[80];
