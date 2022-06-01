@@ -1,4 +1,4 @@
-#if 1
+#ifdef PIL_LOGGING
 
 #include "ctlib/Logging.h"
 
@@ -8,18 +8,19 @@
 #include <stdio.h>
 #include <sys/time.h>
 
-#if defined(__linux__) || defined(__WIN32__)
-#include "pthread.h" // mutex
 #include "ctlib/Logging.h"
+#include "ctlib/ThreadingDefines.h"
+#include <pthread.h> // mutex
 
-#if defined(__WIN32__)
+#ifdef __WIN32__
 #include <windows.h>
-#endif
+#endif // __WIN32__
 
 
 /** Mutex to provide mutual exclution when log function is called by different threads. */
 pthread_mutex_t logMutex;
 
+#ifdef __linux
 // Color codes for different log levels
 #define COLOR_DEFAULT   39 // black
 #define COLOR_INFO      32 // black
@@ -205,4 +206,4 @@ int GetColorCode(Level level)
     }
 }
 #endif // __linux__
-#endif // LOGGING_ENABLES
+#endif // PIL_LOGGING
