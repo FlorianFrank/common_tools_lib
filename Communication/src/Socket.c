@@ -1,3 +1,15 @@
+
+#ifdef __WIN32__
+#include <winsock2.h>
+#include <wspiapi.h>
+
+# else // __linux__
+#include <sys/socket.h> // helperFiles, recvfrom, sendto
+#include <arpa/inet.h> // htons, inet_addr, inet_ntoa
+#endif
+#include <string.h> // memset
+#include <unistd.h> // close
+
 #include "ctlib/Socket.h"
 #if PIL_THREADING
 #include "ctlib/Threading.h"
@@ -6,10 +18,6 @@
 
 #include <stdlib.h> // malloc
 #include "assert.h"
-#include <sys/socket.h> // helperFiles, recvfrom, sendto
-#include <arpa/inet.h> // htons, inet_addr, inet_ntoa
-#include <string.h> // memset
-#include <unistd.h> // close
 
 
 #if embedded
@@ -39,7 +47,7 @@
  */
 PIL_ERROR_CODE
 PIL_SOCKET_Create(PIL_SOCKET *socketRet, TransportProtocol protocol, InternetProtocol ipVersion, const char *ipAddress,
-                  const uint16_t port)
+                  uint16_t port)
 {
 
     if (!socketRet)
@@ -250,7 +258,11 @@ PIL_ERROR_CODE PIL_SOCKET_Connect(PIL_SOCKET *socket, const char *ipAddr, uint16
     struct sockaddr_in address;
     address.sin_family = socket->m_IPVersion;
     address.sin_port = htons(port);
+#if __WIN32__
+    address.sin_addr.s_addr = inet_addr(ipAddr);
+#else
     inet_aton(ipAddr, &address.sin_addr);
+#endif
 
     int connectRet = connect(socket->m_socket, (struct sockaddr *) &address, sizeof(address));
     if (connectRet != 0)
@@ -307,7 +319,11 @@ PIL_ERROR_CODE PIL_SOCKET_Receive(PIL_SOCKET *socketRet, uint8_t *buffer, uint32
     if (!socketRet)
         return PIL_INVALID_ARGUMENTS;
 
+#if __WIN32__
+    uint32_t ret = recv(socketRet->m_socket, (char*)buffer, *bufferLen, 0);
+#else
     uint32_t ret = recv(socketRet->m_socket, buffer, *bufferLen, 0);
+#endif
     if (ret == -1)
     {
         PIL_SetLastError(&socketRet->m_ErrorHandle, PIL_ERRNO);
@@ -444,8 +460,7 @@ PIL_ERROR_CODE PIL_SOCKET_ReceiveFrom(PIL_SOCKET *socketRet, uint8_t *buffer, ui
     addr.sin_addr.s_addr = INADDR_ANY;
     socklen_t senderAddrLen = sizeof(addr);
 
-
-    int ret = recvfrom(socketRet->m_socket, buffer, *bufferLen, MSG_WAITALL, (struct sockaddr *) &addr, &senderAddrLen);
+    int ret = recvfrom(socketRet->m_socket, (char*)buffer, *bufferLen, MSG_WAITALL, (struct sockaddr *) &addr, &senderAddrLen);
     if (ret < 0)
     {
         PIL_SetLastError(&socketRet->m_ErrorHandle, PIL_ERRNO);
@@ -527,7 +542,7 @@ PIL_SOCKET_SendTo(PIL_SOCKET *socketRet, const char *destAddr, const uint16_t po
     ((struct sockaddr_in *) &socketRet->m_SrcAddr)->sin_port = htons(port);
 
     socklen_t senderAddrLen = sizeof(socketRet->m_SrcAddr);
-    int ret = sendto(socketRet->m_socket, buffer, *bufferLen, 0, &socketRet->m_SrcAddr, senderAddrLen);
+    int ret = sendto(socketRet->m_socket, (char*)buffer, *bufferLen, 0, &socketRet->m_SrcAddr, senderAddrLen);
     if (ret < 0)
     {
         PIL_SetLastError(&socketRet->m_ErrorHandle, PIL_ERRNO);
