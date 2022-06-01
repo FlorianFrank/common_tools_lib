@@ -124,6 +124,9 @@ set(source_files ${logging} ${communication} ${file_handling} ${errorHandling} $
 
 if (DEFINED PIL_SHARED)
     add_library(common_tools_lib SHARED ${source_files})
+    if(WIN32)
+        target_link_libraries(common_tools_lib  PRIVATE ws2_32 wsock32)
+    endif()
     set_target_properties(common_tools_lib PROPERTIES PUBLIC_HEADER
     	"${errorHandling_headers};${communication_headers};${file_handling_headers};${logging_headers};${threading_headers};${additional_headers}")
 
@@ -135,6 +138,9 @@ endif () # DEFINED SHARED
 
 if (DEFINED PIL_STATIC)
     add_library(common_tools_lib_static STATIC ${source_files})
+    if(WIN32)
+        target_link_libraries(common_tools_lib_static  PRIVATE ws2_32 wsock32)
+    endif()
 #	install(TARGETS PIL_Static DESTINATION "${CMAKE_")
 
 endif () # DEFINED STATIC

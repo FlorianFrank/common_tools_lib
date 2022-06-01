@@ -13,7 +13,7 @@
 
 
 PIL_ERROR_CODE PIL_SOCKET_Create(PIL_SOCKET *socketRet, TransportProtocol protocol,
-                                 InternetProtocol ipVersion, const char* ipAddress, u_int16_t port);
+                                 InternetProtocol ipVersion, const char* ipAddress, uint16_t port);
 
 PIL_ERROR_CODE PIL_SOCKET_Close(PIL_SOCKET *socketRet);
 

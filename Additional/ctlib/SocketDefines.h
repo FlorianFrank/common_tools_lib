@@ -9,7 +9,15 @@
 #include <zconf.h>
 
 #ifndef embedded
+
+#ifdef __linux__
 #include <sys/socket.h>
+#endif // __linux
+
+#ifdef __WIN32__
+#include <winsock.h>
+#endif // __WIN32__
+
 #else // LWIP
 #include <lwip/tcpip.h>
 #include <lwip/udp.h>
@@ -30,7 +38,7 @@ struct PIL_SOCKET
     struct udp_pcb *conn;
 #endif // Linux
 
-    u_int16_t m_port;
+    uint16_t m_port;
 
     char m_IPAddress[128];
 
