@@ -1,7 +1,9 @@
 //
 // Created by frank55 on 10.11.2020.
 //
-
+#ifdef __WIN32__ // TODO no Win32 support yet
+int i = 0; // TODO
+#else
 #include "ctlib/UARTInterface.h"
 #include "ctlib/ErrorHandler.h"
 #if PIL_LOGGING
@@ -419,3 +421,4 @@ PIL_ERROR_CODE PIL_UART_WaitForDataAvail(PIL_UART_Config *config, uint32_t timeo
     return 0;
 #endif // !embedded
 }
+#endif // __WIN32__
