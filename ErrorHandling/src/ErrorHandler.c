@@ -9,6 +9,10 @@
 #include "ctlib/ErrorHandler.h"
 #include "errno.h"
 
+#if __WIN32__
+#include <sec_api/string_s.h>
+#endif
+
 char errMsgBuff[512];
 
  const char* PIL_ErrorCodeToString(PIL_ERROR_CODE errorCode)
@@ -23,7 +27,13 @@ char errMsgBuff[512];
             return "Socket timeout";
          case PIL_ERRNO:
          {
+#ifdef __WIN32__
+             char errnoBUF[50];
+             strerror_s(errnoBUF, 101 /*TODO*/, errno);
+             sprintf(errMsgBuff, "Errno %d (%s)", errno, errnoBUF);
+#else
              sprintf(errMsgBuff, "Errno %d (%s)", errno, strerror(errno));
+#endif
              return errMsgBuff;
          }
          case PIL_INTERFACE_CLOSED:
