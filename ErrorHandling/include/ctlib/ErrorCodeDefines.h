@@ -45,6 +45,8 @@ enum
      /** Invalid error code. */
     PIL_UNKNOWN_ERROR,
 
+    PIL_XML_PARSING_ERROR
+
 } typedef PIL_ERROR_CODE;
 
 /**

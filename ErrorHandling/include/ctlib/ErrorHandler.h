@@ -15,4 +15,7 @@ PIL_BOOL PIL_SetLastError(PIL_ErrorHandle *socketStruct, PIL_ERROR_CODE errorCod
 
 PIL_BOOL PIL_SetLastErrorMsg(PIL_ErrorHandle *errStruct, PIL_ERROR_CODE errorCode, const char* errorMessage);
 
+const char* PIL_ReturnErrorMessageAsString(PIL_ErrorHandle *errorHandle);
+
+
 #endif //PLATFORMINDEPENDENTLIB_ERRORHANDLER_H

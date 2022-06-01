@@ -109,3 +109,9 @@ char errMsgBuff[512];
     return TRUE;
  }
 
+ const char* PIL_ReturnErrorMessageAsString(PIL_ErrorHandle *errorHandle)
+ {
+     PIL_ReturnErrorMessage(errMsgBuff, errorHandle);
+     return errMsgBuff;
+ }
+
