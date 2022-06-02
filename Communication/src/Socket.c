@@ -34,7 +34,7 @@
 
 #include <sys/select.h> // fd_set, timeval, select
 #include <malloc.h>
-
+#include <errno.h>
 
 #endif // __linux__
 
