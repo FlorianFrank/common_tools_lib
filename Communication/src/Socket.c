@@ -311,7 +311,11 @@ PIL_ERROR_CODE PIL_SOCKET_Connect(PIL_SOCKET *socket, const char *ipAddr, uint16
         int selectRet = select(socket->m_socket + 1, NULL, &fdset, NULL, &tv);
         if (selectRet == 1)
         {
+#if __WIN32__
+            char so_error;
+#else
             int so_error;
+#endif // __WIN32__
             socklen_t len = sizeof so_error;
 
             getsockopt(socket->m_socket, SOL_SOCKET, SO_ERROR, &so_error, &len);
