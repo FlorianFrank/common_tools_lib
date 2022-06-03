@@ -35,7 +35,10 @@
 #include <sys/select.h> // fd_set, timeval, select
 #include <malloc.h>
 #include <errno.h>
-#include <fcntl.h>
+#ifndef __WIN32__
+#include <fcntl.h> // fcntl
+#endif // __WIN32__
+
 
 #endif // __linux__
 
@@ -282,6 +285,7 @@ PIL_ERROR_CODE PIL_SOCKET_Connect(PIL_SOCKET *socket, const char *ipAddr, uint16
     fd_set fdset;
     struct timeval tv;
 
+#ifndef __WIN32__
     if(timeoutInMs > 0)
     {
         // Setting a timeout requires to set the socket in non-blocking mode
@@ -291,6 +295,7 @@ PIL_ERROR_CODE PIL_SOCKET_Connect(PIL_SOCKET *socket, const char *ipAddr, uint16
             return PIL_ERRNO;
         }
     }
+#endif // __WIN32__
 
     int connectRet = connect(socket->m_socket, (struct sockaddr *) &address, sizeof(address));
     if(connectRet == -1 && errno != 115) // Connection in progess
@@ -720,7 +725,7 @@ struct timeval PIL_SOCKET_TransformMSInTimeVal(uint16_t timeoutInMS)
 {
     int timeOutInMicroSeconds = timeoutInMS * 1000;
     struct timeval t;
-    
+
     t.tv_sec = timeOutInMicroSeconds / (int)1e6;
     t.tv_usec = timeOutInMicroSeconds - (t.tv_sec * (int)1e6);
     return t;
