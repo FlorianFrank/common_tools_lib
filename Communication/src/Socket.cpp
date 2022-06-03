@@ -16,10 +16,10 @@ extern "C" {
 namespace PIL
 {
 
-    Socket::Socket(TransportProtocol transportProtocol, InternetProtocol internetProtocol,
-                           const std::string &address, int port) : m_TransportProtocol(transportProtocol),
+    Socket::Socket(TransportProtocol transportProtocol, InternetProtocol internetProtocol, const std::string &address,
+                   int port, uint16_t timeoutInMS) : m_TransportProtocol(transportProtocol),
                                                                    m_InternetProtocol(internetProtocol),
-                                                                   m_IPAddrress(address), m_Port(port)
+                                                                   m_IPAddrress(address), m_Port(port), m_TimeoutInMS(timeoutInMS)
     {
         m_LastError = PIL_SOCKET_Create(&m_SocketRet, transportProtocol, internetProtocol, address.c_str(), port);
     }
@@ -58,9 +58,9 @@ namespace PIL
         return m_LastError;
     }
 
-    WaitRetValue Socket::WaitTillDataAvailable(int timeOut)
+    WaitRetValue Socket::WaitTillDataAvailable(int timeoutInMS)
     {
-        m_LastError = PIL_SOCKET_WaitTillDataAvail(&m_SocketRet, timeOut);
+        m_LastError = PIL_SOCKET_WaitTillDataAvail(&m_SocketRet, timeoutInMS);
         switch (m_LastError)
         {
             case PIL_NO_ERROR:
@@ -72,15 +72,15 @@ namespace PIL
         }
     }
 
-    PIL_ERROR_CODE Socket::Connect(std::string &ipAddr, int port)
+    PIL_ERROR_CODE Socket::Connect(std::string &ipAddr, int port, int timeoutInMs)
     {
-        m_LastError = PIL_SOCKET_Connect(&m_SocketRet, ipAddr.c_str(), port);
+        m_LastError = PIL_SOCKET_Connect(&m_SocketRet, ipAddr.c_str(), port, timeoutInMs);
         return m_LastError;
     }
 
     PIL_ERROR_CODE Socket::Receive(uint8_t *buffer, uint32_t *bufferLen)
     {
-        m_LastError = PIL_SOCKET_Receive(&m_SocketRet, buffer, bufferLen);
+        m_LastError = PIL_SOCKET_Receive(&m_SocketRet, buffer, bufferLen, m_TimeoutInMS);
         return m_LastError;
     }
 
@@ -121,9 +121,9 @@ namespace PIL
         return m_LastError;
     }
 
-    PIL_ERROR_CODE  Socket::ConnectToServer(std::string ipAddr, int destPort, void (*receiveCallback)(uint8_t *, uint32_t))
+    PIL_ERROR_CODE  Socket::ConnectToServer(std::string ipAddr, int destPort, int timeoutInMs, void (*receiveCallback)(uint8_t *, uint32_t))
     {
-        m_LastError = PIL_SOCKET_ConnectToServer(&m_SocketRet, ipAddr.c_str(), m_Port, destPort, receiveCallback);
+        m_LastError = PIL_SOCKET_ConnectToServer(&m_SocketRet, ipAddr.c_str(), m_Port, destPort, timeoutInMs, receiveCallback);
         return m_LastError;
     }
 }

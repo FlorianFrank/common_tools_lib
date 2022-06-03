@@ -21,12 +21,8 @@ namespace PIL
     class Socket
     {
     public:
-        Socket(TransportProtocol
-        transportProtocol,
-        InternetProtocol internetProtocol,
-        const std::string &address,
-        int port
-        );
+        Socket(TransportProtocol transportProtocol, InternetProtocol internetProtocol, const std::string &address,
+               int port, uint16_t timeoutInMS);
 
         ~Socket();
 
@@ -38,9 +34,9 @@ namespace PIL
 
         PIL_ERROR_CODE Accept(char *ipAddr);
 
-        WaitRetValue WaitTillDataAvailable(int timeOut);
+        WaitRetValue WaitTillDataAvailable(int timeoutInMS);
 
-        PIL_ERROR_CODE Connect(std::string &ipAddr, int port);
+        PIL_ERROR_CODE Connect(std::string &ipAddr, int port, int timeoutInMs);
 
         PIL_ERROR_CODE Receive(uint8_t *buffer, uint32_t *bufferLen);
 
@@ -56,7 +52,7 @@ namespace PIL
 
         PIL_ERROR_CODE  CreateServerSocket(void (*receiveCallback)(PIL_SOCKET, char *));
 
-        PIL_ERROR_CODE  ConnectToServer(std::string ipAddr, int destPort, void (*receiveCallback)(uint8_t *, uint32_t));
+        PIL_ERROR_CODE  ConnectToServer(std::string ipAddr, int destPort, int timeoutInMs, void (*receiveCallback)(uint8_t *, uint32_t));
 
         inline PIL_ERROR_CODE GetLastError() { return m_LastError; };
 
@@ -65,6 +61,7 @@ namespace PIL
         std::string m_IPAddrress;
         TransportProtocol m_TransportProtocol;
         InternetProtocol m_InternetProtocol;
+        uint16_t m_TimeoutInMS;
         PIL_ERROR_CODE m_LastError;
 
         PIL_SOCKET m_SocketRet;
