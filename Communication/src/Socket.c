@@ -35,6 +35,7 @@
 #include <sys/select.h> // fd_set, timeval, select
 #include <malloc.h>
 #include <errno.h>
+#include <fcntl.h>
 
 #endif // __linux__
 
@@ -252,12 +253,13 @@ PIL_ERROR_CODE PIL_SOCKET_Accept(PIL_SOCKET *socket, char *ipAddr, PIL_SOCKET *n
 
 /**
  * @brief Connect function if a TCP helperFiles is used.
- * @param socket helperFiles on which the connect function is called.
+ * @param socket helperFiles on which the Connect function is called.
  * @param ipAddr ip address of the connection.
  * @param port port of the new connection.
+ * @param timeoutInMs sets the timeout in milliseconds
  * @return 0 if no error occured.
  */
-PIL_ERROR_CODE PIL_SOCKET_Connect(PIL_SOCKET *socket, const char *ipAddr, uint16_t port)
+PIL_ERROR_CODE PIL_SOCKET_Connect(PIL_SOCKET *socket, const char *ipAddr, uint16_t port, uint16_t timeoutInMs)
 {
     if (socket == NULL)
         return PIL_INVALID_ARGUMENTS;
@@ -277,13 +279,48 @@ PIL_ERROR_CODE PIL_SOCKET_Connect(PIL_SOCKET *socket, const char *ipAddr, uint16
 #else
     inet_aton(ipAddr, &address.sin_addr);
 #endif
+    fd_set fdset;
+    struct timeval tv;
+
+    if(timeoutInMs > 0)
+    {
+        // Setting a timeout requires to set the socket in non-blocking mode
+        if(fcntl(socket->m_socket, F_SETFL, O_NONBLOCK) != 0)
+        {
+            PIL_SetLastError(&socket->m_ErrorHandle, PIL_ERRNO);
+            return PIL_ERRNO;
+        }
+    }
 
     int connectRet = connect(socket->m_socket, (struct sockaddr *) &address, sizeof(address));
-    if (connectRet != 0)
+    if(connectRet == -1 && errno != 115) // Connection in progess
     {
         PIL_SetLastError(&socket->m_ErrorHandle, PIL_ERRNO);
         return PIL_ERRNO;
     }
+
+    if(timeoutInMs > 0){
+        FD_ZERO(&fdset);
+        FD_SET(socket->m_socket, &fdset);
+        tv = PIL_SOCKET_TransformMSInTimeVal(timeoutInMs);
+        int selectRet = select(socket->m_socket + 1, NULL, &fdset, NULL, &tv);
+        if (selectRet == 1)
+        {
+            int so_error;
+            socklen_t len = sizeof so_error;
+
+            getsockopt(socket->m_socket, SOL_SOCKET, SO_ERROR, &so_error, &len);
+            if(so_error != 0)
+            {
+                PIL_SetLastError(&socket->m_ErrorHandle, PIL_ERRNO);
+                return PIL_ERRNO;
+            }
+
+        }
+        else
+            return PIL_TIMEOUT;
+    }
+
 #endif // On LWIP we only support UDP!
     socket->m_IsConnected = TRUE;
     return PIL_NO_ERROR;
@@ -328,14 +365,22 @@ PIL_ERROR_CODE PIL_SOCKET_WaitTillDataAvail(PIL_SOCKET *socketRet, uint32_t time
  *        Afterwards, it contains the amount of data which was received.
  * @return
  */
-PIL_ERROR_CODE PIL_SOCKET_Receive(PIL_SOCKET *socketRet, uint8_t *buffer, uint32_t *bufferLen)
+PIL_ERROR_CODE PIL_SOCKET_Receive(PIL_SOCKET *socketRet, uint8_t *buffer, uint32_t *bufferLen, uint16_t timeoutInMS)
 {
     if (!socketRet)
         return PIL_INVALID_ARGUMENTS;
 
+    if(timeoutInMS > 0)
+    {
+        PIL_ERROR_CODE retWaitForData = PIL_SOCKET_WaitTillDataAvail(socketRet, timeoutInMS);
+        if (retWaitForData != PIL_NO_ERROR)
+            return retWaitForData;
+    }
+
 #if __WIN32__
     uint32_t ret = recv(socketRet->m_socket, (char*)buffer, *bufferLen, 0);
 #else
+
     uint32_t ret = recv(socketRet->m_socket, buffer, *bufferLen, 0);
 #endif
     if (ret == -1)
@@ -374,7 +419,7 @@ void* PIL_ReceiveThreadFunction(void *handle)
 
         if(ret == PIL_NO_ERROR)
         {
-            ret = PIL_SOCKET_Receive(arg->socket, buffer, &len);
+            ret = PIL_SOCKET_Receive(arg->socket, buffer, &len, /*TODO*/0);
             if(ret == PIL_NO_ERROR)
             {
                 arg->receiveCallback(buffer, len);
@@ -657,18 +702,26 @@ PIL_ERROR_CODE PIL_SOCKET_Setup_ServerSocket(PIL_SOCKET *socket, uint16_t port, 
     return PIL_NO_ERROR;
 }
 
-PIL_ERROR_CODE PIL_SOCKET_ConnectToServer(PIL_SOCKET *socket, const char *ipAddr, uint16_t srcPort, uint16_t destPort,
+PIL_ERROR_CODE PIL_SOCKET_ConnectToServer(PIL_SOCKET *socket, const char *ipAddr, uint16_t srcPort, uint16_t destPort, uint16_t timeoutInMs,
                                           void (*receiveCallback)(uint8_t*, uint32_t))
 {
     PIL_ERROR_CODE ret = PIL_SOCKET_Create(socket, TCP, IPv4, "127.0.0.1", srcPort);
     if(ret != PIL_NO_ERROR)
         return ret;
 
-    ret = PIL_SOCKET_Connect(socket, ipAddr, destPort);
+    ret = PIL_SOCKET_Connect(socket, ipAddr, destPort, timeoutInMs);
     if(ret != PIL_NO_ERROR)
         return ret;
     
     return PIL_SOCKET_RegisterCallbackFunction(socket, receiveCallback);
 }
 
-
+struct timeval PIL_SOCKET_TransformMSInTimeVal(uint16_t timeoutInMS)
+{
+    int timeOutInMicroSeconds = timeoutInMS * 1000;
+    struct timeval t;
+    
+    t.tv_sec = timeOutInMicroSeconds / (int)1e6;
+    t.tv_usec = timeOutInMicroSeconds - (t.tv_sec * (int)1e6);
+    return t;
+}

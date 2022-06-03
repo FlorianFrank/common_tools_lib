@@ -23,11 +23,11 @@ PIL_ERROR_CODE PIL_SOCKET_Listen(PIL_SOCKET *socketRet, uint32_t sizeQueue);
 
 PIL_ERROR_CODE PIL_SOCKET_Accept(PIL_SOCKET *socket, char *ipAddr, PIL_SOCKET *newHandle);
 
-PIL_ERROR_CODE PIL_SOCKET_Connect(PIL_SOCKET *socketRet, const char *ipAddr, uint16_t port);
+PIL_ERROR_CODE PIL_SOCKET_Connect(PIL_SOCKET *socketRet, const char *ipAddr, uint16_t port, uint16_t timeoutInMs);
 
 PIL_ERROR_CODE PIL_SOCKET_WaitTillDataAvail(PIL_SOCKET *socketRet, uint32_t timeoutMS);
 
-PIL_ERROR_CODE PIL_SOCKET_Receive(PIL_SOCKET *socketRet , uint8_t *buffer, uint32_t *bufferLen);
+PIL_ERROR_CODE PIL_SOCKET_Receive(PIL_SOCKET *socketRet , uint8_t *buffer, uint32_t *bufferLen, uint16_t timeoutInMS);
 
 PIL_ERROR_CODE PIL_SOCKET_ReceiveFrom(PIL_SOCKET *socketRet , uint8_t *buffer, uint16_t *bufferLen, char *ipAddr, int *port);
 
@@ -41,8 +41,10 @@ PIL_BOOL PIL_SOCKET_IsOpen(PIL_SOCKET *socketRet);
 
 PIL_ERROR_CODE PIL_SOCKET_Setup_ServerSocket(PIL_SOCKET *socket, uint16_t port, void (*receive)(struct PIL_SOCKET retHandle, char* ip));
 
-PIL_ERROR_CODE PIL_SOCKET_ConnectToServer(PIL_SOCKET *socket, const char *ipAddr, uint16_t srcPort, uint16_t destPort,
+PIL_ERROR_CODE PIL_SOCKET_ConnectToServer(PIL_SOCKET *socket, const char *ipAddr, uint16_t srcPort, uint16_t destPort, uint16_t timeoutInMs,
                                           void (*receiveCallback)(uint8_t *retHandle, uint32_t ip));
+
+struct timeval PIL_SOCKET_TransformMSInTimeVal(uint16_t timeoutInMS);
 
 /**
  * Event based functions require Threading support.
