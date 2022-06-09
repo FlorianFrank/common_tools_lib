@@ -181,6 +181,7 @@ PIL_ERROR_CODE PIL_ReadDataFromFile(const char* fileName, uint8_t* buffer, uint3
 PIL_ERROR_CODE
 PIL_ListFilesInDirectory(const char *path, uint8_t filter, PIL_FileListElem *listOfFiles, PIL_BOOL recursive)
 {
+#ifndef __WIN32__
     if(!path || !listOfFiles)
         return PIL_INVALID_ARGUMENTS;
 
@@ -268,6 +269,6 @@ PIL_ListFilesInDirectory(const char *path, uint8_t filter, PIL_FileListElem *lis
             free(handle);
     }
 
-
+#endif
     return PIL_NO_ERROR;
 }

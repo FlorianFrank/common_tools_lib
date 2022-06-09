@@ -13,7 +13,7 @@
 #include <sec_api/string_s.h>
 #endif
 
-char errMsgBuff[512];
+char errMsgBuff[1024];
 
  const char* PIL_ErrorCodeToString(PIL_ERROR_CODE errorCode)
  {
@@ -72,12 +72,12 @@ char errMsgBuff[512];
     const char *errCodeStr = PIL_ErrorCodeToString(socketStruct->m_ErrorCode);
     if(socketStruct->m_ErrorCode == PIL_ERRNO)
     {
-        sprintf(errorStr, "%s: %s", errCodeStr, strerror(socketStruct->m_ErrnoCode));
+        sprintf(errorStr, "%s", errCodeStr);
         return TRUE;
     }
     if(strcmp(socketStruct->m_ErrorMessage, "") != 0)
     {
-        sprintf(errorStr, "%s: %s", errCodeStr, socketStruct->m_ErrorMessage);
+        sprintf(errorStr, "%s", errCodeStr);
         return TRUE;
     }
     strcpy(errorStr, errCodeStr);
