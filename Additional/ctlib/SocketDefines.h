@@ -14,7 +14,7 @@
 
 #ifndef embedded
 
-#ifdef __linux__
+#if defined __linux__ || defined __APPLE__
 #include <sys/socket.h>
 #endif // __linux
 

@@ -31,9 +31,12 @@
 #endif
 
 #ifdef __linux__
+#include <malloc.h>
+#endif // __linux__
+
+#if defined __linux__ || defined __APPLE__
 
 #include <sys/select.h> // fd_set, timeval, select
-#include <malloc.h>
 #include <errno.h>
 #ifndef __WIN32__
 #include <fcntl.h> // fcntl
