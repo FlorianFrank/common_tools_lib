@@ -54,10 +54,11 @@ Contains a platform independent logging implementation.
 ## Testing
 
 #### Windows latest
-![Build Platform Independent Lib]([https://github.com/FlorianFrank/PIL_Snippets/workflows/Build%20Platform%20Independent%20Lib/badge.svg](https://github.com/FlorianFrank/common_tools_lib/actions/workflows/cmake.yml/badge.svg))
+![Build Platform Independent Lib](https://github.com/FlorianFrank/common_tools_lib/actions/workflows/cmake.yml/badge.svg)
 
 #### Mac OS latest
-![Build Platform Independent Lib]([https://github.com/FlorianFrank/PIL_Snippets/workflows/Build%20Platform%20Independent%20Lib/badge.svg](https://github.com/FlorianFrank/common_tools_lib/actions/workflows/cmake.yml/badge.svg))
+![Build Platform Independent Lib](https://github.com/FlorianFrank/common_tools_lib/actions/workflows/cmake.yml/badge.svg)
+
 
 #### Ubuntu latest
-![Build Platform Independent Lib]([https://github.com/FlorianFrank/PIL_Snippets/workflows/Build%20Platform%20Independent%20Lib/badge.svg](https://github.com/FlorianFrank/common_tools_lib/actions/workflows/cmake.yml/badge.svg))
+![Build Platform Independent Lib](https://github.com/FlorianFrank/common_tools_lib/actions/workflows/cmake.yml/badge.svg)
