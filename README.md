@@ -53,10 +53,10 @@ Contains a platform independent logging implementation.
 
 ## Testing
 
-|       OS       |                                                               Status                                                               | 
-|:--------------:|:----------------------------------------------------------------------------------------------------------------------------------:|
-|Windows Latest  | ![Build Platform Independent Lib](https://github.com/FlorianFrank/common_tools_lib/actions/workflows/windows_latest.yml/badge.svg) |
-|Mac OS Latest   | ![Build Platform Independent Lib](https://github.com/FlorianFrank/common_tools_lib/actions/workflows/ubuntu_latest.yml/badge.svg)  |
-|Ubuntu Latest   | ![Build Platform Independent Lib](https://github.com/FlorianFrank/common_tools_lib/actions/workflows/mac_os_latest.yml/badge.svg)  |
+|       OS       |                                                       Status                                                       | 
+|:--------------:|:------------------------------------------------------------------------------------------------------------------:|
+|Windows Latest  | ![Windows latest](https://github.com/FlorianFrank/common_tools_lib/actions/workflows/windows_latest.yml/badge.svg) |
+|Mac OS Latest   |  ![MAC OS latest](https://github.com/FlorianFrank/common_tools_lib/actions/workflows/ubuntu_latest.yml/badge.svg)  |
+|Ubuntu Latest   |  ![Ubuntu Latest](https://github.com/FlorianFrank/common_tools_lib/actions/workflows/mac_os_latest.yml/badge.svg)  |
 
 
