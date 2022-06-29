@@ -53,12 +53,10 @@ Contains a platform independent logging implementation.
 
 ## Testing
 
-#### Windows latest
-![Build Platform Independent Lib](https://github.com/FlorianFrank/common_tools_lib/actions/workflows/cmake.yml/badge.svg)
+|       OS       |                                                                Status                                                     | 
+|:--------------:|:-------------------------------------------------------------------------------------------------------------------------:|
+|Windows Latest  | ![Build Platform Independent Lib](https://github.com/FlorianFrank/common_tools_lib/actions/workflows/cmake.yml/badge.svg) |
+|Mac OS Latest   | ![Build Platform Independent Lib](https://github.com/FlorianFrank/common_tools_lib/actions/workflows/cmake.yml/badge.svg) |
+|Ubuntu Latest   | ![Build Platform Independent Lib](https://github.com/FlorianFrank/common_tools_lib/actions/workflows/cmake.yml/badge.svg) |
 
-#### Mac OS latest
-![Build Platform Independent Lib](https://github.com/FlorianFrank/common_tools_lib/actions/workflows/cmake.yml/badge.svg)
 
-
-#### Ubuntu latest
-![Build Platform Independent Lib](https://github.com/FlorianFrank/common_tools_lib/actions/workflows/cmake.yml/badge.svg)
