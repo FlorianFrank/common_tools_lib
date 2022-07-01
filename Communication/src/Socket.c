@@ -303,6 +303,12 @@ PIL_ERROR_CODE PIL_SOCKET_Connect(PIL_SOCKET *socket, const char *ipAddr, uint16
     int connectRet = connect(socket->m_socket, (struct sockaddr *) &address, sizeof(address));
     if(connectRet == -1 && errno != 115) // Connection in progess
     {
+#ifdef __WIN32__
+        socket->m_ErrorHandle.m_ErrnoCode = WSAGetLastError();
+#else
+        socket->m_ErrorHandle.m_ErrnoCode = errno;
+#endif // __WIN32__
+
         PIL_SetLastError(&socket->m_ErrorHandle, PIL_ERRNO);
         return PIL_ERRNO;
     }
