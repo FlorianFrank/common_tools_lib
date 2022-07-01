@@ -11,6 +11,8 @@
 
 #if __WIN32__
 #include <sec_api/string_s.h>
+#include <winsock.h>
+
 #endif
 
 char errMsgBuff[1024];
@@ -29,8 +31,8 @@ char errMsgBuff[1024];
          {
 #ifdef __WIN32__
              char errnoBUF[50];
-             strerror_s(errnoBUF, 101 /*TODO*/, errno);
-             sprintf(errMsgBuff, "Errno %d (%s)", errno, errnoBUF);
+             strerror_s(errnoBUF, 101 /*TODO*/, WSAGetLastError());
+             sprintf(errMsgBuff, "Errno %d (%s)", WSAGetLastError(), errnoBUF);
 #else
              sprintf(errMsgBuff, "Errno %d (%s)", errno, strerror(errno));
 #endif
