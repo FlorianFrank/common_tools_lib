@@ -107,6 +107,7 @@ if(DEFINED PIL_CSV)
 endif()
 
 set(errorHandling_headers
+        "ErrorHandling/include/ctlib/ExceptionHandler.h"
         "ErrorHandling/include/ctlib/ErrorHandler.h"
         "ErrorHandling/include/ctlib/ErrorCodeDefines.h")
 
@@ -114,6 +115,7 @@ set(errorHandling_headers
 
 set(errorHandling
         "${CMAKE_CURRENT_SOURCE_DIR}/ErrorHandling/src/ErrorHandler.c"
+        "${CMAKE_CURRENT_SOURCE_DIR}/ErrorHandling/src/ExceptionHandler.cpp"
         ${errorHandling_headers})
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/ErrorHandling/include")
 
