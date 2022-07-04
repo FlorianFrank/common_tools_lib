@@ -34,9 +34,9 @@ namespace PIL
 
         PIL_ERROR_CODE Accept(char *ipAddr);
 
-        WaitRetValue WaitTillDataAvailable(int timeoutInMS);
+        WaitRetValue WaitTillDataAvailable();
 
-        PIL_ERROR_CODE Connect(std::string &ipAddr, int port, int timeoutInMs);
+        PIL_ERROR_CODE Connect(std::string &ipAddr, int port);
 
         PIL_ERROR_CODE Receive(uint8_t *buffer, uint32_t *bufferLen);
 
@@ -52,9 +52,13 @@ namespace PIL
 
         PIL_ERROR_CODE  CreateServerSocket(void (*receiveCallback)(PIL_SOCKET, char *));
 
-        PIL_ERROR_CODE  ConnectToServer(std::string ipAddr, int destPort, int timeoutInMs, void (*receiveCallback)(uint8_t *, uint32_t));
+        PIL_ERROR_CODE ConnectToServer(std::string &ipAddr, int destPort, void (*receiveCallback)(uint8_t *, uint32_t));
 
         inline PIL_ERROR_CODE GetLastError() { return m_LastError; };
+
+        TransportProtocol GetTransportProtocol() const { return m_TransportProtocol; }
+
+        InternetProtocol GetInternetProtocol() const { return m_InternetProtocol; }
 
     private:
         int m_Port;
@@ -66,7 +70,6 @@ namespace PIL
 
         PIL_SOCKET m_SocketRet;
         std::vector<PIL_SOCKET> m_SocketList;
-        // TODO ring buffer
     };
 
 }
