@@ -18,7 +18,7 @@ static std::string loram_ipsum = "Lorem ipsum dolor sit amet, consetetur sadipsc
 
 char recvBuff[4096];
 
-void receiveHandler(uint8_t *buffer, uint32_t len)
+void ReceiveHandler(uint8_t* buffer, uint32_t len)
 {
     strncpy(recvBuff, (char*)buffer, len);
 }
@@ -46,7 +46,7 @@ TEST(SocketTest_C, SimpleSocketTest)
     acceptFlag = false;
 
     PIL_SOCKET clientSocket;
-    ret = PIL_SOCKET_ConnectToServer(&clientSocket, "127.0.0.1", 15000, 14000, receiveHandler);
+    ret = PIL_SOCKET_ConnectToServer(&clientSocket, "127.0.0.1", 15000, 14000, 1000, ReceiveHandler);
     EXPECT_EQ(ret, PIL_NO_ERROR);
 
     usleep(100000);
@@ -64,12 +64,13 @@ TEST(SocketTest_C, SimpleSocketTest)
 
 TEST(SocketTest_CPP, SimpleSocketTest)
 {
-    PIL::Socket srvSock(TCP, IPv4, "localhost", 14002);
+    PIL::Socket srvSock(TCP, IPv4, "localhost", 14002, 1000);
     bool ret = srvSock.CreateServerSocket(CallbackAccept);
     EXPECT_EQ(ret, PIL_NO_ERROR);
 
-    PIL::Socket clientSock(TCP, IPv4, "localhost", 14003);
-    ret = clientSock.ConnectToServer("127.0.0.1", 14002, receiveHandler);
+    PIL::Socket clientSock(TCP, IPv4, "localhost", 14003, 1000);
+    std::string ipAddr = "127.0.0.1";
+    ret = clientSock.ConnectToServer(ipAddr, 14002, ReceiveHandler);
     EXPECT_EQ(ret, PIL_NO_ERROR);
 //    usleep(1000);
   //  EXPECT_EQ(acceptFlag, true);
