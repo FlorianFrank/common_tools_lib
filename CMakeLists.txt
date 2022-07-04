@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(PlatformIndependentLib C CXX)
 
+set(PIL_FILE_HANDLING 1)
 if (DEFINED ALL)
     set(INSTALL_DIR "/usr")
     option(PIL_COMMUNICATION   "Enable UART and socket communication"       ON)
@@ -50,8 +51,8 @@ if (DEFINED PIL_FILE_HANDLING)
 
     if(DEFINED PIL_CXX)
         set(file_handling_cpp
-                "FileHandling/include/ctlib/FileHandler.h"
-                "Additional/ctlib/FileHandlingDefines.h")
+                "FileHandling/include/ctlib/FileHandler.hpp"
+                "FileHandling/src/FileHandler.cpp")
     endif()
 
     set(file_handling_headers
