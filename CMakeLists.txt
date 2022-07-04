@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(PlatformIndependentLib C CXX)
 
-if (DEFINED ALL)
+if (DEFINED PIL_ALL)
     set(INSTALL_DIR "/usr")
     option(PIL_COMMUNICATION   "Enable UART and socket communication"       ON)
     option(PIL_THREADING       "Enable multithreading support"              ON)
@@ -18,7 +18,7 @@ if (DEFINED ALL)
     set(PIL_CSV                "Enable CSV file support"                    ON)
     set(PIL_CXX                "Enable C++ support"                         ON)
     set(PIL_EXCEPTION_HANDLING "Enable exception handling in C++ version"   ON)
-endif () # DEFINED ALL
+endif () # PIL_ALL
 
 if(PIL_CXX)
 endif()
@@ -148,7 +148,7 @@ if (DEFINED PIL_STATIC)
 
 endif () # DEFINED STATIC
 
-if (UNIT_TESTING)
+if (PIL_UNIT_TESTING)
     if(DEFINED APPLE)
         include_directories("/usr/local/include")
         link_directories("/usr/local/lib")
@@ -160,7 +160,7 @@ if (UNIT_TESTING)
     enable_testing()
     include(GoogleTest)
     gtest_discover_tests("SOCKET_UNIT_TEST")
-endif () # UNIT_TESTING
+endif () # PIL_UNIT_TESTING
 
 option(BUILD_DOC "Build documentation" OFF)
 
