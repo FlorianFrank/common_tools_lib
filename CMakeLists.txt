@@ -48,13 +48,20 @@ endif () # DEFINED COMMUNICATION
 
 if (DEFINED PIL_FILE_HANDLING)
 
+    if(DEFINED PIL_CXX)
+        set(file_handling_cpp
+                "FileHandling/include/ctlib/FileHandler.h"
+                "Additional/ctlib/FileHandlingDefines.h")
+    endif()
+
     set(file_handling_headers
              "FileHandling/include/ctlib/FileHandler.h"
             "Additional/ctlib/FileHandlingDefines.h")
 
     set(file_handling
             "${CMAKE_CURRENT_SOURCE_DIR}/FileHandling/src/FileHandler.c"
-            "${file_handling_headers}")
+            "${file_handling_headers}"
+            "${file_handling_cpp}")
 
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/FileHandling/include")
 endif() # DEFINED FILE_HANDLING
