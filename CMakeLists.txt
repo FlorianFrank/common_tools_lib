@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(PlatformIndependentLib C CXX)
 
-set(PIL_FILE_HANDLING 1)
 if (DEFINED ALL)
     set(INSTALL_DIR "/usr")
     option(PIL_COMMUNICATION   "Enable UART and socket communication"       ON)
