@@ -143,7 +143,6 @@ PIL_ERROR_CODE PIL_SOCKET_Close(PIL_SOCKET *socketRet)
     }
 
     PIL_ERROR_CODE ret =  (close(socketRet->m_socket) == 0) ?  PIL_NO_ERROR : PIL_ERRNO;
-    free(socketRet);
     return ret;
 }
 
