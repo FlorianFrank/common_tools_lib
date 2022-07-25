@@ -134,6 +134,11 @@ set(source_files ${logging} ${communication} ${file_handling} ${errorHandling} $
 
 if (DEFINED PIL_SHARED)
     add_library(common_tools_lib SHARED ${source_files})
+    if(PIL_STATIC_LIBGCC)
+        target_link_options(common_tools_lib PUBLIC -static -static-libgcc -static-libstdc++)
+    endif()
+
+
     if(WIN32)
         target_link_libraries(common_tools_lib  PRIVATE ws2_32 wsock32)
     else()
@@ -150,6 +155,11 @@ endif () # DEFINED SHARED
 
 if (DEFINED PIL_STATIC)
     add_library(common_tools_lib_static STATIC ${source_files})
+
+    if(PIL_STATIC_LIBGCC)
+       target_link_options(common_tools_lib_static PUBLIC -static -static-libgcc -static-libstdc++)
+    endif()
+
     if(WIN32)
         target_link_libraries(common_tools_lib_static  PRIVATE ws2_32 wsock32)
     else()
