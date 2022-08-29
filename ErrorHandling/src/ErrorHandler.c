@@ -54,6 +54,8 @@ char errMsgBuff[1024];
              return "File only partially written";
          case PIL_NO_SUCH_FILE:
              return "No such file or directory";
+         case PIL_ITEM_IN_ERROR_QUEUE:
+             return "Item in error queue";
          default:
              return "Unknown error";
      }

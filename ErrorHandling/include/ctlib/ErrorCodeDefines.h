@@ -17,7 +17,7 @@ enum
 {
     /** No error occurred. */
     PIL_NO_ERROR,
-    /** Invalid arguments passed to a function, e.g. passing a nullptr. **/
+    /**  **/
     PIL_INVALID_ARGUMENTS,
     /** An error occured and an errno error code was set. **/
     PIL_ERRNO,
@@ -29,7 +29,7 @@ enum
     PIL_INVALID_BAUDRATE,
     /* Error insufficient resources. */
     PIL_INSUFFICIENT_RESOURCES,
-    /** Error, insufficient permissiosn to perform a certain operation. */
+    /** Error, insufficient permissions to perform a certain operation. */
     PIL_INSUFFICIENT_PERMISSIONS,
     /** Error, when deadlock is detected in a multithreaded application. */
     PIL_DEADLOCK_DETECTED,
@@ -45,7 +45,9 @@ enum
      /** Invalid error code. */
     PIL_UNKNOWN_ERROR,
 
-    PIL_XML_PARSING_ERROR
+    PIL_XML_PARSING_ERROR,
+
+    PIL_ITEM_IN_ERROR_QUEUE
 
 } typedef PIL_ERROR_CODE;
 
