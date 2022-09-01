@@ -108,9 +108,18 @@ if(logFileStream == NULL)
         if (ret > 0)
         {
 #ifdef __linux__
-            fprintf(logFileStream, "%s\033[%dm %s\033[%dm %s:%u %s\n",
-                    GetActualTime(), GetColorCode(level), GetLogLevelStr(level), COLOR_DEFAULT, fileName, lineNumber,
-                    &loggingBuffer[160]);
+            if(logFileStream == stdout || logFileStream == stderr)
+            {
+                fprintf(logFileStream, "%s\033[%dm %s\033[%dm %s:%u %s\n",
+                        GetActualTime(), GetColorCode(level), GetLogLevelStr(level), COLOR_DEFAULT, fileName, lineNumber,
+                        &loggingBuffer[160]);
+            }else
+            {
+                fprintf(logFileStream, "%s %s %s:%u %s\n",
+                        GetActualTime(), GetLogLevelStr(level), fileName, lineNumber,
+                        &loggingBuffer[160]);
+            }
+
 #else // __WIN32__
             fprintf(logFileStream, "%s %s %s:%d %s\r\n",
                     GetActualTime(), GetLogLevelStr(level), fileName, lineNumber,
@@ -158,7 +167,7 @@ const char *GetActualTime()
     sprintf(&loggingBuffer[80], "%d:%d:%d", t.wHour, t.wMinute, t.wSecond); // TODO error handling
 #endif // __linux__
 
-    return &loggingBuffer[80];
+    return loggingBuffer;
 }
 
 /**
