@@ -1,4 +1,4 @@
-#ifdef CXX
+#ifdef PIL_CXX
 #pragma once
 #include <string>
 #include <vector>
@@ -12,7 +12,6 @@ enum WaitRetValue {
     PIL_SOCK_SUCCESS,
     PIL_SOCK_TIMEOUT,
     PIL_SOCK_ERROR
-
 };
 
 namespace PIL
@@ -54,6 +53,8 @@ namespace PIL
 
         PIL_ERROR_CODE ConnectToServer(std::string &ipAddr, int destPort, void (*receiveCallback)(uint8_t *, uint32_t));
 
+        PIL_ERROR_CODE RegisterReceiveCallbackFunction(void (*receiveCallback)(uint8_t *, uint32_t));
+
         inline PIL_ERROR_CODE GetLastError() { return m_LastError; };
 
         TransportProtocol GetTransportProtocol() const { return m_TransportProtocol; }
@@ -68,9 +69,9 @@ namespace PIL
         uint16_t m_TimeoutInMS;
         PIL_ERROR_CODE m_LastError;
 
-        PIL_SOCKET m_SocketRet;
+        PIL_SOCKET m_SocketRet{};
         std::vector<PIL_SOCKET> m_SocketList;
     };
 
 }
-#endif // CXX
+#endif // PIL_CXX

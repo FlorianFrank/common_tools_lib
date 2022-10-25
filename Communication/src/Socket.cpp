@@ -3,7 +3,7 @@
  */
 
 
-#ifdef CXX
+#ifdef PIL_CXX
 extern "C++" {
 #include <ctlib/Socket.hpp>
 extern "C" {
@@ -183,6 +183,12 @@ namespace PIL
 #endif // PIL_EXCEPTION_HANDLING
         return m_LastError;
     }
+
+    PIL_ERROR_CODE Socket::RegisterReceiveCallbackFunction(void (*receiveCallback)(uint8_t *, uint32_t))
+    {
+        return PIL_SOCKET_RegisterCallbackFunction(&m_SocketRet, receiveCallback);
+    }
+
 }
 }
-#endif // CXX
+#endif // PIL_CXX
