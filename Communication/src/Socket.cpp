@@ -189,6 +189,11 @@ namespace PIL
         return PIL_SOCKET_RegisterCallbackFunction(&m_SocketRet, receiveCallback);
     }
 
+    PIL_ERROR_CODE Socket::GetInterfaceInfos(InterfaceInfoList *interfaceInfos)
+    {
+        return ::GetInterfaceInfos(&m_SocketRet, interfaceInfos);
+    }
+
 }
 }
 #endif // PIL_CXX
