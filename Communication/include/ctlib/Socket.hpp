@@ -55,11 +55,16 @@ namespace PIL
 
         PIL_ERROR_CODE RegisterReceiveCallbackFunction(void (*receiveCallback)(uint8_t *, uint32_t));
 
+        PIL_ERROR_CODE GetInterfaceInfos(InterfaceInfoList *interfaceInfos);
+
+
         inline PIL_ERROR_CODE GetLastError() { return m_LastError; };
 
         TransportProtocol GetTransportProtocol() const { return m_TransportProtocol; }
 
         InternetProtocol GetInternetProtocol() const { return m_InternetProtocol; }
+
+
 
     private:
         int m_Port;
