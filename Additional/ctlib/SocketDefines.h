@@ -90,6 +90,23 @@ struct ReceiveThreadCallbackArg {
     void (*receiveCallback)(uint8_t* buffer, uint32_t len);
 } typedef ReceiveThreadCallbackArg;
 
+#define MAX_NR_INTERFACES      10
+
+#define SIZE_INTERFACE_NAME 30
+#define IP_ADDR_SIZE        40
+#define NETMASK_SIZE        40
+
+struct InterfaceInfo {
+    char m_InterfaceName[SIZE_INTERFACE_NAME];
+    char m_IPAddr[IP_ADDR_SIZE];
+    char m_NetMaskSize[NETMASK_SIZE];
+} typedef InterfaceInfo;
+
+struct InterfaceInfoList {
+    uint32_t availableInterfaces;
+    InterfaceInfo interfaces[MAX_NR_INTERFACES];
+} typedef InterfaceInfoList;
+
 #define DEFAULT_QUEUE_SIZE 10
 #define DEFAULT_TIMEOUT_MS 500
 #define DEFAULT_SOCK_BUFF_SIZE 4096

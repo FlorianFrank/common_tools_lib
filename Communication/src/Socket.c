@@ -40,6 +40,11 @@
 #include <errno.h>
 #ifndef __WIN32__
 #include <fcntl.h> // fcntl
+#include <ifaddrs.h>
+#include <net/if.h>
+#include <sys/ioctl.h>
+#include <netdb.h>
+
 #endif // __WIN32__
 
 
@@ -731,6 +736,58 @@ PIL_ERROR_CODE PIL_SOCKET_ConnectToServer(PIL_SOCKET *socket, const char *ipAddr
         return ret;
     
     return PIL_SOCKET_RegisterCallbackFunction(socket, receiveCallback);
+}
+
+
+PIL_ERROR_CODE GetInterfaceInfos(PIL_SOCKET *socket, InterfaceInfoList *interfaceInfos)
+{
+#ifdef __linux__
+    struct ifaddrs *interface;
+    interface = (struct ifaddrs *) malloc(sizeof(struct ifaddrs));
+    getifaddrs(&interface);
+    struct ifreq ifr;
+
+    uint32_t interfaceCtr = 0;
+    interfaceInfos->availableInterfaces = 0;
+    while (interface->ifa_next != NULL)
+    {
+        if (interfaceCtr > MAX_NR_INTERFACES - 1)
+            return PIL_INSUFFICIENT_RESOURCES;
+        memset(&ifr, 0, sizeof(ifr));
+        strcpy(ifr.ifr_name, interface->ifa_name);
+        ioctl(socket->m_socket, SIOCGIFNETMASK, &ifr);
+        char ipAddress[IP_ADDR_SIZE];
+        getnameinfo(interface->ifa_addr, sizeof(struct sockaddr_in), ipAddress, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+        char *netmask = inet_ntoa(((struct sockaddr_in *) &(ifr.ifr_netmask))->sin_addr);
+        PIL_BOOL addToList = TRUE;
+        if (strlen(ipAddress) > 0 && strlen(netmask) > 0)
+        {
+            for (int i = 0; i < interfaceInfos->availableInterfaces; i++)
+            {
+                if (strcmp(interfaceInfos->interfaces[i].m_InterfaceName, interface->ifa_name) == 0)
+                {
+                    addToList = FALSE;
+                    break;
+                }
+            }
+
+            if (addToList)
+            {
+                strcpy(interfaceInfos->interfaces[interfaceInfos->availableInterfaces].m_IPAddr, ipAddress);
+                strcpy(interfaceInfos->interfaces[interfaceInfos->availableInterfaces].m_NetMaskSize, netmask);
+                strcpy(interfaceInfos->interfaces[interfaceInfos->availableInterfaces].m_InterfaceName, interface->ifa_name);
+                interfaceInfos->availableInterfaces++;
+            }
+        }
+
+
+
+
+        interface = interface->ifa_next;
+        interfaceCtr++;
+    }
+#endif // __linux__
+    return PIL_NO_ERROR;
 }
 
 struct timeval PIL_SOCKET_TransformMSInTimeVal(uint16_t timeoutInMS)

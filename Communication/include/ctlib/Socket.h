@@ -46,6 +46,8 @@ PIL_ERROR_CODE PIL_SOCKET_ConnectToServer(PIL_SOCKET *socket, const char *ipAddr
 
 struct timeval PIL_SOCKET_TransformMSInTimeVal(uint16_t timeoutInMS);
 
+PIL_ERROR_CODE GetInterfaceInfos(PIL_SOCKET *socket, InterfaceInfoList *interfaceInfos);
+
 /**
  * Event based functions require Threading support.
  */
