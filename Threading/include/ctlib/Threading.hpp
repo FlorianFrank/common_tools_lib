@@ -19,6 +19,7 @@ namespace PIL
     {
     public:
         Threading(void *(*threadFunction)(void *), void *argument);
+        ~Threading();
 
         void Run();
 
@@ -31,7 +32,7 @@ namespace PIL
     private:
         ThreadHandle *m_ThreadHandle;
         void *m_argument;
-        void *m_RetValue;
+        void *m_RetValue{};
         void *(*m_ThreadFunction)(void *function);
 
     };
