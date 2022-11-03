@@ -774,14 +774,11 @@ PIL_ERROR_CODE GetInterfaceInfos(PIL_SOCKET *socket, InterfaceInfoList *interfac
             if (addToList)
             {
                 strcpy(interfaceInfos->interfaces[interfaceInfos->availableInterfaces].m_IPAddr, ipAddress);
-                strcpy(interfaceInfos->interfaces[interfaceInfos->availableInterfaces].m_NetMaskSize, netmask);
+                strcpy(interfaceInfos->interfaces[interfaceInfos->availableInterfaces].m_NetMask, netmask);
                 strcpy(interfaceInfos->interfaces[interfaceInfos->availableInterfaces].m_InterfaceName, interface->ifa_name);
                 interfaceInfos->availableInterfaces++;
             }
         }
-
-
-
 
         interface = interface->ifa_next;
         interfaceCtr++;
