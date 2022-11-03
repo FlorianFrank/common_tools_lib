@@ -9,7 +9,7 @@
 
 extern "C" {
 #include "Threading.h"
-};
+}
 
 
 namespace PIL
