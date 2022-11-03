@@ -90,7 +90,7 @@ struct ReceiveThreadCallbackArg {
     void (*receiveCallback)(uint8_t* buffer, uint32_t len);
 } typedef ReceiveThreadCallbackArg;
 
-#define MAX_NR_INTERFACES      10
+#define MAX_NR_INTERFACES      256
 
 #define SIZE_INTERFACE_NAME 30
 #define IP_ADDR_SIZE        40
@@ -99,7 +99,7 @@ struct ReceiveThreadCallbackArg {
 struct InterfaceInfo {
     char m_InterfaceName[SIZE_INTERFACE_NAME];
     char m_IPAddr[IP_ADDR_SIZE];
-    char m_NetMaskSize[NETMASK_SIZE];
+    char m_NetMask[NETMASK_SIZE];
 } typedef InterfaceInfo;
 
 struct InterfaceInfoList {
