@@ -1,16 +1,23 @@
 //
 // Created by florianfrank on 30.05.21.
 //
-#ifdef CXX
+#ifdef PIL_CXX
 
 
+#include <iostream>
 #include "ctlib/Threading.hpp"
 
 
 PIL::Threading::Threading(void *(*threadFunction)(void *), void *argument) : ErrorHandler(),
 m_ThreadFunction(threadFunction), m_argument(argument)
 {
+    m_ThreadHandle = new ThreadHandle;
     m_LastError = PIL_THREADING_CreateThread(m_ThreadHandle, m_ThreadFunction, argument);
+}
+
+PIL::Threading::~Threading()
+{
+        delete m_ThreadHandle;
 }
 
 void PIL::Threading::Run()
@@ -32,6 +39,7 @@ void PIL::Threading::Detach()
 {
     m_LastError = PIL_THREADING_Detach(m_ThreadHandle);
 }
+
 
 
 
