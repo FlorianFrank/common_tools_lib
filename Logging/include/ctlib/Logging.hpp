@@ -10,14 +10,26 @@ extern "C" {
 #include <string>
 
 namespace PIL {
+
+    enum Level {
+      INFO = INFO_LVL,
+      DEBUG = DEBUG_LVL,
+      WARNING = WARNING_LVL,
+      ERROR = ERROR_LVL
+    };
+
     class Logging {
     public:
+        Logging();
         Logging(Level logLevel, std::string *fileName);
         ~Logging();
 
         void CloseLogFile();
 
-        void LogMessage(Level level, const char* fileName, unsigned int lineNumber, const char* message, ...);
+        void LogMessage(Level level, const char* fileName, unsigned int lineNumber, std::string message, ...);
+        void Log(Level level, const char* fileName, unsigned int lineNumber, std::string message);
+    private:
+        static ::Level PILLOGDefinesToCLogDefines(Level);
 
     };
 }

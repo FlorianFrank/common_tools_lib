@@ -33,7 +33,10 @@ pthread_mutex_t logMutex;
 /** Initialization of variables. */
 Level logLevel;
 FILE *logFileStream = NULL;
-char *loggingBuffer;
+char *loggingBuffer = NULL;
+
+#define TIME_STRING_MAX_SIZE 64
+#define MESSAGE_OFFSET       256
 
 #ifdef __linux__
 int GetColorCode(Level level);
@@ -46,7 +49,7 @@ int GetColorCode(Level level);
  * @param level every message of that level or with a higher level is printed.
  * @param file path and filename of the logfile, if file is null, log to stdout.
  */
-void InitializeLogging(const Level level, const char *file)
+PIL_ERROR_CODE InitializeLogging(const Level level, const char *file)
 {
     logLevel = level;
 
@@ -55,26 +58,27 @@ void InitializeLogging(const Level level, const char *file)
         // Define logfile
         logFileStream = fopen(file, "ab+");
         if(logFileStream == NULL)
-        {
             printf("Error could not open logfile %s (Error %s)\n",
                     file, strerror(errno));
-        }
     } else
         // Log to std::out if file is null
         logFileStream = stdout;
 
+    if(loggingBuffer)
+        return PIL_DOUBLE_INITIALIZE;
     loggingBuffer = (char*)malloc(LOG_BUF_SIZE * sizeof(char));
+    printf("Logging initialized\n");
 #if __linux__
     if(pthread_mutex_init(&logMutex, NULL) != 0)
         printf("Error could not initialize logMutex\n");
 #endif // __linux__
+    return PIL_NO_ERROR;
 }
 
 void LogMessageVA(Level level, const char *fileName, unsigned int lineNumber, const char *message, va_list vaList)
 {
-    char buffer[512];
-    vsprintf(buffer, message, vaList);
-    LogMessage(level, fileName, lineNumber, buffer);
+    vsnprintf(&loggingBuffer[MESSAGE_OFFSET], LOG_BUF_SIZE - MESSAGE_OFFSET -1,  message, vaList);
+    LogMessage(level, fileName, lineNumber, &loggingBuffer[MESSAGE_OFFSET]);
 }
 
 /**
@@ -99,11 +103,19 @@ if(logFileStream == NULL)
     if(pthread_mutex_lock(&logMutex) != 0)
         printf("Error while calling pthread_mutex_lock\n");
 #endif // __linux__
-    va_list vaList;
-    va_start(vaList, message);
+
+
     if (level >= logLevel)
     {
-        int ret = vsprintf(&loggingBuffer[160], message, vaList);
+
+        if(!loggingBuffer)
+        {
+            printf("Logging not initialized!\n");
+            return;
+        }
+        va_list vaList;
+        va_start(vaList, message);
+        int ret = vsprintf(&loggingBuffer[MESSAGE_OFFSET], message, vaList);
         va_end(vaList);
         if (ret > 0)
         {
@@ -112,12 +124,12 @@ if(logFileStream == NULL)
             {
                 fprintf(logFileStream, "%s\033[%dm %s\033[%dm %s:%u %s\n",
                         GetActualTime(), GetColorCode(level), GetLogLevelStr(level), COLOR_DEFAULT, fileName, lineNumber,
-                        &loggingBuffer[160]);
+                        &loggingBuffer[MESSAGE_OFFSET]);
             }else
             {
                 fprintf(logFileStream, "%s %s %s:%u %s\n",
                         GetActualTime(), GetLogLevelStr(level), fileName, lineNumber,
-                        &loggingBuffer[160]);
+                        &loggingBuffer[MESSAGE_OFFSET]);
             }
 
 #else // __WIN32__
@@ -139,27 +151,34 @@ if(logFileStream == NULL)
 /**
  * @brief This function closes the file stream if opened.
  */
-void CloseLogfile()
+PIL_ERROR_CODE CloseLogfile(void)
 {
     if(logFileStream != stdout && logFileStream != NULL)
-        fclose(logFileStream);
+    {
+        int errCode = fclose(logFileStream);
+        if (errCode != 0)
+            return PIL_INTERFACE_CLOSED; // TODO
+    }
     free(loggingBuffer);
+    loggingBuffer = NULL;
+    return PIL_NO_ERROR;
 }
 
 /**
  * Return current time as string in format HH:MM:SS:microseconds.
  * @return string containing the time.
  */
-const char *GetActualTime()
+const char *GetActualTime(void)
 {
 #ifdef __linux__
     struct timeval time = { 0 };
     gettimeofday(&time, NULL);
 
-    char timeStr[80];
-    size_t size = strftime(timeStr, 80, "%H:%M:%S", localtime(&time.tv_sec));
-    if (size > 0)
-        sprintf(loggingBuffer, "%s:%li", timeStr, time.tv_usec);
+    size_t size = strftime(loggingBuffer, TIME_STRING_MAX_SIZE, "%H:%M:%S", localtime(&time.tv_sec));
+    if (size <= 0)
+        printf("ERROR");
+
+        //sprintf(loggingBuffer, "%s:%li", loggingBuffer, time.tv_usec); TODO
 #endif // WIN32
 #ifdef __WIN32__
     SYSTEMTIME t;

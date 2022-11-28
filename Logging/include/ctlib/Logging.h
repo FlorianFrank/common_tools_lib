@@ -7,9 +7,10 @@
 
 #include <string.h> // strrchr
 #include <stdarg.h>
+#include "ctlib/ErrorCodeDefines.h"
 
 /** Max size of an message to log. **/
-#define LOG_BUF_SIZE 1024
+#define LOG_BUF_SIZE 10000
 
 /** Remove path from file name. e.g. /home/user/SampleFile.c -> SampleFile.c. */
 #ifdef __WIN32__
@@ -19,19 +20,19 @@
 #endif // __WIN32__
 
 /** Enum storing the loglevel, to indicate the type of message. */
-typedef enum
+ enum
 {
-    INFO_LVL = 0,
+    INFO_LVL,
     DEBUG_LVL,
     ERROR_LVL,
     WARNING_LVL,
     NONE_LVL
-} Level;
+} typedef Level;
 #ifdef LOGGING_ENABLED
 
-void InitializeLogging(Level level, const char *file);
+PIL_ERROR_CODE InitializeLogging(Level level, const char *file);
 
-void CloseLogfile();
+PIL_ERROR_CODE CloseLogfile();
 
 void LogMessage(Level level, const char *fileName, unsigned int lineNumber, const char *message, ...);
 void LogMessageVA(Level level, const char *fileName, unsigned int lineNumber, const char *message, va_list vaList);
