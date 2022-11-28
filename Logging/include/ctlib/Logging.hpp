@@ -11,6 +11,10 @@ extern "C" {
 
 namespace PIL {
 
+#ifdef WIN32
+#undef ERROR
+#endif //
+
     enum Level {
       INFO = INFO_LVL,
       DEBUG = DEBUG_LVL,
