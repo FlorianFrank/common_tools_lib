@@ -22,11 +22,11 @@
 /** Enum storing the loglevel, to indicate the type of message. */
  enum
 {
-    INFO_LVL,
-    DEBUG_LVL,
-    ERROR_LVL,
-    WARNING_LVL,
-    NONE_LVL
+    INFO_LVL = 0,
+    DEBUG_LVL = 1,
+    ERROR_LVL = 2,
+    WARNING_LVL = 3,
+    NONE_LVL = 4
 } typedef Level;
 #ifdef LOGGING_ENABLED
 
