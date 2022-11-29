@@ -13,7 +13,7 @@ namespace PIL {
 
 #ifdef WIN32
 #undef ERROR
-#endif //
+#endif // WIN32
 
     enum Level {
       INFO = INFO_LVL,
