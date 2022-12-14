@@ -28,6 +28,7 @@ namespace PIL {
         Logging(Level logLevel, std::string *fileName);
         ~Logging();
 
+        void SetLogLevel(PIL::Level logLevel);
         void CloseLogFile();
 
         void LogMessage(Level level, const char* fileName, unsigned int lineNumber, std::string message, ...);
