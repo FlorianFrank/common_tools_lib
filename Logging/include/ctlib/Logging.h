@@ -32,6 +32,7 @@
 
 PIL_ERROR_CODE InitializeLogging(Level level, const char *file);
 
+void SetLogLevel(Level level);
 PIL_ERROR_CODE CloseLogfile();
 
 void LogMessage(Level level, const char *fileName, unsigned int lineNumber, const char *message, ...);

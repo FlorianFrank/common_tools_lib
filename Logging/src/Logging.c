@@ -147,6 +147,13 @@ if(logFileStream == NULL)
 #endif // __linux__
 }
 
+/**
+ * @brief Set the current log level.
+ */
+void SetLogLevel(Level level) {
+    logLevel = level;
+}
+
 
 /**
  * @brief This function closes the file stream if opened.
