@@ -572,7 +572,7 @@ PIL_ERROR_CODE PIL_SOCKET_ReceiveFrom(PIL_SOCKET *socketRet, uint8_t *buffer, ui
  * @param bufferLen length of the m_ReceiveBuffer, after this method, the sent data are stored in this variable.
  * @return 0 if no error is occurred else -1 is returned.
  */
-PIL_ERROR_CODE PIL_SOCKET_Send(PIL_SOCKET *socketRet, uint8_t *buffer, uint32_t *bufferLen)
+PIL_ERROR_CODE PIL_SOCKET_Send(PIL_SOCKET *socketRet, const uint8_t *buffer, uint32_t *bufferLen)
 {
     if (!socketRet)
         return PIL_INVALID_ARGUMENTS;

@@ -17,6 +17,8 @@ enum WaitRetValue {
 namespace PIL
 {
 
+#define MAX_BUF_LEN 2048
+
     class Socket
     {
     public:
@@ -37,11 +39,15 @@ namespace PIL
 
         PIL_ERROR_CODE Connect(std::string &ipAddr, int port);
 
+        PIL_ERROR_CODE Receive(std::string &retBuffer);
+
         PIL_ERROR_CODE Receive(uint8_t *buffer, uint32_t *bufferLen);
 
         PIL_ERROR_CODE ReceiveFrom(uint8_t *buffer, int *bufferLen, char *ipAddr, int port);
 
-        PIL_ERROR_CODE Send(uint8_t *buffer, int *len);
+        PIL_ERROR_CODE Send(const uint8_t *buffer, int *len);
+
+        PIL_ERROR_CODE Send(std::string &message);
 
         PIL_ERROR_CODE SendTo(std::string &destAddr, int port, uint8_t *buffer, int *bufferLen);
 

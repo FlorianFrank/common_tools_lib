@@ -114,6 +114,15 @@ namespace PIL
         return m_LastError;
     }
 
+    PIL_ERROR_CODE Socket::Receive(std::string &retBuffer)
+    {
+        uint32_t bufferLen = MAX_BUF_LEN;
+        uint8_t buffer[2048];
+        auto ret = Receive(buffer, &bufferLen);
+        retBuffer = std::string((char *)buffer, bufferLen);
+        return ret;
+    }
+
     PIL_ERROR_CODE Socket::ReceiveFrom(uint8_t *buffer, int *bufferLen, char *ipAddr, int port)
     {
         m_LastError = PIL_SOCKET_ReceiveFrom(&m_SocketRet, buffer, reinterpret_cast<uint16_t *>(bufferLen), ipAddr,
@@ -126,7 +135,12 @@ namespace PIL
 
     }
 
-    PIL_ERROR_CODE Socket::Send(uint8_t *buffer, int *len)
+    PIL_ERROR_CODE Socket::Send(std::string &message){
+        int len = message.length();
+        return Send(reinterpret_cast<const uint8_t*>(message.c_str()), &len);
+    }
+
+    PIL_ERROR_CODE Socket::Send(const uint8_t *buffer, int *len)
     {
         m_LastError = PIL_SOCKET_Send(&m_SocketRet, buffer, reinterpret_cast<uint32_t *>(len));
 #ifdef PIL_EXCEPTION_HANDLING
