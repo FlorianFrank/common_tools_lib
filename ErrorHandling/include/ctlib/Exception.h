@@ -5,9 +5,9 @@
 #ifndef INSTRUMENT_CONTROL_LIB_EXCEPTION_H
 #define INSTRUMENT_CONTROL_LIB_EXCEPTION_H
 
-#include <ctlib/ErrorHandler.hpp>
 #include <string>
 #include <exception>
+#include <ctlib/ErrorHandler.hpp>
 
 #define MAX_ERROR_MESSAGE_LENGTH 2048
 

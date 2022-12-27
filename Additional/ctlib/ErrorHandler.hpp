@@ -5,7 +5,9 @@
 #ifndef PLATFORMINDEPENDENTLIB_WRAPPERCLASS_H
 #define PLATFORMINDEPENDENTLIB_WRAPPERCLASS_H
 
+extern "C" {
 #include "ctlib/ErrorHandler.h"
+};
 
 class ErrorHandler
 {
