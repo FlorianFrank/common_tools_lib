@@ -18,6 +18,7 @@ if (DEFINED PIL_ALL)
     set(PIL_CSV                "Enable CSV file support"                    ON)
     set(PIL_CXX                "Enable C++ support"                         ON)
     set(PIL_EXCEPTION_HANDLING "Enable exception handling in C++ version"   ON)
+    set(PIL_TIMING "Enable exception handling in C++ version"   ON)
 endif () # PIL_ALL
 
 if(PIL_CXX)
@@ -43,8 +44,12 @@ if (DEFINED PIL_COMMUNICATION)
             "${communication_headers}")
 
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/Communication/include")
-
 endif () # DEFINED COMMUNICATION
+
+if (DEFINED PIL_TIMING)
+        set(timing "Timing/include/ctlib/Timing.hpp" "Timing/src/Timing.cpp")
+        include_directories("Timing/include")
+endif()
 
 if (DEFINED PIL_FILE_HANDLING)
 
@@ -131,7 +136,7 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/ErrorHandling/include")
 set(additional_headers "Additional/ctlib/DataTypeDefines.h")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/Additional")
 
-set(source_files ${logging} ${communication} ${file_handling} ${errorHandling} ${additional_headers} ${unitTestFiles} ${threading} ${string} ${csv})
+set(source_files ${logging} ${communication} ${file_handling} ${errorHandling} ${additional_headers} ${unitTestFiles} ${threading} ${string} ${csv} ${timing})
 
 if (DEFINED PIL_SHARED)
     add_library(common_tools_lib SHARED ${source_files})

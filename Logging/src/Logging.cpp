@@ -70,3 +70,7 @@ void PIL::Logging::Log(PIL::Level level, const char *fileName, unsigned int line
     }
 
 }
+
+void PIL::Logging::SetLogLevel(PIL::Level logLevel) {
+    ::SetLogLevel(PILLOGDefinesToCLogDefines(logLevel));
+}

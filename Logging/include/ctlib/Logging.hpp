@@ -13,7 +13,7 @@ namespace PIL {
 
 #ifdef WIN32
 #undef ERROR
-#endif //
+#endif // WIN32
 
     enum Level {
       INFO = INFO_LVL,
@@ -28,6 +28,7 @@ namespace PIL {
         Logging(Level logLevel, std::string *fileName);
         ~Logging();
 
+        void SetLogLevel(PIL::Level logLevel);
         void CloseLogFile();
 
         void LogMessage(Level level, const char* fileName, unsigned int lineNumber, std::string message, ...);
