@@ -20,6 +20,7 @@
 
 #ifdef __WIN32__
 #include <winsock.h>
+#undef ERROR // Satisfy mingwo on windows due to macro redefinition
 #endif // __WIN32__
 
 #else // LWIP
