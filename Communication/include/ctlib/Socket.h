@@ -31,7 +31,7 @@ PIL_ERROR_CODE PIL_SOCKET_Receive(PIL_SOCKET *socketRet , uint8_t *buffer, uint3
 
 PIL_ERROR_CODE PIL_SOCKET_ReceiveFrom(PIL_SOCKET *socketRet , uint8_t *buffer, uint16_t *bufferLen, char *ipAddr, int *port);
 
-PIL_ERROR_CODE PIL_SOCKET_Send(PIL_SOCKET *socketRet, uint8_t *buffer, uint32_t *bufferLen);
+PIL_ERROR_CODE PIL_SOCKET_Send(PIL_SOCKET *socketRet, const uint8_t *buffer, uint32_t *bufferLen);
 
 PIL_ERROR_CODE PIL_SOCKET_SendTo(PIL_SOCKET *socketRet, const char* destAddr, uint16_t port, uint8_t *buffer, uint32_t *bufferLen);
 
