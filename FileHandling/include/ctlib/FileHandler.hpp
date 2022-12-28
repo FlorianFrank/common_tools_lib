@@ -21,8 +21,7 @@ namespace PIL {
         PIL_ERROR_CODE CloseFile();
         PIL_ERROR_CODE WriteFile(std::string &buffer, bool flush);
         PIL_ERROR_CODE ReadFile(std::string *buffer);
-        PIL_ERROR_CODE LISTFilesInDirectory(std::string &path, uint8_t filer, PIL_FileListElem *listOfFiles, bool recursive);
-
+        static PIL_ERROR_CODE ListFilesInDirectory(std::string &path, uint8_t filter, PIL_FileListElem *listOfFiles, bool recursive);
 
     private:
         std::string m_FileName;

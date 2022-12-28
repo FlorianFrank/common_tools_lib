@@ -35,9 +35,7 @@ PIL_ERROR_CODE PIL_OpenFile(PIL_FileHandle *fileHandle, const char* fileName, PI
     else
         return PIL_INVALID_ARGUMENTS;
 
-
     fileHandle->fileHandle = fopen(fileName, p);
-
     if(!fileHandle->fileHandle)
     {
         fileHandle->errCode = errno;
@@ -117,15 +115,17 @@ PIL_ERROR_CODE PIL_ReadFile(PIL_FileHandle *fileHandle, uint8_t* buffer, uint32_
     if(!fileHandle->isOpen)
         return PIL_INTERFACE_CLOSED;
 
-    int sizeToWrite = *bufferLen;
-    size_t ret = fread(buffer, 1, *bufferLen, fileHandle->fileHandle);
-    if(ret < sizeToWrite)
-    {
-        *bufferLen = ret;
-        fileHandle->errCode = ferror(fileHandle->fileHandle);
-        return PIL_ONLY_PARTIALLY_READ_WRITTEN;
-    }
+    size_t sizeToRead = *bufferLen;
 
+    fseek(fileHandle->fileHandle, 0, SEEK_SET);
+
+    *bufferLen = fread(buffer, 1, sizeToRead, fileHandle->fileHandle);
+
+    if(*bufferLen <= 0)
+    {
+        fileHandle->errCode = errno;
+        return PIL_ERRNO;
+    }
     return PIL_NO_ERROR;
 }
 
@@ -221,7 +221,7 @@ PIL_ListFilesInDirectory(const char *path, uint8_t filter, PIL_FileListElem *lis
             case DT_REG:
                 if((REGULAR_FILES & filter) >= 1)
                 {
-                    handle->type = DIRECTORIES;
+                    handle->type = REGULAR_FILES;
                     addToList = TRUE;
                 }
                 break;
