@@ -81,11 +81,17 @@ jobs:
         build-type: Release
      # run: cmake ${{runner.workspace}}/common_tools_lib -G "${{ matrix.config.generators }}"  -DALL=1
 
-    - name: Build
+    - name: Run CMake
       working-directory: ${{runner.workspace}}/build
       shell: bash
       # Execute the build.  You can specify a specific target with "--target <NAME>"
       run: cmake --build . --config $BUILD_TYPE
+
+    - name: Run make build
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      # Execute the build.  You can specify a specific target with "--target <NAME>"
+      run: make
 
     - name: Test
       if: matrix.config.os != 'windows-latest'
