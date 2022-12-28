@@ -305,7 +305,12 @@ PIL_ERROR_CODE PIL_SOCKET_Connect(PIL_SOCKET *socket, const char *ipAddr, uint16
 #endif // __WIN32__
 
     int connectRet = connect(socket->m_socket, (struct sockaddr *) &address, sizeof(address));
-    if(connectRet == -1 && errno != 115) // Connection in progess
+#ifdef __linux__
+    if(connectRet == -1 && errno != 115) // Connection in progess TODO
+#endif
+#ifdef __APPLE__
+    if(connectRet == -1 && errno != 36) // Connection in progess TODO
+#endif
     {
 #ifdef __WIN32__
         socket->m_ErrorHandle.m_ErrnoCode = WSAGetLastError();
