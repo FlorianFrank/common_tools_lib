@@ -17,11 +17,8 @@ namespace PIL {
         explicit Exception(PIL_ErrorHandle errHandle);
         explicit Exception(PIL_ERROR_CODE errorCode);
         explicit Exception(PIL_ERROR_CODE errorCode, std::string errorMessage);
-        explicit Exception(PIL_ERROR_CODE  errorCode, const char *fileName, unsigned int lineNumber, const std::string message, ...);
-
-
+        explicit Exception(PIL_ERROR_CODE  errorCode, const char *fileName, unsigned int lineNumber, std::string message = "", ...);
         explicit Exception(PIL_ERROR_CODE  errorCode, const char *fileName, unsigned int lineNumber, const std::string& message, va_list vaList);
-
         [[nodiscard]] const char *what() const noexcept override;
 
     private:
