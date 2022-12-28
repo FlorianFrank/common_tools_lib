@@ -60,11 +60,10 @@ jobs:
       # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
       run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DALL=1
 
-    - name: Build
+    - name: Build project
       working-directory: ${{runner.workspace}}/build
       shell: bash
-      # Execute the build.  You can specify a specific target with "--target <NAME>"
-      run: cmake --build . --config $BUILD_TYPE
+      run: cmake --build . --config ${{ matrix.config.build_type }} --target all
 
     - name: Test
       if: matrix.config.os != 'windows-latest'
