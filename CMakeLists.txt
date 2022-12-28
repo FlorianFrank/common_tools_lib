@@ -182,7 +182,8 @@ if (PIL_UNIT_TESTING)
     endif() # APPLE
 
     set(UNIT_TEST_FILES "UnitTesting/SocketUnitTest.cpp"
-                        "UnitTesting/ExceptionUnitTest.cpp")
+                        "UnitTesting/ExceptionUnitTest.cpp"
+                        "UnitTesting/FileHandlingUnitTest.cpp")
 
     add_executable(SOCKET_UNIT_TEST ${UNIT_TEST_FILES})
     target_link_libraries(SOCKET_UNIT_TEST gtest_main gtest pthread common_tools_lib)
