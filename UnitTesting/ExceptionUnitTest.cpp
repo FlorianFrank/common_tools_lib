@@ -34,7 +34,7 @@ TEST(ExceptionTest, ExceptionFileNameLineNumberAdditionalMessage){
                          throw PIL::Exception(PIL_INTERFACE_CLOSED, __FILENAME__, __LINE__, "Additional Message %d", 42);
                      }
                      catch(PIL::Exception &e) {
-                         EXPECT_STREQ( "Exception (ExceptionUnitTest.cpp:43): Socket is closed (Additional Message 42)", e.what() );
+                         EXPECT_STREQ( "Exception (ExceptionUnitTest.cpp:34): Socket is closed (Additional Message 42)", e.what() );
                          throw;
                      }
                  }, PIL::Exception );
@@ -46,7 +46,7 @@ TEST(ExceptionTest, ExceptionFileNameLineNumberNoAdditionalMessage){
                          throw PIL::Exception(PIL_INTERFACE_CLOSED, __FILENAME__, __LINE__);
                      }
                      catch(PIL::Exception &e) {
-                         EXPECT_STREQ( "Exception (ExceptionUnitTest.cpp:59): Socket is closed", e.what() );
+                         EXPECT_STREQ( "Exception (ExceptionUnitTest.cpp:46): Socket is closed", e.what() );
                          throw;
                      }
                  }, PIL::Exception );
