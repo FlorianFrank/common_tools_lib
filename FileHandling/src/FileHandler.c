@@ -264,6 +264,7 @@ PIL_ListFilesInDirectory(const char *path, uint8_t filter, PIL_FileListElem *lis
             currentElem->next = malloc(sizeof(PIL_FileListElem));
             currentElem->next->previous = currentElem;
             currentElem->next->next = NULL;
+            currentElem->next->handle = NULL;
             currentElem = currentElem->next;
         }else
             free(handle);
