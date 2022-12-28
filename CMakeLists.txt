@@ -8,6 +8,7 @@ project(PlatformIndependentLib C CXX)
 
 if (DEFINED PIL_ALL)
     set(INSTALL_DIR "/usr")
+
     option(PIL_COMMUNICATION   "Enable UART and socket communication"       ON)
     option(PIL_THREADING       "Enable multithreading support"              ON)
     set(PIL_FILE_HANDLING      "Enable file handling support"               ON)
@@ -22,7 +23,9 @@ if (DEFINED PIL_ALL)
 endif () # PIL_ALL
 
 if(PIL_CXX)
+    add_definitions(-DPIL_CXX=1)
 endif()
+
 if (DEFINED PIL_COMMUNICATION)
     if(DEFINED PIL_CXX)
     set(communication_headers_cxx
