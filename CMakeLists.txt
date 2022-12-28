@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 
 set(CMAKE_C_FLAGS "-Wall -pedantic -Werror -g3 ${CMAKE_C_FLAGS}")
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(PlatformIndependentLib C CXX)
@@ -181,7 +181,10 @@ if (PIL_UNIT_TESTING)
         link_directories("/usr/local/lib")
     endif() # APPLE
 
-    add_executable(SOCKET_UNIT_TEST "UnitTesting/SocketUnitTest.cpp")
+    set(UNIT_TEST_FILES "UnitTesting/SocketUnitTest.cpp"
+                        "UnitTesting/ExceptionUnitTest.cpp")
+
+    add_executable(SOCKET_UNIT_TEST ${UNIT_TEST_FILES})
     target_link_libraries(SOCKET_UNIT_TEST gtest_main gtest pthread common_tools_lib)
 
     enable_testing()
