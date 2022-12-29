@@ -34,10 +34,11 @@ jobs:
       with:
           node-version: ${{ matrix.node }}
 
-    - name: Googletest installer
-      # You may pin to the exact commit or the version.
-      # uses: MarkusJx/googletest-installer@2dbed3d0a9dc19bebe3e36773185ab9c17664c8d
-      uses: MarkusJx/googletest-installer@v1.1
+    - name: Install gtest
+      uses: MarkusJx/googletest-installer@93885edf173c4d59c40b3fa7d851b0be69967bd0
+      with:
+        CMAKE_CXX_COMPILER: g++
+        CMAKE_C_COMPILER: gcc
 
     - uses: actions/checkout@v3
 
