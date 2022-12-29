@@ -37,8 +37,8 @@ jobs:
     - name: Install gtest
       uses: MarkusJx/googletest-installer@93885edf173c4d59c40b3fa7d851b0be69967bd0
       with:
-        CMAKE_CXX_COMPILER: g++
-        CMAKE_C_COMPILER: gcc
+        CC_path: C:/ProgramData/chocolatey/bin/gcc.exe
+        CXX_path: C:/ProgramData/chocolatey/bin/g++.exe
 
     - uses: actions/checkout@v3
 
