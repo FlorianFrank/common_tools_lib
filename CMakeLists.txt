@@ -181,8 +181,8 @@ endif () # DEFINED STATIC
 if (DEFINED ENV{GITHUB_ACTIONS})
     if (WIN32)
 
-        link_directories("D:/gtest/lib")
-        include_directories("D:/gtest/include")
+        link_directories("googletest/build/lib")
+        include_directories("googletest/googletest/include/")
     endif ()
 endif ()
 
