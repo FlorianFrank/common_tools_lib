@@ -50,14 +50,13 @@ jobs:
       # We'll use this as our working directory for all subsequent commands
       run: cmake -E make_directory ${{runner.workspace}}/build
 
-    - name: Configure CMake Windows
-      if: matrix.config.os == 'windows-latest'
-      uses: ashutoshvarma/action-cmake-build@master
-      with:
-        build-dir: ${{ runner.workspace }}/build
-        cc: ${{ matrix.config.cc }}
-        cxx: ${{ matrix.config.cxx }}
-        run: cmake -G Ninja $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=${{matrix.config.build_type}} -DPIL_ALL=1
+    - name: Configure CMake
+      if: matrix.config.os != 'windows-latest'
+      working-directory: ${{runner.workspace}}/build
+      # Note the current convention is to use the -S and -B options here to specify source
+      # and build directories, but this is only available with CMake 3.13 and higher.
+      # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
+      run: cmake -G Ninja $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=${{matrix.config.build_type}} -DPIL_ALL=1 -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc
 
     - name: Build project
       working-directory: ${{runner.workspace}}/build
