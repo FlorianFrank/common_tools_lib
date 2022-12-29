@@ -34,10 +34,10 @@ jobs:
       with:
           node-version: ${{ matrix.node }}
 
-#    - name: Googletest installer
+    #- name: Googletest installer
       # You may pin to the exact commit or the version.
       # uses: MarkusJx/googletest-installer@2dbed3d0a9dc19bebe3e36773185ab9c17664c8d
-      #uses: MarkusJx/googletest-installer@v1.1
+     # uses: MarkusJx/googletest-installer@v1.1
 
     - uses: actions/checkout@v3
 
@@ -52,7 +52,7 @@ jobs:
       # and build directories, but this is only available with CMake 3.13 and higher.
       # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
       shell: pwsh
-      run: ls ..
+      run: cmake ../common_tools_lib -GNinja -DCMAKE_BUILD_TYPE=${{matrix.config.build_type}} -DPIL_ALL=1 -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc
 
     - name: Build project
       working-directory: ${{runner.workspace}}/build
