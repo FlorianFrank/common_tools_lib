@@ -1,5 +1,5 @@
+#ifndef __WIN32__
 #pragma once
-
 #if defined(__linux__) || defined(__APPLE__)
 #include <ctime>
 #include <string>
@@ -70,3 +70,4 @@ private:
     static uint64_t transformNsToUnit(uint64_t time, TimeUnit unit);
     static double transformNsToUnitDouble(uint64_t time, TimeUnit unit);
 };
+#endif // __WIN32__

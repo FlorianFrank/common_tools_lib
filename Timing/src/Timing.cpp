@@ -1,5 +1,5 @@
 #include "ctlib/Timing.hpp"
-
+#ifndef __WIN32__
 #if defined(__linux__) || defined(__APPLE__)
 #include <iostream>
 #include <numeric>
@@ -189,3 +189,4 @@ double Timing::evaluateMeasureArrayDouble(EvalFunctions evalFunctions, Timing::T
 double Timing::transformNsToUnitDouble(uint64_t time, Timing::TimeUnit unit) {
     return static_cast<double>(time) / (static_cast<double>(NANO_SECS) / unit);
 }
+#endif // __WIN32__
