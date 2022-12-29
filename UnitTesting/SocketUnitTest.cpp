@@ -5,11 +5,14 @@
 #include <gtest/gtest.h> // google test
 #include <string>
 
+#include "ctlib/Socket.hpp"
+#include <thread>
+#include <chrono>
+
 extern "C" {
-#include <ctlib/Socket.h>
+#include "ctlib/Socket.h"
 }
 
-#include "ctlib/Socket.hpp"
 
 bool acceptFlag = true;
 static std::string loram_ipsum = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut "
@@ -49,7 +52,7 @@ TEST(SocketTest_C, SimpleSocketTest)
     ret = PIL_SOCKET_ConnectToServer(&clientSocket, "127.0.0.1", 15000, 14000, 1000, ReceiveHandler);
     EXPECT_EQ(ret, PIL_NO_ERROR);
 
-    usleep(100000);
+    std::this_thread::sleep_for(std::chrono::microseconds(100000));
     EXPECT_EQ(acceptFlag, true);
 
     EXPECT_STREQ(loram_ipsum.c_str(), recvBuff);
