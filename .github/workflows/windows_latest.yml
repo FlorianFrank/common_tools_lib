@@ -54,7 +54,7 @@ jobs:
     - name: Copy Google Test Libs
       working-directory: ${{runner.workspace}}/build
       shell: pwsh
-      run: cp D:/a/common_tools_lib/common_tools_lib/googletest/build/lib/Release/gtest* .
+      run: cp D:/gtest/lib/gtest* .
 
 
     - name: Configure CMake
