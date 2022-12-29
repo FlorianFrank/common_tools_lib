@@ -178,6 +178,13 @@ if (DEFINED PIL_STATIC)
 
 endif () # DEFINED STATIC
 
+if (DEFINED ENV{GITHUB_ACTIONS})
+    if (WIN32)
+        link_directories("D:/gtest/lib")
+        include_directories("D:/gtest/include")
+    endif ()
+endif ()
+
 if (PIL_UNIT_TESTING)
     if(DEFINED APPLE)
         include_directories("/usr/local/include")
