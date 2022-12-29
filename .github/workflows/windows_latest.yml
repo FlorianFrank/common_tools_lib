@@ -46,16 +46,8 @@ jobs:
       run: cmake -E make_directory ${{runner.workspace}}/build
 
     - name: Install gtest
-      uses: MarkusJx/googletest-installer@93885edf173c4d59c40b3fa7d851b0be69967bd0
-      with:
-        CC_path: C:/ProgramData/chocolatey/bin/gcc.exe
-        CXX_path: C:/ProgramData/chocolatey/bin/g++.exe
-
-    - name: Copy Google Test Libs
-      working-directory: ${{runner.workspace}}/build
-      shell: pwsh
-      run: cp D:/gtest/lib/gtest* .
-
+      working-directory: ${{runner.workspace}}/common_tools_lib
+      run: ./build_gtest.bat
 
     - name: Configure CMake
       working-directory: ${{runner.workspace}}/build
