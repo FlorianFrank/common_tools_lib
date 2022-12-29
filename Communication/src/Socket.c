@@ -306,13 +306,13 @@ PIL_ERROR_CODE PIL_SOCKET_Connect(PIL_SOCKET *socket, const char *ipAddr, uint16
 
     int connectRet = connect(socket->m_socket, (struct sockaddr *) &address, sizeof(address));
 #ifdef __linux__
-    if(connectRet == -1 && errno != 115) // Connection in progess TODO
+    if(connectRet == -1 && errno != 115) { // Connection in progess TODO
 #endif
 #ifdef __APPLE__
-    if(connectRet == -1 && errno != 36) // Connection in progess TODO
+    if(connectRet == -1 && errno != 36) { // Connection in progess TODO
 #endif
-    {
 #ifdef __WIN32__
+        if(connectRet != 0){
         socket->m_ErrorHandle.m_ErrnoCode = WSAGetLastError();
 #else
         socket->m_ErrorHandle.m_ErrnoCode = errno;
