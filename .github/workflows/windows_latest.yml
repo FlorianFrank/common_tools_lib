@@ -81,5 +81,5 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: SOCKET_UNIT_TEST.exe
-        path: ${{ runner.workspace }}/build/SOCKET_UNIT_TEST.exe
+        name: artifact
+        path: ${{ runner.workspace }}/build

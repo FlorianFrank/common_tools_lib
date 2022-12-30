@@ -201,7 +201,7 @@ if (PIL_UNIT_TESTING)
 
     enable_testing()
     include(GoogleTest)
-    gtest_discover_tests("SOCKET_UNIT_TEST")
+    #gtest_discover_tests("SOCKET_UNIT_TEST")
 endif () # PIL_UNIT_TESTING
 
 option(BUILD_DOC "Build documentation" OFF)
