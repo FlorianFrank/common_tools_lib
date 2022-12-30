@@ -49,6 +49,10 @@ jobs:
       working-directory: ${{runner.workspace}}/common_tools_lib
       run: ./build_gtest.bat
 
+    - name: Copy GTest
+      working-directory: ${{runner.workspace}}/common_tools_lib
+      run: cp googletest/lib/* ${{runner.workspace}}/build
+
     - name: Configure CMake
       working-directory: ${{runner.workspace}}/build
       # Note the current convention is to use the -S and -B options here to specify source
