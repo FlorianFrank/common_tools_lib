@@ -73,7 +73,7 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: common_tools_lib_windows_mingw
+        name: common_tools_lib_mac_os
         path: |
           ${{ runner.workspace }}/build/*.dylib
           ${{ runner.workspace }}/build/*.a
