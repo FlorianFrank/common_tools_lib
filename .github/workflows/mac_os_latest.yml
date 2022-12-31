@@ -70,9 +70,12 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       run: GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V
 
-    - name: Upload test results
-      uses: actions/upload-artifact@v2
-      if: failure()
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
       with:
-        name: test_results_xml
-        path: ${{runner.workspace}}/build/test-results/**/*.xml
+        name: common_tools_lib_windows_mingw
+        path: |
+          ${{ runner.workspace }}/build/*.dylib
+          ${{ runner.workspace }}/build/*.a
+          ${{ runner.workspace }}/build/SOCKET_UNIT_TEST
+          ${{runner.workspace}}/build/test-results/**/*.xml

@@ -74,13 +74,6 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       run: .\SOCKET_UNIT_TEST.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V
 
-    - name: Upload test results
-      uses: actions/upload-artifact@v2
-      if: failure()
-      with:
-        name: test_results_xml
-        path: ${{runner.workspace}}/build/test-results/**/*.xml
-
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
@@ -89,3 +82,4 @@ jobs:
           ${{ runner.workspace }}/build/*.dll
           ${{ runner.workspace }}/build/*.exe
           ${{ runner.workspace }}/build/*.a
+          ${{runner.workspace}}/build/test-results/**/*.xml
