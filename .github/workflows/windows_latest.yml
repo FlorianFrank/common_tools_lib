@@ -82,7 +82,10 @@ jobs:
         path: ${{runner.workspace}}/build/test-results/**/*.xml
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: common_tools_lib_windows_mingw
-        path: ${{ runner.workspace }}/build/*.(dll|exe|lib|a)
+        path: |
+          ${{ runner.workspace }}/build/*.dll
+          ${{ runner.workspace }}/build/*.exe
+          ${{ runner.workspace }}/build/*.a
