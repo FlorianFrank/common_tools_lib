@@ -49,7 +49,7 @@ TEST(FileHandlingTestCpp, FileAppend){
     ASSERT_STREQ((sampleText+sampleText).c_str(), retText.c_str());
 }
 
-#ifdef __WIN32__
+#ifndef __WIN32__
 TEST(FileHandlingTestCpp, ListFilesDirectoriesOnly){
     std::string path = ".";
     PIL_FileListElem listOfFiles;
