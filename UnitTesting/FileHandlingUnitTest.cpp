@@ -49,14 +49,15 @@ TEST(FileHandlingTestCpp, FileAppend){
     ASSERT_STREQ((sampleText+sampleText).c_str(), retText.c_str());
 }
 
+#ifdef __WIN32__
 TEST(FileHandlingTestCpp, ListFilesDirectoriesOnly){
     std::string path = ".";
     PIL_FileListElem listOfFiles;
     auto ret = PIL::FileHandler::ListFilesInDirectory(path, DIRECTORIES, &listOfFiles, false);
     ASSERT_EQ(ret, PIL_NO_ERROR);
     auto currentElem = &listOfFiles;
-    ASSERT_FALSE(currentElem->previous);
-    ASSERT_TRUE(currentElem->next);
+    ASSERT_EQ(nullptr, currentElem->previous);
+    ASSERT_NE(nullptr, currentElem->next);
     while(currentElem)
     {
         if(currentElem->handle)
@@ -82,3 +83,4 @@ TEST(FileHandlingTestCpp, ListFilesFilesOnly){
         currentElem = currentElem->next;
     }
 }
+#endif // __WIN32__
