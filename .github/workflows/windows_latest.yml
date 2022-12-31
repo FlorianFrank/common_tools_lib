@@ -84,5 +84,5 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: artifact
-        path: ${{ runner.workspace }}/build
+        name: common_tools_lib_windows_mingw
+        path: ${{ runner.workspace }}/build/*.(dll|exe|lib|a)
