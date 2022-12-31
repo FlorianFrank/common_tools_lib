@@ -72,7 +72,7 @@ jobs:
 
     - name: Test
       working-directory: ${{runner.workspace}}/build
-      run: GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V
+      run: .\SOCKET_UNIT_TEST.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V
 
     - name: Upload test results
       uses: actions/upload-artifact@v2
