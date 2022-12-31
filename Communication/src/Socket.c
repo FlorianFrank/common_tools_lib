@@ -131,7 +131,11 @@ PIL_ERROR_CODE PIL_SOCKET_Close(PIL_SOCKET *socketRet)
     if (socketRet->m_IsOpen)
     {
         socketRet->m_IsOpen = FALSE;
+#ifndef __WIN32__
         if (close(socketRet->m_socket) != 0)
+#else // __linux__ || __APPLE__
+        if (closesocket(socketRet->m_socket) != 0)
+#endif // __WIN32__
         {
             PIL_SetLastError(&socketRet->m_ErrorHandle, PIL_ERRNO);
             return PIL_ERRNO;
