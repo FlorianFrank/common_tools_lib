@@ -20,7 +20,7 @@ PIL::Exception::Exception(PIL_ERROR_CODE errorCode)
 
 PIL::Exception::Exception(PIL_ERROR_CODE errorCode, std::string errorMessage)
 {
-    m_ErrorMessage = "Exception: " + std::move(errorMessage) + "(" + PIL_ErrorCodeToString(errorCode) + ")";
+    m_ErrorMessage = "Exception: " + std::string(PIL_ErrorCodeToString(errorCode)) + " (" + std::move(errorMessage) + ")";
 }
 
 PIL::Exception::Exception(PIL_ERROR_CODE errorCode, const char *fileName, unsigned int lineNumber,
@@ -42,13 +42,15 @@ void PIL::Exception::setErrorMessageVarArgs(PIL_ERROR_CODE errorCode, const char
                                             const std::string &message, va_list vaList)
 {
     std::stringstream stringStream;
-    stringStream << fileName << ":" << lineNumber << " ";
+    stringStream << "Exception (" << fileName << ":" << lineNumber << "): ";
+    stringStream << PIL_ErrorCodeToString(errorCode);
 
-    std::streambuf* old = std::cout.rdbuf(stringStream.rdbuf());
-    vprintf(message.c_str(), vaList);
-    std::cout.rdbuf( old );
+    if(!message.empty()) {
+    char formatStrBuffer[MAX_ERROR_MESSAGE_LENGTH];
+        vsprintf(formatStrBuffer, message.c_str(), vaList);
+        stringStream << " (" << formatStrBuffer << ")";
+    }
 
-    stringStream << " (" << PIL_ErrorCodeToString(errorCode) << ")";
     m_ErrorMessage = stringStream.str();
 }
 

@@ -1,13 +1,14 @@
 cmake_minimum_required(VERSION 3.0)
 
 set(CMAKE_C_FLAGS "-Wall -pedantic -Werror -g3 ${CMAKE_C_FLAGS}")
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(PlatformIndependentLib C CXX)
 
 if (DEFINED PIL_ALL)
     set(INSTALL_DIR "/usr")
+
     option(PIL_COMMUNICATION   "Enable UART and socket communication"       ON)
     option(PIL_THREADING       "Enable multithreading support"              ON)
     set(PIL_FILE_HANDLING      "Enable file handling support"               ON)
@@ -22,7 +23,9 @@ if (DEFINED PIL_ALL)
 endif () # PIL_ALL
 
 if(PIL_CXX)
+    add_definitions(-DPIL_CXX=1)
 endif()
+
 if (DEFINED PIL_COMMUNICATION)
     if(DEFINED PIL_CXX)
     set(communication_headers_cxx
@@ -175,13 +178,25 @@ if (DEFINED PIL_STATIC)
 
 endif () # DEFINED STATIC
 
+if (DEFINED ENV{GITHUB_ACTIONS})
+    if (WIN32)
+
+        link_directories("googletest/build/lib")
+        include_directories("googletest/googletest/include/")
+    endif ()
+endif ()
+
 if (PIL_UNIT_TESTING)
     if(DEFINED APPLE)
         include_directories("/usr/local/include")
         link_directories("/usr/local/lib")
     endif() # APPLE
 
-    add_executable(SOCKET_UNIT_TEST "UnitTesting/SocketUnitTest.cpp")
+    set(UNIT_TEST_FILES "UnitTesting/SocketUnitTest.cpp"
+                        "UnitTesting/ExceptionUnitTest.cpp"
+                        "UnitTesting/FileHandlingUnitTest.cpp")
+
+    add_executable(SOCKET_UNIT_TEST ${UNIT_TEST_FILES})
     target_link_libraries(SOCKET_UNIT_TEST gtest_main gtest pthread common_tools_lib)
 
     enable_testing()

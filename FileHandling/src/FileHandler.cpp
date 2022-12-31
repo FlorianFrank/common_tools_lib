@@ -48,6 +48,7 @@ PIL_ERROR_CODE PIL::FileHandler::ReadFile(std::string *buffer)
     uint32_t buffLen = 1024; // TODO
     uint8_t cBuff[1024];
     auto ret = PIL_ReadFile(&m_Handle, cBuff, &buffLen);
+
 #ifdef PIL_EXCEPTION_HANDLING
     if(ret != PIL_NO_ERROR)
         throw ExceptionHandler(ret);
@@ -60,15 +61,15 @@ PIL_ERROR_CODE PIL::FileHandler::ReadFile(std::string *buffer)
 #endif // PIL_EXCEPTION_HANDLING
         return PIL_INVALID_ARGUMENTS;
     }
-    buffer->append(reinterpret_cast<char*>(cBuff));
+    *buffer = std::string(reinterpret_cast<char *>(cBuff), buffLen);
     return ret;
 }
 
 
 /*static*/ PIL_ERROR_CODE
-PIL::FileHandler::LISTFilesInDirectory(std::string &path, uint8_t filer, PIL_FileListElem *listOfFiles, bool recursive)
+PIL::FileHandler::ListFilesInDirectory(std::string &path, uint8_t filter, PIL_FileListElem *listOfFiles, bool recursive)
 {
-    auto ret = PIL_ListFilesInDirectory(path.c_str(), filer, listOfFiles, (recursive) ? TRUE : FALSE);
+    auto ret = PIL_ListFilesInDirectory(path.c_str(), filter, listOfFiles, (recursive) ? TRUE : FALSE);
 #ifdef PIL_EXCEPTION_HANDLING
     if(ret != PIL_NO_ERROR)
         throw ExceptionHandler(PIL_INVALID_ARGUMENTS);

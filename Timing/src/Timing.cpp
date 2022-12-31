@@ -1,6 +1,6 @@
 #include "ctlib/Timing.hpp"
-
-#if __linux__
+#ifndef __WIN32__
+#if defined(__linux__) || defined(__APPLE__)
 #include <iostream>
 #include <numeric>
 #include <algorithm>
@@ -47,7 +47,7 @@ Timing::Timing() : m_Running(false),
  * store the result on the time measurement vector and restart the measurement.
  */
 void Timing::start() {
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
     if (m_Running)
         stop();
     m_Running = true;
@@ -65,7 +65,7 @@ void Timing::stop() {
     if(!m_Running)
         return;
     m_Running = false;
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
     if (clock_gettime(CLOCK_MONOTONIC_RAW, &m_CurrentMeasurement.m_Stop) != 0)
         std::cout << "Error while calling \"clock_gettime()\"" << std::endl;
     m_TimeMeasurements.emplace_back(m_CurrentMeasurement);
@@ -80,7 +80,7 @@ void Timing::stop() {
 void Timing::reset() {
     if (m_Running)
         stop();
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
     m_TimeMeasurements.clear();
 #else
     m_currentCtr = 0;
@@ -157,7 +157,7 @@ double Timing::evaluateMeasureArrayDouble(EvalFunctions evalFunctions, Timing::T
  * @return difference between start and stop timestamp in nanoseconds encoded as 64-bit integer.
  */
 /*static*/ uint64_t Timing::transformTimingVarToNs(const TimingVar &tsStart, const TimingVar &tsStop) {
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
     if (tsStart.tv_nsec <= tsStop.tv_nsec)
         return ((tsStop.tv_sec - tsStart.tv_sec) * NANO_SECS) + (tsStop.tv_nsec - tsStart.tv_nsec);
     else {
@@ -189,3 +189,4 @@ double Timing::evaluateMeasureArrayDouble(EvalFunctions evalFunctions, Timing::T
 double Timing::transformNsToUnitDouble(uint64_t time, Timing::TimeUnit unit) {
     return static_cast<double>(time) / (static_cast<double>(NANO_SECS) / unit);
 }
+#endif // __WIN32__

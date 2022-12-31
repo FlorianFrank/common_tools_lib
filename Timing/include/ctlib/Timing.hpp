@@ -1,16 +1,11 @@
+#ifndef __WIN32__
 #pragma once
-
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
 #include <ctime>
 #include <string>
 #include <vector>
 #include <tuple>
 #include <map>
-#else
-// TODO add option for architecture specific implementation
-#endif // __linux__
-
-#ifdef __linux__
 typedef struct timespec TimingVar;
 typedef std::vector<uint64_t> &OperationList;
 #else
@@ -65,7 +60,7 @@ private:
     };
 
     CurrentMeasurement m_CurrentMeasurement;
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
     std::vector<CurrentMeasurement> m_TimeMeasurements;
 #else
     int m_currentCtr = 0;
@@ -75,3 +70,4 @@ private:
     static uint64_t transformNsToUnit(uint64_t time, TimeUnit unit);
     static double transformNsToUnitDouble(uint64_t time, TimeUnit unit);
 };
+#endif // __WIN32__

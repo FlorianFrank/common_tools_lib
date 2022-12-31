@@ -13,11 +13,7 @@
 #define LOG_BUF_SIZE 10000
 
 /** Remove path from file name. e.g. /home/user/SampleFile.c -> SampleFile.c. */
-#ifdef __WIN32__
-#define __FILENAME__ (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
-#else // Linux
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
-#endif // __WIN32__
 
 /** Enum storing the loglevel, to indicate the type of message. */
  enum
