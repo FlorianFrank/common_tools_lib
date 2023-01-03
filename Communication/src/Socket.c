@@ -123,9 +123,7 @@ PIL_ERROR_CODE PIL_SOCKET_Close(PIL_SOCKET *socketRet)
         return PIL_INVALID_ARGUMENTS;
 
     if(socketRet->m_callbackActive == TRUE)
-    {
         PIL_SOCKET_UnregisterCallbackFunction(socketRet);
-    }
 
 #ifndef embedded
     if (socketRet->m_IsOpen)
@@ -145,11 +143,8 @@ PIL_ERROR_CODE PIL_SOCKET_Close(PIL_SOCKET *socketRet)
 #else // lwip
     udp_remove(socketRet->conn);
 #endif // linux
-
     if(socketRet->m_AcceptThreadHandle)
-    {
-        PIL_THREADING_JoinThread(socketRet->m_AcceptThreadHandle, NULL);
-    }
+        PIL_THREADING_AbortThread(socketRet->m_AcceptThreadHandle);
 
     PIL_ERROR_CODE ret =  (close(socketRet->m_socket) == 0) ?  PIL_NO_ERROR : PIL_ERRNO;
     return ret;
@@ -411,16 +406,19 @@ PIL_ERROR_CODE PIL_SOCKET_Receive(PIL_SOCKET *socketRet, uint8_t *buffer, uint32
 #if __WIN32__
     uint32_t ret = recv(socketRet->m_socket, (char*)buffer, *bufferLen, 0);
 #else
+    ssize_t ret = recv(socketRet->m_socket, buffer, *bufferLen, 0);
 
-    uint32_t ret = recv(socketRet->m_socket, buffer, *bufferLen, 0);
 #endif
     if (ret == -1)
     {
         PIL_SetLastError(&socketRet->m_ErrorHandle, PIL_ERRNO);
         return PIL_ERRNO;
     }
-
     *bufferLen = ret;
+
+    if(ret == 0)
+        return PIL_NO_DATA_RECEIVED;
+
     return PIL_NO_ERROR;
 }
 
@@ -438,9 +436,9 @@ void* PIL_ReceiveThreadFunction(void *handle)
 
     uint8_t buffer[DEFAULT_SOCK_BUFF_SIZE];
     uint32_t len = DEFAULT_SOCK_BUFF_SIZE;
-
     while(arg->socket->m_callbackActive)
     {
+        memset(buffer, 0, DEFAULT_SOCK_BUFF_SIZE);
         PIL_ERROR_CODE  ret = PIL_SOCKET_WaitTillDataAvail(arg->socket, DEFAULT_TIMEOUT_MS);
         if(ret != PIL_NO_ERROR && ret != PIL_TIMEOUT)
         {
@@ -450,10 +448,10 @@ void* PIL_ReceiveThreadFunction(void *handle)
 
         if(ret == PIL_NO_ERROR)
         {
-            ret = PIL_SOCKET_Receive(arg->socket, buffer, &len, /*TODO*/0);
+            ret = PIL_SOCKET_Receive(arg->socket, buffer, &len, 0);
             if(ret == PIL_NO_ERROR)
             {
-                arg->receiveCallback(buffer, len);
+                arg->receiveCallback(arg->socket, buffer, len, arg->additionalArg);
             }
         }
     }
@@ -467,7 +465,7 @@ void* PIL_ReceiveThreadFunction(void *handle)
  * @param callback
  * @return
  */
-PIL_ERROR_CODE PIL_SOCKET_RegisterCallbackFunction(PIL_SOCKET *socketRet, void (*callback)(uint8_t *, uint32_t))
+PIL_ERROR_CODE PIL_SOCKET_RegisterReceiveCallbackFunction(PIL_SOCKET *socketRet, void (*callback)(PIL_SOCKET *socket, uint8_t *, uint32_t, void*), void* additional)
 {
     if(!socketRet || !callback)
         return PIL_INVALID_ARGUMENTS;
@@ -476,6 +474,7 @@ PIL_ERROR_CODE PIL_SOCKET_RegisterCallbackFunction(PIL_SOCKET *socketRet, void (
     socketRet->m_callbackThreadArg = malloc(sizeof(ReceiveThreadCallbackArg));
     socketRet->m_callbackThreadArg ->socket = socketRet;
     socketRet->m_callbackThreadArg ->receiveCallback = callback;
+    socketRet->m_callbackThreadArg ->additionalArg = additional;
 
     socketRet->m_callbackThreadHandle = malloc(sizeof(ThreadHandle));
     socketRet->m_callbackThreadHandle->m_ThreadArgument.m_ThreadArgument = (void*)&socketRet->m_callbackThreadArg ;
@@ -506,23 +505,22 @@ PIL_ERROR_CODE PIL_SOCKET_RegisterCallbackFunction(PIL_SOCKET *socketRet, void (
  */
 PIL_ERROR_CODE PIL_SOCKET_UnregisterCallbackFunction(PIL_SOCKET *socketRet)
 {
-    if(!socketRet)
+    if (!socketRet)
         return PIL_INVALID_ARGUMENTS;
 
-    socketRet->m_callbackActive = FALSE;
-    if(!socketRet->m_callbackThreadHandle)
+    if (socketRet->m_callbackActive)
     {
-        return PIL_INVALID_ARGUMENTS;
-    }
-        PIL_ERROR_CODE ret = PIL_THREADING_JoinThread(socketRet->m_callbackThreadHandle, NULL);
+        socketRet->m_callbackActive = FALSE;
+        if (!socketRet->m_callbackThreadHandle)
+            return PIL_INVALID_ARGUMENTS;
+        PIL_ERROR_CODE ret = PIL_THREADING_AbortThread(socketRet->m_callbackThreadHandle);
         free(socketRet->m_callbackThreadHandle);
         socketRet->m_callbackThreadHandle = NULL;
         free(socketRet->m_callbackThreadArg);
         socketRet->m_callbackThreadArg = NULL;
-        if(ret != PIL_NO_ERROR)
-        {
+        if (ret != PIL_NO_ERROR)
             return PIL_THREAD_NOT_JOINABLE;
-        }
+    }
     return PIL_NO_ERROR;
 }
 
@@ -690,15 +688,13 @@ void* PIL_AcceptThreadFunction(void* value)
         if(ret != PIL_NO_ERROR)
             return NULL;
         retHandle.m_IsConnected = TRUE;
-        arg->receiveCallback(retHandle, ipAddr);
+        arg->acceptCallback(retHandle, ipAddr);
     }while(arg->socket.m_IsOpen);
     return NULL;
 }
 
-PIL_ERROR_CODE PIL_SOCKET_Setup_ServerSocket(PIL_SOCKET *socket, uint16_t port, void (*receiveCallback)(struct PIL_SOCKET retHandle, char* ip))
+PIL_ERROR_CODE PIL_SOCKET_Setup_ServerSocket(PIL_SOCKET *socket, uint16_t port, void (*acceptCallback)(struct PIL_SOCKET retHandle, char* ip))
 {
-    if(!receiveCallback)
-        return PIL_INVALID_ARGUMENTS;
 
     PIL_ERROR_CODE ret = PIL_SOCKET_Create(socket, TCP, IPv4, "127.0.0.1", port);
     if(ret != PIL_NO_ERROR)
@@ -712,29 +708,34 @@ PIL_ERROR_CODE PIL_SOCKET_Setup_ServerSocket(PIL_SOCKET *socket, uint16_t port, 
     if(ret != PIL_NO_ERROR)
         return ret;
 
+    if(acceptCallback)
+        return PIL_SOCKET_RegisterAcceptCallback(socket, acceptCallback);
+
+    return PIL_NO_ERROR;
+}
+
+PIL_ERROR_CODE PIL_SOCKET_RegisterAcceptCallback(PIL_SOCKET *socket, void (*receiveCallback)(PIL_SOCKET, char *))
+{
     ThreadArg *arg = malloc(sizeof(struct ThreadArg));
     arg->socket = *socket;
-    arg->receiveCallback = receiveCallback;
+    arg->acceptCallback = receiveCallback;
 
     socket->m_AcceptThreadHandle = malloc(sizeof(ThreadHandle));
-    PIL_ERROR_CODE  socketRet = PIL_THREADING_CreateThread(socket->m_AcceptThreadHandle, PIL_AcceptThreadFunction, arg);
-    if(socketRet == PIL_NO_ERROR)
-    {
+    PIL_ERROR_CODE socketRet = PIL_THREADING_CreateThread(socket->m_AcceptThreadHandle, PIL_AcceptThreadFunction, arg);
+    if (socketRet == PIL_NO_ERROR)
         socketRet = PIL_THREADING_RunThread(socket->m_AcceptThreadHandle, FALSE);
-    }
 
-    if(socketRet != PIL_NO_ERROR)
+    if (socketRet != PIL_NO_ERROR)
     {
         free(socket->m_AcceptThreadHandle);
         socket->m_AcceptThreadHandle = NULL;
         return socketRet;
     }
-
     return PIL_NO_ERROR;
 }
 
 PIL_ERROR_CODE PIL_SOCKET_ConnectToServer(PIL_SOCKET *socket, const char *ipAddr, uint16_t srcPort, uint16_t destPort, uint16_t timeoutInMs,
-                                          void (*receiveCallback)(uint8_t*, uint32_t))
+                                          void (*receiveCallback)(PIL_SOCKET* socket, uint8_t*, uint32_t, void*), void* additionalArgument)
 {
     PIL_ERROR_CODE ret = PIL_SOCKET_Create(socket, TCP, IPv4, "127.0.0.1", srcPort);
     if(ret != PIL_NO_ERROR)
@@ -744,7 +745,7 @@ PIL_ERROR_CODE PIL_SOCKET_ConnectToServer(PIL_SOCKET *socket, const char *ipAddr
     if(ret != PIL_NO_ERROR)
         return ret;
     
-    return PIL_SOCKET_RegisterCallbackFunction(socket, receiveCallback);
+    return PIL_SOCKET_RegisterReceiveCallbackFunction(socket, receiveCallback, NULL);
 }
 
 

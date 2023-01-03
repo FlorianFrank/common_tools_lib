@@ -29,6 +29,7 @@ enum
     PIL_INVALID_BAUDRATE,
     /* Error insufficient resources. */
     PIL_INSUFFICIENT_RESOURCES,
+    PIL_NO_DATA_RECEIVED,
     /** Error, insufficient permissions to perform a certain operation. */
     PIL_INSUFFICIENT_PERMISSIONS,
     /** Error, when deadlock is detected in a multithreaded application. */

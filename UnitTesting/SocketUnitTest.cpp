@@ -21,18 +21,31 @@ static std::string loram_ipsum = "Lorem ipsum dolor sit amet, consetetur sadipsc
 
 char recvBuff[4096];
 
-void ReceiveHandler(uint8_t* buffer, uint32_t len)
+void ReceiveHandlerC(PIL_SOCKET *socket, uint8_t* buffer, uint32_t len, void*)
 {
     strncpy(recvBuff, (char*)buffer, len);
 }
 
 
-void CallbackAccept(PIL_SOCKET sck, char* ip)
+void ReceiveHandlerCPP(std::shared_ptr<PIL::Socket> &socket, std::string& buffer)
+{
+    strncpy(recvBuff, (char*)buffer.c_str(), buffer.length());
+}
+
+
+void CallbackAcceptCPP(std::shared_ptr<PIL::Socket> &sck)
 {
     acceptFlag = true;
-    uint32_t length = loram_ipsum.length();
-    PIL_SOCKET_Send(&sck, reinterpret_cast<uint8_t*>((char*)loram_ipsum.c_str()), &length);
+    sck->Send(loram_ipsum);
 }
+
+void CallbackAcceptC(PIL_SOCKET sock, char* ipAddr)
+{
+    acceptFlag = true;
+    uint32_t len = loram_ipsum.length();
+    PIL_SOCKET_Send(&sock, (const uint8_t*)loram_ipsum.c_str(), &len);
+}
+
 
 
 /**
@@ -43,13 +56,13 @@ TEST(SocketTest_C, SimpleSocketTest)
 {
 
     PIL_SOCKET srvSocket;
-    PIL_ERROR_CODE ret = PIL_SOCKET_Setup_ServerSocket(&srvSocket, 14000, CallbackAccept);
+    PIL_ERROR_CODE ret = PIL_SOCKET_Setup_ServerSocket(&srvSocket, 14000, CallbackAcceptC);
     EXPECT_EQ(ret,PIL_NO_ERROR);
 
     acceptFlag = false;
 
     PIL_SOCKET clientSocket;
-    ret = PIL_SOCKET_ConnectToServer(&clientSocket, "127.0.0.1", 15000, 14000, 1000, ReceiveHandler);
+    ret = PIL_SOCKET_ConnectToServer(&clientSocket, "127.0.0.1", 15000, 14000, 1000, ReceiveHandlerC, nullptr);
     EXPECT_EQ(ret, PIL_NO_ERROR);
 
     std::this_thread::sleep_for(std::chrono::microseconds(100000));
@@ -68,16 +81,18 @@ TEST(SocketTest_C, SimpleSocketTest)
 TEST(SocketTest_CPP, SimpleSocketTest)
 {
     PIL::Socket srvSock(TCP, IPv4, "localhost", 14002, 1000);
-    bool ret = srvSock.CreateServerSocket(CallbackAccept);
+    std::function<void(std::shared_ptr<PIL::Socket>&)> callbackFunct(CallbackAcceptCPP);
+    bool ret = srvSock.CreateServerSocket(callbackFunct);
     EXPECT_EQ(ret, PIL_NO_ERROR);
+    std::this_thread::sleep_for(std::chrono::microseconds(10000));
 
     PIL::Socket clientSock(TCP, IPv4, "localhost", 14003, 1000);
     std::string ipAddr = "127.0.0.1";
-    ret = clientSock.ConnectToServer(ipAddr, 14002, ReceiveHandler);
+    std::function<void(std::shared_ptr<PIL::Socket>& , std::string &)> callbackFunc = ReceiveHandlerCPP;
+    ret = clientSock.ConnectToServer(ipAddr, 14002, callbackFunc);
     EXPECT_EQ(ret, PIL_NO_ERROR);
-//    usleep(1000);
-  //  EXPECT_EQ(acceptFlag, true);
-    //EXPECT_STREQ(loram_ipsum.c_str(), recvBuff);
+    srvSock.Close();
+    clientSock.Close();
 }
 
 /**

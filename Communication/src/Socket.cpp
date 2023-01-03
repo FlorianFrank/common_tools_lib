@@ -3,6 +3,11 @@
  */
 
 
+#include <functional>
+#include <cassert>
+#include <iostream>
+#include <memory>
+
 #ifdef PIL_CXX
 extern "C++" {
 #include <ctlib/Socket.hpp>
@@ -10,11 +15,16 @@ extern "C" {
 #include "ctlib/Socket.h"
 }
 
+#include "ctlib/Threading.hpp"
 #include "ctlib/ExceptionHandler.h"
 #include <string>
 
 namespace PIL
 {
+
+    Socket::Socket(PIL_SOCKET* socket, std::string &ip, uint16_t port) : m_SocketRet(*socket)
+    {
+    }
 
     Socket::Socket(TransportProtocol transportProtocol, InternetProtocol internetProtocol, const std::string &address,
                    int port, uint16_t timeoutInMS) : m_TransportProtocol(transportProtocol),
@@ -24,13 +34,15 @@ namespace PIL
         m_LastError = PIL_SOCKET_Create(&m_SocketRet, transportProtocol, internetProtocol, address.c_str(), port);
     }
 
-    Socket::~Socket()
-    {
+    Socket::~Socket(){
         Close();
     }
 
     PIL_ERROR_CODE Socket::Close()
     {
+        auto retCode = UnregisterCallbackFunction();
+        if(retCode != PIL_NO_ERROR)
+            return retCode;
         m_LastError = PIL_SOCKET_Close(&m_SocketRet);
 #ifdef PIL_EXCEPTION_HANDLING
         if(m_LastError != PIL_NO_ERROR)
@@ -176,9 +188,58 @@ namespace PIL
         return PIL_SOCKET_IsOpen(&m_SocketRet);
     }
 
-    PIL_ERROR_CODE Socket::CreateServerSocket(void (*receiveCallback)(PIL_SOCKET, char *))
+    struct ThreadArgCXX {
+        ThreadArg argC;
+        std::function<void(std::shared_ptr<PIL::Socket>&)> acceptCallback;
+    };
+
+    void* PIL_AcceptThreadFunctionCXX(void* value)
     {
-        m_LastError = PIL_SOCKET_Setup_ServerSocket(&m_SocketRet, m_Port, receiveCallback);
+        std::shared_ptr<PIL::Socket> socketPtr;
+        assert(value);
+
+        auto *arg = static_cast<ThreadArgCXX *>(value);
+        char ipAddr[MAX_IP_LEN];
+
+        do {
+            PIL_SOCKET retHandle;
+            int ret = PIL_SOCKET_Accept(&arg->argC.socket, ipAddr, &retHandle);
+            if(ret != PIL_NO_ERROR)
+                return nullptr;
+            retHandle.m_IsConnected = TRUE;
+            std::string ipStr = ipAddr;
+            socketPtr = std::move(std::make_shared<PIL::Socket>(&retHandle, ipStr, retHandle.m_port));
+            arg->acceptCallback(socketPtr);
+
+        }while(arg->argC.socket.m_IsOpen);
+        return nullptr;
+    }
+
+    PIL_ERROR_CODE Socket::RegisterAcceptCallback(std::function<void(std::shared_ptr<PIL::Socket>&)> &f)
+    {
+        auto *arg = new ThreadArgCXX;
+        arg->argC.socket = m_SocketRet;
+        arg->argC.acceptCallback = nullptr;
+        arg->acceptCallback = f;
+
+        std::function<void*(void*)> threadFunc = PIL_AcceptThreadFunctionCXX;
+        PIL::Threading threading(threadFunc, arg);
+        threading.Run();
+
+        return PIL_NO_ERROR;
+    }
+
+
+    PIL_ERROR_CODE Socket::CreateServerSocket(std::function<void(std::shared_ptr<PIL::Socket>&)> &receiveCallback)
+    {
+
+    m_LastError = PIL_SOCKET_Setup_ServerSocket(&m_SocketRet, m_Port, nullptr);
+    if(m_LastError != PIL_NO_ERROR)
+        return m_LastError;
+    auto ret = RegisterAcceptCallback(receiveCallback);
+    if(ret != PIL_NO_ERROR)
+        return ret;
+
 #ifdef PIL_EXCEPTION_HANDLING
         if(m_LastError != PIL_NO_ERROR)
             throw ExceptionHandler(m_LastError);
@@ -187,10 +248,17 @@ namespace PIL
     }
 
     PIL_ERROR_CODE
-    Socket::ConnectToServer(std::string &ipAddr, int destPort, void (*receiveCallback)(uint8_t *, uint32_t))
+    Socket::ConnectToServer(std::string &ipAddr, int destPort, std::function<void(std::shared_ptr<Socket>& , std::string &)> &receiveCallback)
     {
-        m_LastError = PIL_SOCKET_ConnectToServer(&m_SocketRet, ipAddr.c_str(), m_Port, destPort, m_TimeoutInMS,
-                                                 receiveCallback);
+        auto functionPtr = [](PIL_SOCKET* socket, uint8_t *buffer, uint32_t bufferLen, void* additionalArg){
+            std::string ip = socket->m_IPAddress;
+            std::shared_ptr<PIL::Socket> socketCXX(new PIL::Socket(socket, ip, socket->m_port));
+            std::string value = std::string((char *)buffer, bufferLen);
+            auto *arg = reinterpret_cast<ReceiveCallbackArg*>(additionalArg);
+            arg->m_ReceiveCallback(socketCXX, value);
+        };
+
+        m_LastError = PIL_SOCKET_ConnectToServer(&m_SocketRet, ipAddr.c_str(), m_Port, destPort, m_TimeoutInMS, functionPtr, &receiveCallback);
 #ifdef PIL_EXCEPTION_HANDLING
         if(m_LastError != PIL_NO_ERROR)
             throw ExceptionHandler(m_LastError);
@@ -198,10 +266,25 @@ namespace PIL
         return m_LastError;
     }
 
-    PIL_ERROR_CODE Socket::RegisterReceiveCallbackFunction(void (*receiveCallback)(uint8_t *, uint32_t))
+
+    PIL_ERROR_CODE Socket::RegisterReceiveCallbackFunction(ReceiveCallbackArg& additionalArg)
     {
-        return PIL_SOCKET_RegisterCallbackFunction(&m_SocketRet, receiveCallback);
+        auto callback = [](PIL_SOCKET *socket, uint8_t *buffer, uint32_t bufferLen, void* additionalArg){
+            std::string ip = socket->m_IPAddress;
+            std::string value = std::string((char *)buffer, bufferLen);
+            auto *arg = reinterpret_cast<ReceiveCallbackArg*>(additionalArg);
+            arg->m_Socket = std::move(std::make_shared<PIL::Socket>(socket, ip, socket->m_port));
+            arg->m_ReceiveCallback(arg->m_Socket, value);
+        };
+
+        return PIL_SOCKET_RegisterReceiveCallbackFunction(&m_SocketRet, callback, &additionalArg);
     }
+
+    PIL_ERROR_CODE Socket::UnregisterCallbackFunction()
+    {
+        return PIL_SOCKET_UnregisterCallbackFunction(&m_SocketRet);
+    }
+
 
     PIL_ERROR_CODE Socket::GetInterfaceInfos(InterfaceInfoList *interfaceInfos)
     {

@@ -39,10 +39,12 @@ const char *PIL_SOCKET_GetSenderIP(PIL_SOCKET *socketRet);
 
 PIL_BOOL PIL_SOCKET_IsOpen(PIL_SOCKET *socketRet);
 
-PIL_ERROR_CODE PIL_SOCKET_Setup_ServerSocket(PIL_SOCKET *socket, uint16_t port, void (*receive)(struct PIL_SOCKET retHandle, char* ip));
+PIL_ERROR_CODE PIL_SOCKET_RegisterAcceptCallback(PIL_SOCKET *socket, void (*callback)(PIL_SOCKET, char *));
+
+PIL_ERROR_CODE PIL_SOCKET_Setup_ServerSocket(PIL_SOCKET *socket, uint16_t port, void (*acceptCallback)(struct PIL_SOCKET retHandle, char* ip));
 
 PIL_ERROR_CODE PIL_SOCKET_ConnectToServer(PIL_SOCKET *socket, const char *ipAddr, uint16_t srcPort, uint16_t destPort, uint16_t timeoutInMs,
-                                          void (*receiveCallback)(uint8_t *retHandle, uint32_t ip));
+                                          void (*receiveCallback)(PIL_SOCKET* socket, uint8_t *retHandle, uint32_t ip, void*), void* additionalArgument);
 
 struct timeval PIL_SOCKET_TransformMSInTimeVal(uint16_t timeoutInMS);
 
@@ -51,11 +53,13 @@ PIL_ERROR_CODE GetInterfaceInfos(PIL_SOCKET *socket, InterfaceInfoList *interfac
 /**
  * Event based functions require Threading support.
  */
-#ifdef PIL_THREADING
-PIL_ERROR_CODE PIL_SOCKET_RegisterCallbackFunction(PIL_SOCKET *socketRet, void (*callback)(uint8_t *buffer,
-                                                                                           uint32_t len));
+//#ifdef PIL_THREADING
+PIL_ERROR_CODE PIL_SOCKET_RegisterReceiveCallbackFunction(PIL_SOCKET *socketRet,
+                                                          void (*callback)(PIL_SOCKET* socket, uint8_t *buffer, uint32_t len,
+                                                                    void *), void *additional);
+
 PIL_ERROR_CODE PIL_SOCKET_UnregisterCallbackFunction(PIL_SOCKET *socketRet);
-#endif // PIL_THREADING
+//#endif // PIL_THREADING
 
 
 

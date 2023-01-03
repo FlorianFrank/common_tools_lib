@@ -2,6 +2,8 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <functional>
+#include <memory>
 
 extern "C"
 {
@@ -25,7 +27,17 @@ namespace PIL
         Socket(TransportProtocol transportProtocol, InternetProtocol internetProtocol, const std::string &address,
                int port, uint16_t timeoutInMS);
 
+        Socket(PIL_SOCKET *socket, std::string &ip, uint16_t port);
+
         ~Socket();
+
+        struct ReceiveCallbackArg {
+            explicit ReceiveCallbackArg(std::function<void(std::shared_ptr<PIL::Socket>&, std::string&)>& c): m_ReceiveCallback(c)
+            {
+            }
+            std::function<void(std::shared_ptr<PIL::Socket>&, std::string&)> &m_ReceiveCallback;
+            std::shared_ptr<PIL::Socket> m_Socket = {};
+        };
 
         PIL_ERROR_CODE Close();
 
@@ -55,11 +67,13 @@ namespace PIL
 
         PIL_BOOL IsOpen();
 
-        PIL_ERROR_CODE  CreateServerSocket(void (*receiveCallback)(PIL_SOCKET, char *));
+        PIL_ERROR_CODE CreateServerSocket(std::function<void(std::shared_ptr<PIL::Socket>&)> &receiveCallback);
 
-        PIL_ERROR_CODE ConnectToServer(std::string &ipAddr, int destPort, void (*receiveCallback)(uint8_t *, uint32_t));
+        PIL_ERROR_CODE ConnectToServer(std::string &ipAddr, int destPort, std::function<void(std::shared_ptr<Socket>& , std::string &)> &receiveCallback);
 
-        PIL_ERROR_CODE RegisterReceiveCallbackFunction(void (*receiveCallback)(uint8_t *, uint32_t));
+        PIL_ERROR_CODE RegisterReceiveCallbackFunction(ReceiveCallbackArg& additionalArg);
+
+        PIL_ERROR_CODE UnregisterCallbackFunction();
 
         PIL_ERROR_CODE GetInterfaceInfos(InterfaceInfoList *interfaceInfos);
 
@@ -72,8 +86,9 @@ namespace PIL
 
 
 
+
     private:
-        int m_Port;
+        uint16_t m_Port;
         std::string m_IPAddrress;
         TransportProtocol m_TransportProtocol;
         InternetProtocol m_InternetProtocol;
@@ -82,6 +97,8 @@ namespace PIL
 
         PIL_SOCKET m_SocketRet{};
         std::vector<PIL_SOCKET> m_SocketList;
+
+        PIL_ERROR_CODE RegisterAcceptCallback(std::function<void(std::shared_ptr<PIL::Socket>&)> &f);
     };
 
 }

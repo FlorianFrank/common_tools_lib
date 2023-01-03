@@ -83,12 +83,13 @@ enum
 
 struct ThreadArg{
     struct PIL_SOCKET socket;
-    void (*receiveCallback)(struct PIL_SOCKET retHandle, char* ip);
+    void (*acceptCallback)(struct PIL_SOCKET retHandle, char* ip);
 } typedef ThreadArg;
 
 struct ReceiveThreadCallbackArg {
     PIL_SOCKET *socket;
-    void (*receiveCallback)(uint8_t* buffer, uint32_t len);
+    void (*receiveCallback)(PIL_SOCKET* socket, uint8_t* buffer, uint32_t len, void*);
+    void *additionalArg;
 } typedef ReceiveThreadCallbackArg;
 
 #define MAX_NR_INTERFACES      256
