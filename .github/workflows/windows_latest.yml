@@ -72,7 +72,10 @@ jobs:
 
     - name: Test
       working-directory: ${{runner.workspace}}/build
-      run: .\SOCKET_UNIT_TEST.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V
+      run: .\SocketUnitTest.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V;
+           .\ExceptionUnitTest.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V;
+           .\FileHandlingUnitTest.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V
+
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
