@@ -192,16 +192,24 @@ if (PIL_UNIT_TESTING)
         link_directories("/usr/local/lib")
     endif() # APPLE
 
-    set(UNIT_TEST_FILES "UnitTesting/SocketUnitTest.cpp"
-                        "UnitTesting/ExceptionUnitTest.cpp"
-                        "UnitTesting/FileHandlingUnitTest.cpp")
-
-    add_executable(SOCKET_UNIT_TEST ${UNIT_TEST_FILES})
-    target_link_libraries(SOCKET_UNIT_TEST gtest_main gtest pthread common_tools_lib)
-
     enable_testing()
     include(GoogleTest)
-    gtest_discover_tests("SOCKET_UNIT_TEST")
+
+    set(SOCKET_UNIT_TEST_FILES "UnitTesting/SocketUnitTest.cpp")
+    add_executable(SocketUnitTest ${SOCKET_UNIT_TEST_FILES})
+    target_link_libraries(SocketUnitTest gtest_main gtest pthread common_tools_lib)
+    gtest_discover_tests("SocketUnitTest")
+
+    set(EXCEPTION_UNIT_TEST_FILES "UnitTesting/SocketUnitTest.cpp")
+    add_executable(ExceptionUnitTest ${EXCEPTION_UNIT_TEST_FILES})
+    target_link_libraries(ExceptionUnitTest gtest_main gtest pthread common_tools_lib)
+    gtest_discover_tests("ExceptionUnitTest")
+
+    set(FILE_HANDLING_UNIT_TEST_FILES "UnitTesting/SocketUnitTest.cpp")
+    add_executable(FileHandlingUnitTest ${FILE_HANDLING_UNIT_TEST_FILES})
+    target_link_libraries(FileHandlingUnitTest gtest_main gtest pthread common_tools_lib)
+    gtest_discover_tests("FileHandlingUnitTest")
+
 endif () # PIL_UNIT_TESTING
 
 option(BUILD_DOC "Build documentation" OFF)

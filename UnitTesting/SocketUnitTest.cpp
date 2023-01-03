@@ -84,8 +84,6 @@ TEST(SocketTest_CPP, SimpleSocketTest)
     std::function<void(std::shared_ptr<PIL::Socket>&)> callbackFunct(CallbackAcceptCPP);
     bool ret = srvSock.CreateServerSocket(callbackFunct);
     EXPECT_EQ(ret, PIL_NO_ERROR);
-    std::this_thread::sleep_for(std::chrono::microseconds(10000));
-
     PIL::Socket clientSock(TCP, IPv4, "localhost", 14003, 1000);
     std::string ipAddr = "127.0.0.1";
     std::function<void(std::shared_ptr<PIL::Socket>& , std::string &)> callbackFunc = ReceiveHandlerCPP;
@@ -93,6 +91,7 @@ TEST(SocketTest_CPP, SimpleSocketTest)
     EXPECT_EQ(ret, PIL_NO_ERROR);
     srvSock.Close();
     clientSock.Close();
+
 }
 
 /**
