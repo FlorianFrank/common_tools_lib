@@ -2,16 +2,10 @@
  * @brief This class contains
  */
 
-
-#include <functional>
-#include <cassert>
-#include <iostream>
-#include <memory>
 #include "ctlib/Exception.h"
 #include "ctlib/Logging.h"
 
 #ifdef PIL_CXX
-extern "C++" {
 #include <ctlib/Socket.hpp>
 extern "C" {
 #include "ctlib/Socket.h"
@@ -19,7 +13,8 @@ extern "C" {
 
 #include "ctlib/Threading.hpp"
 #include "ctlib/ExceptionHandler.h"
-#include <string>
+
+#include <cassert> // assert
 
 namespace PIL
 {
@@ -300,7 +295,7 @@ namespace PIL
         if(ret != PIL_NO_ERROR)
             throw PIL::Exception(m_LastError, __FILENAME__, __LINE__);
 #endif // PIL_EXCEPTION_HANDLING
-            return ret;
+        return ret;
     }
 
     PIL_ERROR_CODE Socket::UnregisterCallbackFunction()
@@ -324,6 +319,5 @@ namespace PIL
         return ret;
     }
 
-}
 }
 #endif // PIL_CXX

@@ -6,6 +6,9 @@ extern "C" {
     #include "ctlib/SocketDefines.h"
 }
 
+#include <functional> // std::function
+#include <memory> // std::shared_ptr
+
 namespace PIL
 {
 
