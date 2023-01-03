@@ -18,7 +18,7 @@ namespace PIL
     class Threading : public ErrorHandler
     {
     public:
-        Threading(void *(*threadFunction)(void *), void *argument);
+        Threading(std::function<void*(void *)> &function, void *argument);
         ~Threading();
 
         void Run();
@@ -31,10 +31,9 @@ namespace PIL
 
     private:
         ThreadHandle *m_ThreadHandle;
-        void *m_argument;
+        void *m_Argument;
         void *m_RetValue{};
-        void *(*m_ThreadFunction)(void *function);
-
+        std::function<void*(void*)> m_ThreadFunction;
     };
 }
 

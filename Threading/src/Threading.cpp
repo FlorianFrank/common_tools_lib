@@ -5,14 +5,16 @@
 
 
 #include <iostream>
+#include <functional>
 #include "ctlib/Threading.hpp"
 
 
-PIL::Threading::Threading(void *(*threadFunction)(void *), void *argument) : ErrorHandler(),
-m_ThreadFunction(threadFunction), m_argument(argument)
+PIL::Threading::Threading(std::function<void*(void*)> &function, void *argument) : ErrorHandler(),
+                                                                                   m_ThreadFunction(function), m_Argument(argument)
 {
     m_ThreadHandle = new ThreadHandle;
-    m_LastError = PIL_THREADING_CreateThread(m_ThreadHandle, m_ThreadFunction, argument);
+    auto functionPtr = m_ThreadFunction.target<void* (*)(void*)>();
+    m_LastError = PIL_THREADING_CreateThread(m_ThreadHandle, *functionPtr, argument);
 }
 
 PIL::Threading::~Threading()

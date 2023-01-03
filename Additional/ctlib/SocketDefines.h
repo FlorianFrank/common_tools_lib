@@ -83,12 +83,13 @@ enum
 
 struct ThreadArg{
     struct PIL_SOCKET socket;
-    void (*receiveCallback)(struct PIL_SOCKET retHandle, char* ip);
+    void (*acceptCallback)(struct PIL_SOCKET retHandle, char* ip);
 } typedef ThreadArg;
 
 struct ReceiveThreadCallbackArg {
     PIL_SOCKET *socket;
-    void (*receiveCallback)(uint8_t* buffer, uint32_t len);
+    void (*receiveCallback)(PIL_SOCKET* socket, uint8_t* buffer, uint32_t len, void*);
+    void *additionalArg;
 } typedef ReceiveThreadCallbackArg;
 
 #define MAX_NR_INTERFACES      256
@@ -113,6 +114,10 @@ struct InterfaceInfoList {
 #define DEFAULT_SOCK_BUFF_SIZE 4096
 #define MAX_IP_LEN 39 // Max size of an IP-address in textual representation (e.g. 0000:0000:0000:0000:0000:0000:0000:0000)
 
-
+enum WaitRetValue {
+    PIL_SOCK_SUCCESS,
+    PIL_SOCK_TIMEOUT,
+    PIL_SOCK_ERROR
+};
 
 #endif //PLATFORMINDEPENDENTLIB_SOCKETDEFINES_H

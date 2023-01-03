@@ -12,7 +12,7 @@ int lastThreadCtr = 0;
 
 void* ThreadFunction(void *threadArgs)
 {
-    PIL_ThreadArgument *pilThreadArgument = (void*)threadArgs;
+    PIL_ThreadArgument *pilThreadArgument = (PIL_ThreadArgument*)threadArgs;
     do{
         pilThreadArgument->m_ThreadFunction(pilThreadArgument->m_ThreadArgument);
     }while(pilThreadArgument->m_Loop && pilThreadArgument->m_Running);
@@ -93,31 +93,37 @@ PIL_ERROR_CODE PIL_THREADING_Detach(ThreadHandle *threadHandle)
 
 PIL_ERROR_CODE PIL_THREADING_JoinThread(ThreadHandle *threadHandle, void **retValue)
 {
-    threadHandle->m_ThreadArgument.m_Running = FALSE;
-    int ret = pthread_join(threadHandle->m_Handle, retValue);
-    if(ret != 0)
+    if(threadHandle->m_Running)
     {
-        switch (ret)
+        threadHandle->m_ThreadArgument.m_Running = FALSE;
+        int ret = pthread_join(threadHandle->m_Handle, retValue);
+        if (ret != 0)
         {
-            case EDEADLK:
-                PIL_SetLastError(&threadHandle->m_ErrorHandle, PIL_DEADLOCK_DETECTED);
-                return PIL_DEADLOCK_DETECTED;
-            case EINVAL:
-                PIL_SetLastError(&threadHandle->m_ErrorHandle, PIL_THREAD_NOT_JOINABLE);
-                return PIL_THREAD_NOT_JOINABLE;
-            case ESRCH:
-                PIL_SetLastError(&threadHandle->m_ErrorHandle, PIL_THREAD_NOT_FOUND);
-                return PIL_THREAD_NOT_FOUND;
-            default:
-                PIL_SetLastError(&threadHandle->m_ErrorHandle, PIL_UNKNOWN_ERROR);
-                return PIL_UNKNOWN_ERROR;
+            switch (ret)
+            {
+                case EDEADLK:
+                    // Join from own thread
+                    PIL_SetLastError(&threadHandle->m_ErrorHandle, PIL_DEADLOCK_DETECTED);
+                    return PIL_DEADLOCK_DETECTED;
+                case EINVAL:
+                    PIL_SetLastError(&threadHandle->m_ErrorHandle, PIL_THREAD_NOT_JOINABLE);
+                    return PIL_THREAD_NOT_JOINABLE;
+                case ESRCH:
+                    PIL_SetLastError(&threadHandle->m_ErrorHandle, PIL_THREAD_NOT_FOUND);
+                    return PIL_THREAD_NOT_FOUND;
+                default:
+                    PIL_SetLastError(&threadHandle->m_ErrorHandle, PIL_UNKNOWN_ERROR);
+                    return PIL_UNKNOWN_ERROR;
+            }
         }
-    }
-    threadHandle->m_Running = FALSE;
+        threadHandle->m_Running = FALSE;
+    } else
+        return PIL_THREAD_NOT_FOUND;
     return PIL_NO_ERROR;
 }
 
 PIL_ERROR_CODE PIL_THREADING_AbortThread(ThreadHandle *threadHandle)
 {
+    pthread_cancel(threadHandle->m_Handle);
     return PIL_NO_ERROR;
 }
