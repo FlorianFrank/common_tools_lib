@@ -26,6 +26,10 @@ if(PIL_CXX)
     add_definitions(-DPIL_CXX=1)
 endif()
 
+if(PIL_EXCEPTION_HANDLING)
+    add_definitions(-DPIL_EXCEPTION_HANDLING=1)
+endif()
+
 if (DEFINED PIL_COMMUNICATION)
     if(DEFINED PIL_CXX)
     set(communication_headers_cxx

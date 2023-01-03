@@ -114,6 +114,10 @@ struct InterfaceInfoList {
 #define DEFAULT_SOCK_BUFF_SIZE 4096
 #define MAX_IP_LEN 39 // Max size of an IP-address in textual representation (e.g. 0000:0000:0000:0000:0000:0000:0000:0000)
 
-
+enum WaitRetValue {
+    PIL_SOCK_SUCCESS,
+    PIL_SOCK_TIMEOUT,
+    PIL_SOCK_ERROR
+};
 
 #endif //PLATFORMINDEPENDENTLIB_SOCKETDEFINES_H

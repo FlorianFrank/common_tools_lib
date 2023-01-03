@@ -89,9 +89,6 @@ TEST(SocketTest_CPP, SimpleSocketTest)
     std::function<void(std::shared_ptr<PIL::Socket>& , std::string &)> callbackFunc = ReceiveHandlerCPP;
     ret = clientSock.ConnectToServer(ipAddr, 14002, callbackFunc);
     EXPECT_EQ(ret, PIL_NO_ERROR);
-    srvSock.Close();
-    clientSock.Close();
-
 }
 
 /**

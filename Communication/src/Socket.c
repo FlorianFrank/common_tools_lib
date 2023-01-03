@@ -144,7 +144,7 @@ PIL_ERROR_CODE PIL_SOCKET_Close(PIL_SOCKET *socketRet)
     udp_remove(socketRet->conn);
 #endif // linux
     if(socketRet->m_AcceptThreadHandle)
-        PIL_THREADING_AbortThread(socketRet->m_AcceptThreadHandle);
+        PIL_THREADING_JoinThread(socketRet->m_AcceptThreadHandle, NULL);
 
     PIL_ERROR_CODE ret =  (close(socketRet->m_socket) == 0) ?  PIL_NO_ERROR : PIL_ERRNO;
     return ret;
@@ -513,7 +513,7 @@ PIL_ERROR_CODE PIL_SOCKET_UnregisterCallbackFunction(PIL_SOCKET *socketRet)
         socketRet->m_callbackActive = FALSE;
         if (!socketRet->m_callbackThreadHandle)
             return PIL_INVALID_ARGUMENTS;
-        PIL_ERROR_CODE ret = PIL_THREADING_AbortThread(socketRet->m_callbackThreadHandle);
+        PIL_ERROR_CODE ret = PIL_THREADING_JoinThread(socketRet->m_callbackThreadHandle, NULL);
         free(socketRet->m_callbackThreadHandle);
         socketRet->m_callbackThreadHandle = NULL;
         free(socketRet->m_callbackThreadArg);
