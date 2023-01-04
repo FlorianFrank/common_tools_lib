@@ -183,10 +183,18 @@ if (DEFINED PIL_STATIC)
 endif () # DEFINED STATIC
 
 if (DEFINED ENV{GITHUB_ACTIONS})
-    if (WIN32)
 
-        link_directories("googletest/build/lib")
-        include_directories("googletest/googletest/include/")
+    if (WIN32)
+        if(DEFINED GTEST_LINK_DIR)
+            link_directories(${GTEST_LINK_DIR})
+        else()
+            link_directories("googletest/build/lib")
+        endif()
+        if(DEFINED GTEST_INCLUDE_DIR)
+            include_directories(${GTEST_INCLUDE_DIR})
+        else()
+            include_directories("googletest/googletest/include")
+        endif()
     endif ()
 endif ()
 
