@@ -3,17 +3,12 @@ name: windows_latest
 on: [push]
 
 env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
   CC: gcc
   CXX: g++
 
 jobs:
   build:
-    # The CMake configure and build commands are platform agnostic and should work equally
-    # well on Windows or Mac.  You can convert this to a matrix build if you need
-    # cross-platform coverage.
-    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
@@ -36,22 +31,13 @@ jobs:
       with:
           node-version: ${{ matrix.node }}
 
-
-
-    - uses: actions/checkout@v3
+    - name: Checkout Repository and Submodules
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
 
     - name: Create Build Environment
-      # Some projects don't allow in-source building, so create a separate build directory
-      # We'll use this as our working directory for all subsequent commands
       run: cmake -E make_directory ${{runner.workspace}}/build
-
-    - name: Install gtest
-      working-directory: ${{runner.workspace}}/common_tools_lib
-      run: ./build_gtest.bat
-
-    - name: Copy GTest
-      working-directory: ${{runner.workspace}}/common_tools_lib
-      run: cp googletest/build/lib/* ${{runner.workspace}}/build
 
     - name: Copy Windows DLLs
       working-directory: ${{runner.workspace}}/common_tools_lib
@@ -59,28 +45,24 @@ jobs:
 
     - name: Configure CMake
       working-directory: ${{runner.workspace}}/build
-      # Note the current convention is to use the -S and -B options here to specify source
-      # and build directories, but this is only available with CMake 3.13 and higher.
-      # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
       shell: pwsh
       run: cmake ../common_tools_lib -GNinja -DCMAKE_BUILD_TYPE=${{matrix.config.build_type}} -DPIL_ALL=1 -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc
 
-    - name: Build project
+    - name: Build Project
       working-directory: ${{runner.workspace}}/build
       shell: pwsh
       run: cmake --build . --config ${{ matrix.config.build_type }} --target all
 
-    - name: Test
+    - name: Run UnitTests
       working-directory: ${{runner.workspace}}/build
       run: .\SocketUnitTest.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V;
            .\ExceptionUnitTest.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V;
            .\FileHandlingUnitTest.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V
 
-
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: common_tools_lib_windows_mingw
+        name: common_tools_lib_windows_mingw_x64
         path: |
           ${{ runner.workspace }}/build/*.dll
           ${{ runner.workspace }}/build/*.exe

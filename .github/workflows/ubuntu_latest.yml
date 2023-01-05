@@ -3,15 +3,10 @@ name: ubuntu_latest
 on: [push]
 
 env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
 
 jobs:
   build:
-    # The CMake configure and build commands are platform agnostic and should work equally
-    # well on Windows or Mac.  You can convert this to a matrix build if you need
-    # cross-platform coverage.
-    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
@@ -34,41 +29,31 @@ jobs:
       with:
           node-version: ${{ matrix.node }}
 
-    - name: install Dependencies Linux
-      if: matrix.config.os == 'ubuntu-latest'
-      run: sudo apt-get install libgtest-dev
-
-    - name: Googletest installer
-      # You may pin to the exact commit or the version.
-      # uses: MarkusJx/googletest-installer@2dbed3d0a9dc19bebe3e36773185ab9c17664c8d
-      uses: MarkusJx/googletest-installer@v1.1
-
-    - uses: actions/checkout@v3
+    - name: Checkout Repository and Submodules
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
 
     - name: Configure CMake
-      if: matrix.config.os != 'windows-latest'
       working-directory: ${{runner.workspace}}/build
-      # Note the current convention is to use the -S and -B options here to specify source
-      # and build directories, but this is only available with CMake 3.13 and higher.
-      # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
       run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=${{matrix.config.build_type}} -DPIL_ALL=1
 
-    - name: Build project
+    - name: Build Project
       working-directory: ${{runner.workspace}}/build
       shell: bash
       run: cmake --build . --config ${{ matrix.config.build_type }} --target all
 
-    - name: Test
+    - name: Run UnitTests
       working-directory: ${{runner.workspace}}/build
       run: GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V
 
-    - name: Upload artifacts
+    - name: Upload Artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: common_tools_lib_ubuntu
+        name: common_tools_lib_ubuntu_x64
         path: |
           ${{ runner.workspace }}/build/*.so
           ${{ runner.workspace }}/build/*.a
