@@ -34,8 +34,7 @@ jobs:
       with:
           node-version: ${{ matrix.node }}
 
-    - name: install Dependencies Linux
-      if: matrix.config.os == 'ubuntu-latest'
+    - name: install Dependencies
       run: sudo apt-get install libgtest-dev
 
     - name: Googletest installer
@@ -43,7 +42,10 @@ jobs:
       # uses: MarkusJx/googletest-installer@2dbed3d0a9dc19bebe3e36773185ab9c17664c8d
       uses: MarkusJx/googletest-installer@v1.1
 
-    - uses: actions/checkout@v3
+    - name: Checkout repository and submodules
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
