@@ -684,12 +684,12 @@ void* PIL_AcceptThreadFunction(void* value)
     char ipAddr[MAX_IP_LEN];
     PIL_SOCKET retHandle;
     do {
-        int ret = PIL_SOCKET_Accept(&arg->socket, ipAddr, &retHandle);
+        int ret = PIL_SOCKET_Accept(arg->socket, ipAddr, &retHandle);
         if(ret != PIL_NO_ERROR)
             return NULL;
         retHandle.m_IsConnected = TRUE;
         arg->acceptCallback(retHandle, ipAddr);
-    }while(arg->socket.m_IsOpen);
+    }while(arg->socket->m_IsOpen);
     return NULL;
 }
 
@@ -717,7 +717,7 @@ PIL_ERROR_CODE PIL_SOCKET_Setup_ServerSocket(PIL_SOCKET *socket, uint16_t port, 
 PIL_ERROR_CODE PIL_SOCKET_RegisterAcceptCallback(PIL_SOCKET *socket, void (*receiveCallback)(PIL_SOCKET, char *))
 {
     ThreadArg *arg = malloc(sizeof(struct ThreadArg));
-    arg->socket = *socket;
+    arg->socket = socket;
     arg->acceptCallback = receiveCallback;
 
     socket->m_AcceptThreadHandle = malloc(sizeof(ThreadHandle));

@@ -19,7 +19,7 @@ namespace PIL
     public:
         Socket(TransportProtocol transportProtocol, InternetProtocol internetProtocol, const std::string &address,
                int port, uint16_t timeoutInMS);
-        Socket(PIL_SOCKET *socket, std::string &ip, uint16_t port);
+        Socket(std::unique_ptr<PIL_SOCKET> &socket, std::string &ip, uint16_t port);
         ~Socket();
 
         PIL_ERROR_CODE Bind(PIL_BOOL reuse);
@@ -46,15 +46,15 @@ namespace PIL
         TransportProtocol GetTransportProtocol() const { return m_TransportProtocol; }
         InternetProtocol GetInternetProtocol() const { return m_InternetProtocol; }
 
-        PIL_ERROR_CODE CreateServerSocket(std::function<void(std::shared_ptr<PIL::Socket>&)> &receiveCallback);
-        PIL_ERROR_CODE ConnectToServer(std::string &ipAddr, int destPort, std::function<void(std::shared_ptr<Socket>& , std::string &)> &receiveCallback);
+        PIL_ERROR_CODE CreateServerSocket(std::function<void(std::unique_ptr<PIL::Socket>&)> &receiveCallback);
+        PIL_ERROR_CODE ConnectToServer(std::string &ipAddr, int destPort, std::function<void(std::unique_ptr<Socket>& , std::string &)> &receiveCallback);
 
 
         struct ReceiveCallbackArg {
-            explicit ReceiveCallbackArg(std::function<void(std::shared_ptr<PIL::Socket>&, std::string&)>& c): m_ReceiveCallback(c){
+            explicit ReceiveCallbackArg(std::function<void(std::unique_ptr<PIL::Socket>&, std::string&)>& c): m_ReceiveCallback(c){
             }
-            std::function<void(std::shared_ptr<PIL::Socket>&, std::string&)> &m_ReceiveCallback;
-            std::shared_ptr<PIL::Socket> m_Socket = {};
+            std::function<void(std::unique_ptr<PIL::Socket>&, std::string&)> &m_ReceiveCallback;
+            std::unique_ptr<PIL::Socket> m_Socket = {};
         };
 
         PIL_ERROR_CODE RegisterReceiveCallbackFunction(ReceiveCallbackArg& additionalArg);
@@ -70,10 +70,10 @@ namespace PIL
         uint16_t m_TimeoutInMS;
         PIL_ERROR_CODE m_LastError;
 
-        PIL_SOCKET m_SocketRet{};
-        std::vector<PIL_SOCKET> m_SocketList;
+        std::unique_ptr<PIL_SOCKET> m_CSocketHandle;
+        std::vector<std::unique_ptr<PIL_SOCKET>> m_SocketList;
 
-        PIL_ERROR_CODE RegisterAcceptCallback(std::function<void(std::shared_ptr<PIL::Socket>&)> &f);
+        PIL_ERROR_CODE RegisterAcceptCallback(std::function<void(std::unique_ptr<PIL::Socket>&)> &f);
     };
 
 }

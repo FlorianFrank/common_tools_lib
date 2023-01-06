@@ -82,7 +82,7 @@ enum
 } typedef InternetProtocol;
 
 struct ThreadArg{
-    struct PIL_SOCKET socket;
+    struct PIL_SOCKET* socket;
     void (*acceptCallback)(struct PIL_SOCKET retHandle, char* ip);
 } typedef ThreadArg;
 
