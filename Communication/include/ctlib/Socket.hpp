@@ -60,7 +60,6 @@ namespace PIL
         PIL_ERROR_CODE RegisterReceiveCallbackFunction(ReceiveCallbackArg& additionalArg);
         PIL_ERROR_CODE UnregisterCallbackFunction();
 
-        inline PIL_ERROR_CODE GetLastError() { return m_LastError; };
 
     private:
         uint16_t m_Port;
@@ -68,7 +67,6 @@ namespace PIL
         TransportProtocol m_TransportProtocol;
         InternetProtocol m_InternetProtocol;
         uint16_t m_TimeoutInMS;
-        PIL_ERROR_CODE m_LastError;
 
         std::unique_ptr<PIL_SOCKET> m_CSocketHandle;
         std::vector<std::unique_ptr<PIL_SOCKET>> m_SocketList;

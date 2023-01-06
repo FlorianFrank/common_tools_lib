@@ -745,7 +745,7 @@ PIL_ERROR_CODE PIL_SOCKET_ConnectToServer(PIL_SOCKET *socket, const char *ipAddr
     if(ret != PIL_NO_ERROR)
         return ret;
     
-    return PIL_SOCKET_RegisterReceiveCallbackFunction(socket, receiveCallback, NULL);
+    return PIL_SOCKET_RegisterReceiveCallbackFunction(socket, receiveCallback, additionalArgument);
 }
 
 
