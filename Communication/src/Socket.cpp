@@ -28,7 +28,7 @@ namespace PIL
         std::function<void(std::unique_ptr<PIL::Socket>&)> acceptCallback = {};
     };
 
-    Socket::Socket(std::unique_ptr<PIL_SOCKET> &socket, std::string &ip, uint16_t port) : m_CSocketHandle(std::move(socket)), m_IPAddress(ip), m_Port(port),
+    Socket::Socket(std::unique_ptr<PIL_SOCKET> socket, std::string &ip, uint16_t port) : m_CSocketHandle(std::move(socket)), m_IPAddress(ip), m_Port(port),
                                                                                           m_TransportProtocol(TCP), m_InternetProtocol(IPv4), m_TimeoutInMS(0){
 
     }
@@ -211,9 +211,14 @@ namespace PIL
         char ipAddr[MAX_IP_LEN];
 
         do {
+            if(!arg->argC.socket->m_IsOpen){
+                return arg;
+            }
             std::unique_ptr<PIL_SOCKET> retHandle = std::make_unique<PIL_SOCKET>();
             int ret = PIL_SOCKET_Accept(arg->argC.socket, ipAddr, retHandle.get());
-            if(ret != PIL_NO_ERROR && arg->argC.socket->m_IsOpen){
+            if(ret == PIL_INTERFACE_CLOSED)
+                return arg;
+            if(ret != PIL_NO_ERROR){
 #ifdef PIL_EXCEPTION_HANDLING
                 throw PIL::Exception(PIL_ERRNO, __FILENAME__, __LINE__);
 #endif // PIL_EXCEPTION_HANDLING
@@ -222,7 +227,7 @@ namespace PIL
             retHandle->m_IsOpen = TRUE;
             retHandle->m_IsConnected = TRUE;
             std::string ipStr = ipAddr;
-            std::unique_ptr<PIL::Socket> socketPtr = std::make_unique<PIL::Socket>(retHandle, ipStr, retHandle->m_port);
+            std::unique_ptr<PIL::Socket> socketPtr = std::make_unique<PIL::Socket>(std::move(retHandle), ipStr, retHandle->m_port);
             arg->acceptCallback(socketPtr);
         }while(arg->argC.socket->m_IsOpen);
         return arg;
@@ -270,7 +275,7 @@ namespace PIL
             }
             std::string ip = socket->m_IPAddress;
             std::unique_ptr<PIL_SOCKET> s = std::unique_ptr<PIL_SOCKET>(socket);
-            std::unique_ptr<PIL::Socket> socketCXX = std::make_unique<PIL::Socket>(s, ip, socket->m_port);
+            std::unique_ptr<PIL::Socket> socketCXX = std::make_unique<PIL::Socket>(std::move(s), ip, socket->m_port);
             std::string value = std::string((char *)buffer, bufferLen);
             auto *arg = reinterpret_cast<ReceiveCallbackArg*>(additionalArg);
             arg->m_ReceiveCallback(socketCXX, value);
@@ -292,7 +297,7 @@ namespace PIL
             std::string value = std::string((char *)buffer, bufferLen);
             auto *arg = reinterpret_cast<ReceiveCallbackArg*>(additionalArg);
             auto s = std::unique_ptr<PIL_SOCKET>(socket);
-            arg->m_Socket = std::make_unique<PIL::Socket>(s, ip, socket->m_port);
+            arg->m_Socket = std::make_unique<PIL::Socket>(std::move(s), ip, socket->m_port);
             arg->m_ReceiveCallback(arg->m_Socket, value);
         };
 

@@ -246,6 +246,10 @@ PIL_ERROR_CODE PIL_SOCKET_Accept(PIL_SOCKET *socket, char *ipAddr, PIL_SOCKET *n
     int acceptRet = accept(socket->m_socket, (struct sockaddr *) &address, &addrLen);
     if (acceptRet < 0)
     {
+#if __APPLE__
+        if(errno == 53)
+            return PIL_INTERFACE_CLOSED;
+#endif // __APPLE__
         PIL_SetLastError(&socket->m_ErrorHandle, PIL_ERRNO);
         return PIL_ERRNO;
     }

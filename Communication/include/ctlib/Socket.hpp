@@ -19,7 +19,7 @@ namespace PIL
     public:
         Socket(TransportProtocol transportProtocol, InternetProtocol internetProtocol, const std::string &address,
                int port, uint16_t timeoutInMS);
-        Socket(std::unique_ptr<PIL_SOCKET> &socket, std::string &ip, uint16_t port);
+        Socket(std::unique_ptr<PIL_SOCKET> socket, std::string &ip, uint16_t port);
         ~Socket();
 
         PIL_ERROR_CODE Bind(PIL_BOOL reuse);
