@@ -1,18 +1,21 @@
+/**
+ * @copyright University of Passau - Chair of Computer Engineering
+ * @author Florian Frank
+ */
 #ifdef PIL_CXX
 #pragma once
-#include <vector>
 
 extern "C" {
     #include "ctlib/SocketDefines.h"
 }
+#include "ctlib/Threading.hpp"
 
+#include <vector> // std::vector
 #include <functional> // std::function
 #include <memory> // std::shared_ptr
-#include "ctlib/Threading.hpp"
 
 namespace PIL
 {
-
 #define MAX_BUF_LEN 2048
 
     class Socket
