@@ -58,6 +58,8 @@ jobs:
       run: .\SocketUnitTest.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V;
            .\ExceptionUnitTest.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V;
            .\FileHandlingUnitTest.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V
+           .\ThreadingUnitTest.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V
+
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v3

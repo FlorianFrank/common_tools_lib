@@ -1,7 +1,7 @@
-//
-// Created by florianfrank on 31.12.20.
-//
-
+/**
+ * @copyright University of Passau - Chair of Computer Engineering
+ * @author Florian Frank
+ */
 #ifndef PLATFORMINDEPENDENTLIB_THREADING_H
 #define PLATFORMINDEPENDENTLIB_THREADING_H
 

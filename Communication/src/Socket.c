@@ -1,11 +1,19 @@
-
+/**
+ * @copyright University of Passau - Chair of Computer Engineering
+ * @author Florian Frank
+ */
 #ifdef __WIN32__
 #include <winsock2.h>
 #include <wspiapi.h>
-
 # else // __linux__
 #include <sys/socket.h> // helperFiles, recvfrom, sendto
 #include <arpa/inet.h> // htons, inet_addr, inet_ntoa
+#ifdef __linux__
+#include <ifaddrs.h>
+#include <net/if.h>
+#include <sys/ioctl.h>
+#include <netdb.h>
+#endif // __linux__
 #endif
 #include <string.h> // memset
 #include <unistd.h> // close
@@ -40,14 +48,7 @@
 #include <errno.h>
 #ifndef __WIN32__
 #include <fcntl.h> // fcntl
-#include <ifaddrs.h>
-#include <net/if.h>
-#include <sys/ioctl.h>
-#include <netdb.h>
-
 #endif // __WIN32__
-
-
 #endif // __linux__
 
 /**
@@ -107,7 +108,7 @@ PIL_SOCKET_Create(PIL_SOCKET *socketRet, TransportProtocol protocol, InternetPro
     }
 #else // lwip
     socketRet->conn = udp_new();
-#endif // linux
+#endif // embedded
     socketRet->m_IsOpen = TRUE;
     return PIL_NO_ERROR;
 }
@@ -142,7 +143,7 @@ PIL_ERROR_CODE PIL_SOCKET_Close(PIL_SOCKET *socketRet)
     }
 #else // lwip
     udp_remove(socketRet->conn);
-#endif // linux
+#endif // embedded
     if(socketRet->m_AcceptThreadHandle)
         PIL_THREADING_JoinThread(socketRet->m_AcceptThreadHandle, NULL);
 
@@ -197,7 +198,7 @@ PIL_ERROR_CODE PIL_SOCKET_Bind(PIL_SOCKET *socketRet, PIL_BOOL reuseSock)
     PIL_SetLastError(&socketRet->m_ErrorHandle, PIL_ERRNO); // TODO
     return -1;
         }
-#endif // Linux
+#endif // embedded
     return PIL_NO_ERROR;
 }
 
@@ -213,13 +214,13 @@ PIL_ERROR_CODE PIL_SOCKET_Listen(PIL_SOCKET *socketRet, uint32_t sizeQueue)
     if (socketRet == NULL)
         return PIL_INVALID_ARGUMENTS;
 
-    uint32_t listenRet = listen(socketRet->m_socket, sizeQueue);
+    uint32_t listenRet = listen(socketRet->m_socket, (int)sizeQueue);
     if (listenRet != 0)
     {
         PIL_SetLastError(&socketRet->m_ErrorHandle, PIL_ERRNO);
         return PIL_ERRNO;
     }
-#endif // we use LWIP only for UDP
+#endif // embedded
     return PIL_NO_ERROR;
 }
 
@@ -246,6 +247,10 @@ PIL_ERROR_CODE PIL_SOCKET_Accept(PIL_SOCKET *socket, char *ipAddr, PIL_SOCKET *n
     int acceptRet = accept(socket->m_socket, (struct sockaddr *) &address, &addrLen);
     if (acceptRet < 0)
     {
+#if __APPLE__
+        if(errno == 53)
+            return PIL_INTERFACE_CLOSED;
+#endif // __APPLE__
         PIL_SetLastError(&socket->m_ErrorHandle, PIL_ERRNO);
         return PIL_ERRNO;
     }
@@ -266,7 +271,7 @@ PIL_ERROR_CODE PIL_SOCKET_Accept(PIL_SOCKET *socket, char *ipAddr, PIL_SOCKET *n
  * @param ipAddr ip address of the connection.
  * @param port port of the new connection.
  * @param timeoutInMs sets the timeout in milliseconds
- * @return 0 if no error occured.
+ * @return 0 if no error occurred.
  */
 PIL_ERROR_CODE PIL_SOCKET_Connect(PIL_SOCKET *socket, const char *ipAddr, uint16_t port, uint16_t timeoutInMs)
 {
@@ -288,7 +293,7 @@ PIL_ERROR_CODE PIL_SOCKET_Connect(PIL_SOCKET *socket, const char *ipAddr, uint16
 #else
     inet_aton(ipAddr, &address.sin_addr);
 #endif
-    fd_set fdset;
+    fd_set fdSet;
     struct timeval tv;
 
 #ifndef __WIN32__
@@ -308,7 +313,7 @@ PIL_ERROR_CODE PIL_SOCKET_Connect(PIL_SOCKET *socket, const char *ipAddr, uint16
     if(connectRet == -1 && errno != 115) { // Connection in progess TODO
 #endif
 #ifdef __APPLE__
-    if(connectRet == -1 && errno != 36) { // Connection in progess TODO
+    if(connectRet == -1 && errno != 36) { // Connection in process TODO
 #endif
 #ifdef __WIN32__
         if(connectRet != 0){
@@ -322,10 +327,10 @@ PIL_ERROR_CODE PIL_SOCKET_Connect(PIL_SOCKET *socket, const char *ipAddr, uint16
     }
 
     if(timeoutInMs > 0){
-        FD_ZERO(&fdset);
-        FD_SET(socket->m_socket, &fdset);
+        FD_ZERO(&fdSet);
+        FD_SET(socket->m_socket, &fdSet);
         tv = PIL_SOCKET_TransformMSInTimeVal(timeoutInMs);
-        int selectRet = select(socket->m_socket + 1, NULL, &fdset, NULL, &tv);
+        int selectRet = select(socket->m_socket + 1, NULL, &fdSet, NULL, &tv);
         if (selectRet == 1)
         {
 #if __WIN32__
@@ -370,7 +375,7 @@ PIL_ERROR_CODE PIL_SOCKET_WaitTillDataAvail(PIL_SOCKET *socketRet, uint32_t time
     FD_ZERO(&readFD);
     FD_SET(socketRet->m_socket, &readFD);
 
-    timeout.tv_usec = (timeoutMS % 1000) * 1000;
+    timeout.tv_usec = (int)(timeoutMS % 1000) * 1000;
     timeout.tv_sec = (timeoutMS - (timeoutMS % 1000)) / 1000;
     int ret = select(socketRet->m_socket + 1, &readFD, NULL, NULL, &timeout);
     if (ret == -1)
@@ -386,7 +391,7 @@ PIL_ERROR_CODE PIL_SOCKET_WaitTillDataAvail(PIL_SOCKET *socketRet, uint32_t time
 /**
  * @brief Blocking receive function. Receives data on the provided socket.
  * @param socketRet socket on which data should be received.
- * @param buffer buffer in which the incomming data should be stored.
+ * @param buffer buffer in which the incoming data should be stored.
  * @param bufferLen the maximum number of the buffer must be passed to this function.
  *        Afterwards, it contains the amount of data which was received.
  * @return
@@ -431,7 +436,7 @@ PIL_ERROR_CODE PIL_SOCKET_Receive(PIL_SOCKET *socketRet, uint8_t *buffer, uint32
 void* PIL_ReceiveThreadFunction(void *handle)
 {
     assert(handle);
-    ReceiveThreadCallbackArg *arg = (ReceiveThreadCallbackArg*) handle;
+    ReceiveThreadCallbackArgC *arg = (ReceiveThreadCallbackArgC*) handle;
     assert(arg->socket && arg->receiveCallback);
 
     uint8_t buffer[DEFAULT_SOCK_BUFF_SIZE];
@@ -455,7 +460,7 @@ void* PIL_ReceiveThreadFunction(void *handle)
             }
         }
     }
-    return NULL;
+    return arg;
 }
 
 #ifdef PIL_THREADING
@@ -471,7 +476,7 @@ PIL_ERROR_CODE PIL_SOCKET_RegisterReceiveCallbackFunction(PIL_SOCKET *socketRet,
         return PIL_INVALID_ARGUMENTS;
 
     // Initialize thread argument
-    socketRet->m_callbackThreadArg = malloc(sizeof(ReceiveThreadCallbackArg));
+    socketRet->m_callbackThreadArg = malloc(sizeof(ReceiveThreadCallbackArgC));
     socketRet->m_callbackThreadArg ->socket = socketRet;
     socketRet->m_callbackThreadArg ->receiveCallback = callback;
     socketRet->m_callbackThreadArg ->additionalArg = additional;
@@ -524,7 +529,7 @@ PIL_ERROR_CODE PIL_SOCKET_UnregisterCallbackFunction(PIL_SOCKET *socketRet)
     return PIL_NO_ERROR;
 }
 
-#endif // THREADING
+#endif // PIL_THREADING
 
 
 
@@ -546,9 +551,9 @@ PIL_ERROR_CODE PIL_SOCKET_ReceiveFrom(PIL_SOCKET *socketRet, uint8_t *buffer, ui
     addr.sin_family = socketRet->m_protocol;
     addr.sin_port = htons(socketRet->m_port);
     addr.sin_addr.s_addr = INADDR_ANY;
-    socklen_t senderAddrLen = sizeof(addr);
+    socklen_t senderAddressLen = sizeof(addr);
 
-    int ret = recvfrom(socketRet->m_socket, (char*)buffer, *bufferLen, MSG_WAITALL, (struct sockaddr *) &addr, &senderAddrLen);
+    long ret = recvfrom(socketRet->m_socket, (char*)buffer, *bufferLen, MSG_WAITALL, (struct sockaddr *) &addr, &senderAddressLen);
     if (ret < 0)
     {
         PIL_SetLastError(&socketRet->m_ErrorHandle, PIL_ERRNO);
@@ -568,7 +573,7 @@ PIL_ERROR_CODE PIL_SOCKET_ReceiveFrom(PIL_SOCKET *socketRet, uint8_t *buffer, ui
         PIL_SetLastError(socketRet);
         return -1;
     }
-#endif // LINUX
+#endif // embedded
     return 0;
 }
 
@@ -592,7 +597,7 @@ PIL_ERROR_CODE PIL_SOCKET_Send(PIL_SOCKET *socketRet, const uint8_t *buffer, uin
 
 #ifndef embedded
     //  socklen_t senderAddrLen = sizeof(socketRet->m_SrcAddr);
-    int ret = send(socketRet->m_socket, (char*)buffer, *bufferLen, 0/*, &socketRet->m_SrcAddr, senderAddrLen*/);
+    long ret = send(socketRet->m_socket, (char*)buffer, *bufferLen, 0/*, &socketRet->m_SrcAddr, senderAddrLen*/);
     if (ret < 0)
     {
         PIL_SetLastError(&socketRet->m_ErrorHandle, PIL_ERRNO);
@@ -608,7 +613,7 @@ PIL_ERROR_CODE PIL_SOCKET_Send(PIL_SOCKET *socketRet, const uint8_t *buffer, uin
         PIL_SetLastError(socketRet);
         return -1;
         }
-#endif // Linux
+#endif // embedded
     return PIL_NO_ERROR;
 }
 
@@ -630,7 +635,7 @@ PIL_SOCKET_SendTo(PIL_SOCKET *socketRet, const char *destAddr, const uint16_t po
     ((struct sockaddr_in *) &socketRet->m_SrcAddr)->sin_port = htons(port);
 
     socklen_t senderAddrLen = sizeof(socketRet->m_SrcAddr);
-    int ret = sendto(socketRet->m_socket, (char*)buffer, *bufferLen, 0, &socketRet->m_SrcAddr, senderAddrLen);
+    long ret = sendto(socketRet->m_socket, (char*)buffer, *bufferLen, 0, &socketRet->m_SrcAddr, senderAddrLen);
     if (ret < 0)
     {
         PIL_SetLastError(&socketRet->m_ErrorHandle, PIL_ERRNO);
@@ -645,7 +650,7 @@ PIL_SOCKET_SendTo(PIL_SOCKET *socketRet, const char *destAddr, const uint16_t po
     err_t ret = udp_sendto(socketRet->conn, newbuff, &socketRet->m_SrcAddr, socketRet->m_port);
     if(ret != 0)
             return -1;
-#endif // Linux
+#endif // embedded
     return 0;
 }
 
@@ -661,7 +666,7 @@ const char *PIL_SOCKET_GetSenderIP(PIL_SOCKET *socketRet)
         return NULL;
 
     return inet_ntoa(((struct sockaddr_in *) &socketRet->m_SrcAddr)->sin_addr);
-#endif // Not supported by LWIP
+#endif // embedded
 }
 
 /**
@@ -680,17 +685,17 @@ void* PIL_AcceptThreadFunction(void* value)
 {
     assert(value);
 
-    ThreadArg *arg = value;
+    AcceptThreadArgC *arg = value;
     char ipAddr[MAX_IP_LEN];
     PIL_SOCKET retHandle;
     do {
-        int ret = PIL_SOCKET_Accept(&arg->socket, ipAddr, &retHandle);
+        int ret = PIL_SOCKET_Accept(arg->socket, ipAddr, &retHandle);
         if(ret != PIL_NO_ERROR)
             return NULL;
         retHandle.m_IsConnected = TRUE;
         arg->acceptCallback(retHandle, ipAddr);
-    }while(arg->socket.m_IsOpen);
-    return NULL;
+    }while(arg->socket->m_IsOpen);
+    return arg;
 }
 
 PIL_ERROR_CODE PIL_SOCKET_Setup_ServerSocket(PIL_SOCKET *socket, uint16_t port, void (*acceptCallback)(struct PIL_SOCKET retHandle, char* ip))
@@ -716,8 +721,8 @@ PIL_ERROR_CODE PIL_SOCKET_Setup_ServerSocket(PIL_SOCKET *socket, uint16_t port, 
 
 PIL_ERROR_CODE PIL_SOCKET_RegisterAcceptCallback(PIL_SOCKET *socket, void (*receiveCallback)(PIL_SOCKET, char *))
 {
-    ThreadArg *arg = malloc(sizeof(struct ThreadArg));
-    arg->socket = *socket;
+    AcceptThreadArgC *arg = malloc(sizeof(struct AcceptThreadArgC));
+    arg->socket = socket;
     arg->acceptCallback = receiveCallback;
 
     socket->m_AcceptThreadHandle = malloc(sizeof(ThreadHandle));
@@ -745,7 +750,7 @@ PIL_ERROR_CODE PIL_SOCKET_ConnectToServer(PIL_SOCKET *socket, const char *ipAddr
     if(ret != PIL_NO_ERROR)
         return ret;
     
-    return PIL_SOCKET_RegisterReceiveCallbackFunction(socket, receiveCallback, NULL);
+    return PIL_SOCKET_RegisterReceiveCallbackFunction(socket, receiveCallback, additionalArgument);
 }
 
 
@@ -803,6 +808,6 @@ struct timeval PIL_SOCKET_TransformMSInTimeVal(uint16_t timeoutInMS)
     struct timeval t;
 
     t.tv_sec = timeOutInMicroSeconds / (int)1e6;
-    t.tv_usec = timeOutInMicroSeconds - (t.tv_sec * (int)1e6);
+    t.tv_usec = timeOutInMicroSeconds - ((int)t.tv_sec * (int)1e6);
     return t;
 }
