@@ -98,6 +98,10 @@ if(DEFINED PIL_THREADING)
 
     set(threading_headers_cxx "Threading/include/ctlib/Threading.hpp")
     if(PIL_CXX)
+        set(threading_headers_cxx ${threading_headers_cxx}
+                "${CMAKE_CURRENT_SOURCE_DIR}/Threading/include/ctlib/ThreadArg.hpp")
+
+
         set(threading_cxx "${CMAKE_CURRENT_SOURCE_DIR}/Threading/src/Threading.cpp")
     endif()
 
@@ -108,8 +112,7 @@ if(DEFINED PIL_THREADING)
 
     set(threading
     	"${CMAKE_CURRENT_SOURCE_DIR}/Threading/src/Threading.c"
-    	"${threading_headers}"
-        "${threading_cxx}")
+    	"${threading_headers}")
 
     include_directories("${CMAKE_CURRENT_SOURCE_DIR}/Threading/include")
 
@@ -201,7 +204,6 @@ if (PIL_UNIT_TESTING)
     add_executable(FileHandlingUnitTest ${FILE_HANDLING_UNIT_TEST_FILES})
     target_link_libraries(FileHandlingUnitTest gtest_main gtest pthread common_tools_lib)
     gtest_discover_tests("FileHandlingUnitTest")
-
 endif () # PIL_UNIT_TESTING
 
 option(BUILD_DOC "Build documentation" OFF)

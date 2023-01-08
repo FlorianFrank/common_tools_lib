@@ -31,8 +31,13 @@
 #include <stdint.h>
 #include "ThreadingDefines.h"
 
+typedef struct PIL_SOCKET PIL_SOCKET;
 
-struct ReceiveThreadCallbackArg typedef ReceiveThreadCallbackArg;
+struct ReceiveThreadCallbackArgC {
+    PIL_SOCKET *socket;
+    void (*receiveCallback)(PIL_SOCKET* socket, uint8_t* buffer, uint32_t len, void*);
+    void *additionalArg;
+} typedef ReceiveThreadCallbackArgC;
 
 struct PIL_SOCKET
 {
@@ -64,7 +69,7 @@ struct PIL_SOCKET
     PIL_ErrorHandle m_ErrorHandle;
 
     ThreadHandle *m_callbackThreadHandle;
-    ReceiveThreadCallbackArg *m_callbackThreadArg;
+    ReceiveThreadCallbackArgC *m_callbackThreadArg;
     PIL_BOOL m_callbackActive;
 
 } typedef PIL_SOCKET;
@@ -81,16 +86,10 @@ enum
     IPv6 = 1
 } typedef InternetProtocol;
 
-struct ThreadArg{
+struct AcceptThreadArgC{
     struct PIL_SOCKET* socket;
     void (*acceptCallback)(struct PIL_SOCKET retHandle, char* ip);
-} typedef ThreadArg;
-
-struct ReceiveThreadCallbackArg {
-    PIL_SOCKET *socket;
-    void (*receiveCallback)(PIL_SOCKET* socket, uint8_t* buffer, uint32_t len, void*);
-    void *additionalArg;
-} typedef ReceiveThreadCallbackArg;
+} typedef AcceptThreadArgC;
 
 #define MAX_NR_INTERFACES      256
 

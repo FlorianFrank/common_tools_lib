@@ -8,6 +8,7 @@ extern "C" {
 
 #include <functional> // std::function
 #include <memory> // std::shared_ptr
+#include "ctlib/Threading.hpp"
 
 namespace PIL
 {
@@ -60,6 +61,15 @@ namespace PIL
         PIL_ERROR_CODE RegisterReceiveCallbackFunction(ReceiveCallbackArg& additionalArg);
         PIL_ERROR_CODE UnregisterCallbackFunction();
 
+        /**
+ * @brief Workaround to pass std::functions to C-acceptCallback function.
+ */
+        struct ThreadAcceptArg {
+            /** Old C-threading function. */
+            AcceptThreadArgC argC = {};
+            /** Function pointer to C++ function returning PIL::Socket object. */
+            std::function<void(std::unique_ptr<PIL::Socket>&)> acceptCallback = {};
+        };
 
     private:
         uint16_t m_Port;
@@ -70,7 +80,8 @@ namespace PIL
 
         std::unique_ptr<PIL_SOCKET> m_CSocketHandle;
         std::vector<std::unique_ptr<PIL_SOCKET>> m_SocketList;
-
+       // std::unique_ptr<ThreadAcceptArg> m_ThreadArg;
+        std::unique_ptr<PIL::Threading<ThreadAcceptArg>> m_AcceptThread;
         PIL_ERROR_CODE RegisterAcceptCallback(std::function<void(std::unique_ptr<PIL::Socket>&)> &f);
     };
 

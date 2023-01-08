@@ -18,15 +18,6 @@ extern "C" {
 
 namespace PIL
 {
-    /**
-     * @brief Workaround to pass std::functions to C-acceptCallback function.
-     */
-    struct ThreadArgCXX {
-        /** Old C-threading function. */
-        ThreadArg argC = {};
-        /** Function pointer to C++ function returning PIL::Socket object. */
-        std::function<void(std::unique_ptr<PIL::Socket>&)> acceptCallback = {};
-    };
 
     Socket::Socket(std::unique_ptr<PIL_SOCKET> socket, std::string &ip, uint16_t port) : m_CSocketHandle(std::move(socket)), m_IPAddress(ip), m_Port(port),
                                                                                           m_TransportProtocol(TCP), m_InternetProtocol(IPv4), m_TimeoutInMS(0){
@@ -203,21 +194,20 @@ namespace PIL
         return PIL_SOCKET_IsOpen(m_CSocketHandle.get());
     }
 
-    void* PIL_AcceptThreadFunctionCXX(void* value)
+    void* PIL_AcceptThreadFunctionCXX(std::unique_ptr<Socket::ThreadAcceptArg> &arg)
     {
-        assert(value);
+        assert(arg);
 
-        auto *arg = static_cast<ThreadArgCXX *>(value);
         char ipAddr[MAX_IP_LEN];
 
         do {
             if(!arg->argC.socket->m_IsOpen){
-                return arg;
+                return arg.get();
             }
             std::unique_ptr<PIL_SOCKET> retHandle = std::make_unique<PIL_SOCKET>();
             int ret = PIL_SOCKET_Accept(arg->argC.socket, ipAddr, retHandle.get());
             if(ret == PIL_INTERFACE_CLOSED)
-                return arg;
+                return arg.get();
             if(ret != PIL_NO_ERROR){
 #ifdef PIL_EXCEPTION_HANDLING
                 throw PIL::Exception(PIL_ERRNO, __FILENAME__, __LINE__);
@@ -230,20 +220,23 @@ namespace PIL
             std::unique_ptr<PIL::Socket> socketPtr = std::make_unique<PIL::Socket>(std::move(retHandle), ipStr, retHandle->m_port);
             arg->acceptCallback(socketPtr);
         }while(arg->argC.socket->m_IsOpen);
-        return arg;
+        return arg.get();
     }
 
     PIL_ERROR_CODE Socket::RegisterAcceptCallback(std::function<void(std::unique_ptr<PIL::Socket>&)> &f)
     {
-        auto *arg = new ThreadArgCXX;
-        arg->argC.socket = m_CSocketHandle.get();
-        arg->argC.acceptCallback = nullptr;
-        arg->acceptCallback = f;
-        std::function<void*(void*)> threadFunc = PIL_AcceptThreadFunctionCXX;
-        PIL::Threading threading(threadFunc, arg);
-        threading.Run();
-
-        return PIL_NO_ERROR;
+        auto threadArg = std::make_unique<ThreadAcceptArg>();
+        threadArg->argC.socket = m_CSocketHandle.get();
+        threadArg->argC.acceptCallback = nullptr;
+        threadArg->acceptCallback = f;
+        std::function<void*(std::unique_ptr<ThreadAcceptArg>&)> threadFunc = PIL_AcceptThreadFunctionCXX;
+        m_AcceptThread = std::make_unique<PIL::Threading<ThreadAcceptArg>>(threadFunc, threadArg);
+        auto ret = m_AcceptThread->Run();
+#ifdef PIL_EXCEPTION_HANDLING
+        if(ret != PIL_NO_ERROR)
+            throw PIL::Exception(ret, __FILENAME__, __LINE__);
+#endif // PIL_EXCEPTION_HANDLING
+        return ret;
     }
 
 

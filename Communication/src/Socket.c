@@ -435,7 +435,7 @@ PIL_ERROR_CODE PIL_SOCKET_Receive(PIL_SOCKET *socketRet, uint8_t *buffer, uint32
 void* PIL_ReceiveThreadFunction(void *handle)
 {
     assert(handle);
-    ReceiveThreadCallbackArg *arg = (ReceiveThreadCallbackArg*) handle;
+    ReceiveThreadCallbackArgC *arg = (ReceiveThreadCallbackArgC*) handle;
     assert(arg->socket && arg->receiveCallback);
 
     uint8_t buffer[DEFAULT_SOCK_BUFF_SIZE];
@@ -475,7 +475,7 @@ PIL_ERROR_CODE PIL_SOCKET_RegisterReceiveCallbackFunction(PIL_SOCKET *socketRet,
         return PIL_INVALID_ARGUMENTS;
 
     // Initialize thread argument
-    socketRet->m_callbackThreadArg = malloc(sizeof(ReceiveThreadCallbackArg));
+    socketRet->m_callbackThreadArg = malloc(sizeof(ReceiveThreadCallbackArgC));
     socketRet->m_callbackThreadArg ->socket = socketRet;
     socketRet->m_callbackThreadArg ->receiveCallback = callback;
     socketRet->m_callbackThreadArg ->additionalArg = additional;
@@ -684,7 +684,7 @@ void* PIL_AcceptThreadFunction(void* value)
 {
     assert(value);
 
-    ThreadArg *arg = value;
+    AcceptThreadArgC *arg = value;
     char ipAddr[MAX_IP_LEN];
     PIL_SOCKET retHandle;
     do {
@@ -720,7 +720,7 @@ PIL_ERROR_CODE PIL_SOCKET_Setup_ServerSocket(PIL_SOCKET *socket, uint16_t port, 
 
 PIL_ERROR_CODE PIL_SOCKET_RegisterAcceptCallback(PIL_SOCKET *socket, void (*receiveCallback)(PIL_SOCKET, char *))
 {
-    ThreadArg *arg = malloc(sizeof(struct ThreadArg));
+    AcceptThreadArgC *arg = malloc(sizeof(struct AcceptThreadArgC));
     arg->socket = socket;
     arg->acceptCallback = receiveCallback;
 
