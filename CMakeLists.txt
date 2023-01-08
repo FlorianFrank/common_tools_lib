@@ -204,6 +204,11 @@ if (PIL_UNIT_TESTING)
     add_executable(FileHandlingUnitTest ${FILE_HANDLING_UNIT_TEST_FILES})
     target_link_libraries(FileHandlingUnitTest gtest_main gtest pthread common_tools_lib)
     gtest_discover_tests("FileHandlingUnitTest")
+
+    set(THREADING_UNIT_TEST "UnitTesting/ThreadingUnitTest.cpp")
+    add_executable(ThreadingUnitTest ${THREADING_UNIT_TEST})
+    target_link_libraries(ThreadingUnitTest gtest_main gtest pthread common_tools_lib)
+    gtest_discover_tests("ThreadingUnitTest")
 endif () # PIL_UNIT_TESTING
 
 option(BUILD_DOC "Build documentation" OFF)
