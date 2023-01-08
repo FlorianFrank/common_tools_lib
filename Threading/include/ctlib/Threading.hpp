@@ -78,6 +78,7 @@ PIL_ERROR_CODE PIL::Threading<T>::Join()
     if(errCode != PIL_NO_ERROR)
         throw PIL::Exception(errCode, __FILENAME__, __LINE__);
 #endif // PIL_EXCEPTION_HANDLING
+    return errCode;
 }
 
 template <typename T>
@@ -88,6 +89,8 @@ PIL_ERROR_CODE PIL::Threading<T>::Abort()
     if(errCode != PIL_NO_ERROR)
         throw PIL::Exception(errCode, __FILENAME__, __LINE__);
 #endif // PIL_EXCEPTION_HANDLING
+    return errCode;
+
 }
 
 template <typename T>
@@ -98,4 +101,6 @@ __attribute__((unused)) PIL_ERROR_CODE PIL::Threading<T>::Detach()
     if(errCode != PIL_NO_ERROR)
         throw PIL::Exception(errCode, __FILENAME__, __LINE__);
 #endif // PIL_EXCEPTION_HANDLING
+    return errCode;
+
 }
