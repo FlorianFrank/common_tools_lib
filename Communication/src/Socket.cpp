@@ -1,7 +1,7 @@
 /**
- * @brief This class contains
+ * @copyright University of Passau - Chair of Computer Engineering
+ * @author Florian Frank
  */
-
 #include "ctlib/Exception.h"
 #include "ctlib/Logging.h"
 
@@ -18,10 +18,9 @@ extern "C" {
 
 namespace PIL
 {
-
-    Socket::Socket(std::unique_ptr<PIL_SOCKET> socket, std::string &ip, uint16_t port) : m_CSocketHandle(std::move(socket)), m_IPAddress(ip), m_Port(port),
-                                                                                          m_TransportProtocol(TCP), m_InternetProtocol(IPv4), m_TimeoutInMS(0){
-
+    Socket::Socket(std::unique_ptr<PIL_SOCKET> socket, std::string &ip, uint16_t port) :
+                m_CSocketHandle(std::move(socket)), m_IPAddress(ip), m_Port(port),
+                m_TransportProtocol(TCP), m_InternetProtocol(IPv4), m_TimeoutInMS(0){
     }
 
     Socket::Socket(TransportProtocol transportProtocol, InternetProtocol internetProtocol, const std::string &address,
@@ -40,8 +39,7 @@ namespace PIL
         Disconnect();
     }
 
-    PIL_ERROR_CODE Socket::Disconnect()
-    {
+    PIL_ERROR_CODE Socket::Disconnect(){
         auto retCode = UnregisterCallbackFunction();
         if(retCode != PIL_NO_ERROR){
 #ifdef PIL_EXCEPTION_HANDLING
@@ -58,8 +56,7 @@ namespace PIL
     }
 
 
-    PIL_ERROR_CODE Socket::Bind(PIL_BOOL reuse)
-    {
+    PIL_ERROR_CODE Socket::Bind(PIL_BOOL reuse){
         auto ret = PIL_SOCKET_Bind(m_CSocketHandle.get(), reuse);
 #ifdef PIL_EXCEPTION_HANDLING
         if(ret != PIL_NO_ERROR)
@@ -68,8 +65,7 @@ namespace PIL
         return ret;
     }
 
-    PIL_ERROR_CODE Socket::Listen(int queueSize)
-    {
+    PIL_ERROR_CODE Socket::Listen(int queueSize){
         auto ret = PIL_SOCKET_Listen(m_CSocketHandle.get(), queueSize);
 #ifdef PIL_EXCEPTION_HANDLING
         if(ret != PIL_NO_ERROR)
@@ -78,12 +74,10 @@ namespace PIL
         return ret;
     }
 
-    PIL_ERROR_CODE Socket::Accept(char *ipAddr)
-    {
+    PIL_ERROR_CODE Socket::Accept(char *ipAddr){
         std::unique_ptr<PIL_SOCKET> sock = std::make_unique<PIL_SOCKET>();
         auto ret = PIL_SOCKET_Accept(m_CSocketHandle.get(), ipAddr, sock.get());
-        if (ret != PIL_NO_ERROR)
-        {
+        if (ret != PIL_NO_ERROR){
 #ifdef PIL_EXCEPTION_HANDLING
             throw PIL::Exception(ret, __FILENAME__, __LINE__);
 #endif // PIL_EXCEPTION_HANDLING
@@ -93,17 +87,14 @@ namespace PIL
         return ret;
     }
 
-    WaitRetValue Socket::WaitTillDataAvailable()
-    {
+    WaitRetValue Socket::WaitTillDataAvailable(){
         auto ret = PIL_SOCKET_WaitTillDataAvail(m_CSocketHandle.get(), m_TimeoutInMS);
-        switch (ret)
-        {
+        switch (ret){
             case PIL_NO_ERROR:
                 return PIL_SOCK_SUCCESS;
             case PIL_TIMEOUT:
                 return PIL_SOCK_TIMEOUT;
-            default:
-            {
+            default:{
 #ifdef PIL_EXCEPTION_HANDLING
                 throw PIL::Exception(ret, __FILENAME__, __LINE__);
 #endif // PIL_EXCEPTION_HANDLING
@@ -112,8 +103,7 @@ namespace PIL
         }
     }
 
-    PIL_ERROR_CODE Socket::Connect(std::string &ipAddr, int port)
-    {
+    PIL_ERROR_CODE Socket::Connect(std::string &ipAddr, int port){
         auto ret = PIL_SOCKET_Connect(m_CSocketHandle.get(), ipAddr.c_str(), port, m_TimeoutInMS);
 #ifdef PIL_EXCEPTION_HANDLING
         if(ret != PIL_NO_ERROR)
@@ -122,8 +112,7 @@ namespace PIL
         return ret;
     }
 
-    PIL_ERROR_CODE Socket::Receive(uint8_t *buffer, uint32_t *bufferLen)
-    {
+    PIL_ERROR_CODE Socket::Receive(uint8_t *buffer, uint32_t *bufferLen){
         auto ret = PIL_SOCKET_Receive(m_CSocketHandle.get(), buffer, bufferLen, m_TimeoutInMS);
 #ifdef PIL_EXCEPTION_HANDLING
         if(ret != PIL_NO_ERROR)
@@ -132,8 +121,7 @@ namespace PIL
         return ret;
     }
 
-    PIL_ERROR_CODE Socket::Receive(std::string &retBuffer)
-    {
+    PIL_ERROR_CODE Socket::Receive(std::string &retBuffer){
         uint32_t bufferLen = MAX_BUF_LEN;
         uint8_t buffer[2048];
         auto ret = Receive(buffer, &bufferLen);
@@ -141,10 +129,9 @@ namespace PIL
         return ret;
     }
 
-    PIL_ERROR_CODE Socket::ReceiveFrom(uint8_t *buffer, int *bufferLen, char *ipAddr, int port)
-    {
-        auto ret = PIL_SOCKET_ReceiveFrom(m_CSocketHandle.get(), buffer, reinterpret_cast<uint16_t *>(bufferLen), ipAddr,
-                                             &port);
+    PIL_ERROR_CODE Socket::ReceiveFrom(uint8_t *buffer, int *bufferLen, char *ipAddr, int port){
+        auto ret = PIL_SOCKET_ReceiveFrom(m_CSocketHandle.get(), buffer,
+                                          reinterpret_cast<uint16_t *>(bufferLen), ipAddr, &port);
 #ifdef PIL_EXCEPTION_HANDLING
         if(ret != PIL_NO_ERROR)
             throw PIL::Exception(ret, __FILENAME__, __LINE__);
@@ -158,8 +145,7 @@ namespace PIL
         return Send(reinterpret_cast<const uint8_t*>(message.c_str()), &len);
     }
 
-    PIL_ERROR_CODE Socket::Send(const uint8_t *buffer, int *len)
-    {
+    PIL_ERROR_CODE Socket::Send(const uint8_t *buffer, int *len){
         auto ret  = PIL_SOCKET_Send(m_CSocketHandle.get(), buffer, reinterpret_cast<uint32_t *>(len));
 #ifdef PIL_EXCEPTION_HANDLING
         if(ret != PIL_NO_ERROR)
@@ -168,8 +154,7 @@ namespace PIL
         return ret;
     }
 
-    PIL_ERROR_CODE Socket::SendTo(std::string &destAddr, int port, uint8_t *buffer, int *bufferLen)
-    {
+    PIL_ERROR_CODE Socket::SendTo(std::string &destAddr, int port, uint8_t *buffer, int *bufferLen){
         auto ret = PIL_SOCKET_SendTo(m_CSocketHandle.get(), destAddr.c_str(), port, buffer,
                                         reinterpret_cast<uint32_t *>(bufferLen));
 #ifdef PIL_EXCEPTION_HANDLING
@@ -179,8 +164,7 @@ namespace PIL
         return ret;
     }
 
-    std::string Socket::GetSenderIP()
-    {
+    std::string Socket::GetSenderIP(){
         const char *senderIP = PIL_SOCKET_GetSenderIP(m_CSocketHandle.get());
 #ifdef PIL_EXCEPTION_HANDLING
         if(!senderIP)
@@ -189,13 +173,11 @@ namespace PIL
         return senderIP;
     }
 
-    PIL_BOOL Socket::IsOpen()
-    {
+    PIL_BOOL Socket::IsOpen(){
         return PIL_SOCKET_IsOpen(m_CSocketHandle.get());
     }
 
-    void* PIL_AcceptThreadFunctionCXX(std::unique_ptr<Socket::ThreadAcceptArg> &arg)
-    {
+    void* PIL_AcceptThreadFunctionCXX(std::unique_ptr<Socket::ThreadAcceptArg> &arg){
         assert(arg);
 
         char ipAddr[MAX_IP_LEN];
@@ -223,8 +205,7 @@ namespace PIL
         return arg.get();
     }
 
-    PIL_ERROR_CODE Socket::RegisterAcceptCallback(std::function<void(std::unique_ptr<PIL::Socket>&)> &f)
-    {
+    PIL_ERROR_CODE Socket::RegisterAcceptCallback(std::function<void(std::unique_ptr<PIL::Socket>&)> &f){
         auto threadArg = std::make_unique<ThreadAcceptArg>();
         threadArg->argC.socket = m_CSocketHandle.get();
         threadArg->argC.acceptCallback = nullptr;
@@ -240,25 +221,21 @@ namespace PIL
     }
 
 
-    PIL_ERROR_CODE Socket::CreateServerSocket(std::function<void(std::unique_ptr<PIL::Socket>&)> &receiveCallback)
-    {
-
-    auto ret = PIL_SOCKET_Setup_ServerSocket(m_CSocketHandle.get(), m_Port, nullptr);
+    PIL_ERROR_CODE Socket::CreateServerSocket(std::function<void(std::unique_ptr<PIL::Socket>&)> &receiveCallback){
+    auto ret = PIL_SOCKET_Setup_ServerSocket(m_CSocketHandle.get(), m_Port, nullptr /*Use C++ callback*/);
     if(ret != PIL_NO_ERROR)
         return ret;
     ret = RegisterAcceptCallback(receiveCallback);
-    if(ret != PIL_NO_ERROR)
-    {
+    if(ret != PIL_NO_ERROR){
 #ifdef PIL_EXCEPTION_HANDLING
         throw PIL::Exception(ret, __FILENAME__, __LINE__);
 #endif // PIL_EXCEPTION_HANDLING
-    }
+        }
         return ret;
     }
 
     PIL_ERROR_CODE
-    Socket::ConnectToServer(std::string &ipAddr, int destPort, std::function<void(std::unique_ptr<Socket>& , std::string &)> &receiveCallback)
-    {
+    Socket::ConnectToServer(std::string &ipAddr, int destPort, std::function<void(std::unique_ptr<Socket>& , std::string &)> &receiveCallback){
         auto functionPtr = [](PIL_SOCKET* socket, uint8_t *buffer, uint32_t bufferLen, void* additionalArg){
             if(!additionalArg){
 #ifdef PIL_EXCEPTION_HANDLING
@@ -274,7 +251,9 @@ namespace PIL
             arg->m_ReceiveCallback(socketCXX, value);
         };
 
-        auto ret = PIL_SOCKET_ConnectToServer(m_CSocketHandle.get(), ipAddr.c_str(), m_Port, destPort, m_TimeoutInMS, functionPtr, &receiveCallback);
+        auto ret = PIL_SOCKET_ConnectToServer(m_CSocketHandle.get(), ipAddr.c_str(),
+                                              m_Port, destPort, m_TimeoutInMS, functionPtr,
+                                              &receiveCallback);
 #ifdef PIL_EXCEPTION_HANDLING
         if(ret != PIL_NO_ERROR)
             throw PIL::Exception(ret, __FILENAME__, __LINE__);
@@ -283,9 +262,9 @@ namespace PIL
     }
 
 
-    PIL_ERROR_CODE Socket::RegisterReceiveCallbackFunction(ReceiveCallbackArg& additionalArg)
-    {
-        auto callback = [](PIL_SOCKET *socket, uint8_t *buffer, uint32_t bufferLen, void* additionalArg){
+    PIL_ERROR_CODE Socket::RegisterReceiveCallbackFunction(ReceiveCallbackArg& additionalArg){
+        auto callback = [](PIL_SOCKET *socket, uint8_t *buffer,
+                uint32_t bufferLen, void* additionalArg){
             std::string ip = socket->m_IPAddress;
             std::string value = std::string((char *)buffer, bufferLen);
             auto *arg = reinterpret_cast<ReceiveCallbackArg*>(additionalArg);
@@ -302,8 +281,7 @@ namespace PIL
         return ret;
     }
 
-    PIL_ERROR_CODE Socket::UnregisterCallbackFunction()
-    {
+    PIL_ERROR_CODE Socket::UnregisterCallbackFunction(){
         if(m_CSocketHandle == nullptr)
             return PIL_NO_ERROR;
         auto ret = PIL_SOCKET_UnregisterCallbackFunction(m_CSocketHandle.get());
@@ -315,8 +293,7 @@ namespace PIL
     }
 
 
-    PIL_ERROR_CODE Socket::GetInterfaceInfos(InterfaceInfoList *interfaceInfos)
-    {
+    PIL_ERROR_CODE Socket::GetInterfaceInfos(InterfaceInfoList *interfaceInfos){
         auto ret = ::GetInterfaceInfos(m_CSocketHandle.get(), interfaceInfos);
 #ifdef PIL_EXCEPTION_HANDLING
         if(ret != PIL_NO_ERROR)
