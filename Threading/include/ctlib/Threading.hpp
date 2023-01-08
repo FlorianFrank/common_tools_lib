@@ -13,7 +13,6 @@ extern "C" {
 #include "Threading.h"
 }
 
-
 namespace PIL
 {
     template <typename T>
@@ -48,8 +47,6 @@ PIL::Threading<T>::Threading(std::function<void*(std::unique_ptr<T>&)> &function
         throw PIL::Exception(m_LastError, __FILENAME__, __LINE__);
 #endif // PIL_EXCEPTION_HANDLING
 }
-
-
 
 template <typename T>
 PIL::Threading<T>::Threading(std::unique_ptr<ThreadArgCXX<T>> &threadArg): ErrorHandler(), m_ThreadArg(std::move(threadArg)),
