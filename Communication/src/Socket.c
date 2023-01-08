@@ -8,6 +8,12 @@
 # else // __linux__
 #include <sys/socket.h> // helperFiles, recvfrom, sendto
 #include <arpa/inet.h> // htons, inet_addr, inet_ntoa
+#ifdef __linux__
+#include <ifaddrs.h>
+#include <net/if.h>
+#include <sys/ioctl.h>
+#include <netdb.h>
+#endif // __linux__
 #endif
 #include <string.h> // memset
 #include <unistd.h> // close
