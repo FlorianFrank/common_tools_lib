@@ -37,6 +37,8 @@ namespace PIL
     };
 }
 
+
+
 template<typename T>
 PIL::Threading<T>::Threading(std::function<void*(std::unique_ptr<T>&)> &function, std::unique_ptr<T> &argument) : ErrorHandler(),
             m_ThreadArg(std::make_unique<ThreadArgCXX<T>>(function, std::move(argument))), m_ThreadHandle(std::make_unique<ThreadHandle>()) {

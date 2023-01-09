@@ -28,11 +28,11 @@ namespace PIL {
             return m_CThreadFunction;
         }
     private:
+        /** C++ thread function called from the c thread function passing m_Argument to the thread.  */
+        std::function<void *(std::unique_ptr<T> &)> m_ThreadFunction;
         /** Argument to pass to the C++ thread function. */
         std::unique_ptr<T> m_Argument;
         /** C thread function required to call the C++ function pointer from the c-thread. */
         void *(*m_CThreadFunction)(void *);
-        /** C++ thread function called from the c thread function passing m_Argument to the thread.  */
-        std::function<void *(std::unique_ptr<T> &)> m_ThreadFunction;
     };
 }

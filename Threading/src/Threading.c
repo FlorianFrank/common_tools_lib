@@ -14,7 +14,11 @@ void* ThreadFunction(void *threadArgs)
 {
     PIL_ThreadArgument *pilThreadArgument = (PIL_ThreadArgument*)threadArgs;
     do{
-        pilThreadArgument->m_ThreadFunction(pilThreadArgument->m_ThreadArgument);
+        if(!pilThreadArgument->m_ThreadFunction(pilThreadArgument->m_ThreadArgument))
+        {
+            pilThreadArgument->m_Running = FALSE;
+            return NULL;
+        }
     }while(pilThreadArgument->m_Loop && pilThreadArgument->m_Running);
     return NULL;
 }
