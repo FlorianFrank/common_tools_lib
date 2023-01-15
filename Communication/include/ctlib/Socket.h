@@ -58,11 +58,7 @@ PIL_ERROR_CODE PIL_SOCKET_RegisterReceiveCallbackFunction(PIL_SOCKET *socketRet,
                                                           void (*callback)(PIL_SOCKET* socket, uint8_t *buffer, uint32_t len,
                                                                     void *), void *additional);
 
-PIL_ERROR_CODE PIL_SOCKET_UnregisterCallbackFunction(PIL_SOCKET *socketRet);
-//#endif // PIL_THREADING
-
-
-
+PIL_ERROR_CODE PIL_SOCKET_UnregisterReceiveCallbackFunction(PIL_SOCKET *socketRet);
 
 /**
  * @}
