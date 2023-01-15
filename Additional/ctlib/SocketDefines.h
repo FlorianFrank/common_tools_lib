@@ -68,9 +68,9 @@ struct PIL_SOCKET
     PIL_BOOL m_IsConnected;
     PIL_ErrorHandle m_ErrorHandle;
 
-    ThreadHandle *m_callbackThreadHandle;
+    ThreadHandle *m_ReceiveCallbackThreadHandle;
     ReceiveThreadCallbackArgC *m_callbackThreadArg;
-    PIL_BOOL m_callbackActive;
+    PIL_BOOL m_ReceiveCallback;
 
 } typedef PIL_SOCKET;
 
