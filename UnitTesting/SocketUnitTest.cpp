@@ -27,9 +27,10 @@ void ReceiveHandlerC(PIL_SOCKET *socket, uint8_t* buffer, uint32_t len, void*)
 }
 
 
-void ReceiveHandlerCPP(std::unique_ptr<PIL::Socket> &socket, std::string& buffer)
+void ReceiveHandlerCPP(std::shared_ptr<PIL::Socket> &socket, std::string& buffer)
 {
     strncpy(recvBuff, (char*)buffer.c_str(), buffer.length());
+    EXPECT_TRUE(strcmp(recvBuff, loram_ipsum.c_str()) == 0);
 }
 
 
@@ -88,8 +89,9 @@ TEST(SocketTest_CPP, SimpleSocketTest)
     EXPECT_EQ(ret, PIL_NO_ERROR);
     PIL::Socket clientSock(TCP, IPv4, "localhost", 14003, 1000);
     std::string destIP = "127.0.0.1";
-    std::function<void(std::unique_ptr<PIL::Socket>& , std::string &)> callbackFunc = ReceiveHandlerCPP;
+    std::function<void(std::shared_ptr<PIL::Socket>& , std::string &)> callbackFunc = ReceiveHandlerCPP;
     ret = clientSock.ConnectToServer(destIP, 14002, callbackFunc);
+    std::this_thread::sleep_for(std::chrono::microseconds(10000));
     EXPECT_EQ(ret, PIL_NO_ERROR);
 }
 
