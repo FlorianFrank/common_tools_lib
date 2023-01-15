@@ -123,8 +123,11 @@ PIL_ERROR_CODE PIL_SOCKET_Close(PIL_SOCKET *socketRet)
     if (!socketRet)
         return PIL_INVALID_ARGUMENTS;
 
-    if(socketRet->m_callbackActive == TRUE)
-        PIL_SOCKET_UnregisterCallbackFunction(socketRet);
+    if(!socketRet->m_IsOpen)
+        return PIL_NO_ERROR;
+
+    if(socketRet->m_ReceiveCallback == TRUE)
+        PIL_SOCKET_UnregisterReceiveCallbackFunction(socketRet);
 
 #ifndef embedded
     if (socketRet->m_IsOpen)
@@ -435,13 +438,13 @@ PIL_ERROR_CODE PIL_SOCKET_Receive(PIL_SOCKET *socketRet, uint8_t *buffer, uint32
  */
 void* PIL_ReceiveThreadFunction(void *handle)
 {
-    assert(handle);
+   assert(handle);
     ReceiveThreadCallbackArgC *arg = (ReceiveThreadCallbackArgC*) handle;
     assert(arg->socket && arg->receiveCallback);
 
     uint8_t buffer[DEFAULT_SOCK_BUFF_SIZE];
     uint32_t len = DEFAULT_SOCK_BUFF_SIZE;
-    while(arg->socket->m_callbackActive)
+    while(arg->socket->m_ReceiveCallback)
     {
         memset(buffer, 0, DEFAULT_SOCK_BUFF_SIZE);
         PIL_ERROR_CODE  ret = PIL_SOCKET_WaitTillDataAvail(arg->socket, DEFAULT_TIMEOUT_MS);
@@ -455,9 +458,7 @@ void* PIL_ReceiveThreadFunction(void *handle)
         {
             ret = PIL_SOCKET_Receive(arg->socket, buffer, &len, 0);
             if(ret == PIL_NO_ERROR)
-            {
                 arg->receiveCallback(arg->socket, buffer, len, arg->additionalArg);
-            }
         }
     }
     return arg;
@@ -481,20 +482,20 @@ PIL_ERROR_CODE PIL_SOCKET_RegisterReceiveCallbackFunction(PIL_SOCKET *socketRet,
     socketRet->m_callbackThreadArg ->receiveCallback = callback;
     socketRet->m_callbackThreadArg ->additionalArg = additional;
 
-    socketRet->m_callbackThreadHandle = malloc(sizeof(ThreadHandle));
-    socketRet->m_callbackThreadHandle->m_ThreadArgument.m_ThreadArgument = (void*)&socketRet->m_callbackThreadArg ;
-    socketRet->m_callbackThreadHandle->m_ThreadArgument.m_ThreadFunction = PIL_ReceiveThreadFunction;
-    PIL_ERROR_CODE createSockRet = PIL_THREADING_CreateThread(socketRet->m_callbackThreadHandle, PIL_ReceiveThreadFunction, (void*)socketRet->m_callbackThreadArg);
+    socketRet->m_ReceiveCallbackThreadHandle = malloc(sizeof(ThreadHandle));
+    socketRet->m_ReceiveCallbackThreadHandle->m_ThreadArgument.m_ThreadArgument = (void*)&socketRet->m_callbackThreadArg ;
+    socketRet->m_ReceiveCallbackThreadHandle->m_ThreadArgument.m_ThreadFunction = PIL_ReceiveThreadFunction;
+    PIL_ERROR_CODE createSockRet = PIL_THREADING_CreateThread(socketRet->m_ReceiveCallbackThreadHandle, PIL_ReceiveThreadFunction, (void*)socketRet->m_callbackThreadArg);
     if (createSockRet == PIL_NO_ERROR)
     {
-        socketRet->m_callbackActive = TRUE;
-        createSockRet = PIL_THREADING_RunThread(socketRet->m_callbackThreadHandle, FALSE);
+        socketRet->m_ReceiveCallback = TRUE;
+        createSockRet = PIL_THREADING_RunThread(socketRet->m_ReceiveCallbackThreadHandle, FALSE);
     }
 
     if (createSockRet != PIL_NO_ERROR)
     {
-        free(socketRet->m_callbackThreadHandle);
-        socketRet->m_callbackThreadHandle = NULL;
+        free(socketRet->m_ReceiveCallbackThreadHandle);
+        socketRet->m_ReceiveCallbackThreadHandle = NULL;
         free(socketRet->m_callbackThreadArg);
         socketRet->m_callbackThreadArg = NULL;
         return createSockRet;
@@ -508,19 +509,19 @@ PIL_ERROR_CODE PIL_SOCKET_RegisterReceiveCallbackFunction(PIL_SOCKET *socketRet,
  * @param socketRet socket for which the callback was registered.
  * @return PIL_NO_ERROR on success.
  */
-PIL_ERROR_CODE PIL_SOCKET_UnregisterCallbackFunction(PIL_SOCKET *socketRet)
+PIL_ERROR_CODE PIL_SOCKET_UnregisterReceiveCallbackFunction(PIL_SOCKET *socketRet)
 {
     if (!socketRet)
         return PIL_INVALID_ARGUMENTS;
 
-    if (socketRet->m_callbackActive)
+    if (socketRet->m_ReceiveCallback)
     {
-        socketRet->m_callbackActive = FALSE;
-        if (!socketRet->m_callbackThreadHandle)
+        socketRet->m_ReceiveCallback = FALSE;
+        if (!socketRet->m_ReceiveCallbackThreadHandle)
             return PIL_INVALID_ARGUMENTS;
-        PIL_ERROR_CODE ret = PIL_THREADING_JoinThread(socketRet->m_callbackThreadHandle, NULL);
-        free(socketRet->m_callbackThreadHandle);
-        socketRet->m_callbackThreadHandle = NULL;
+        PIL_ERROR_CODE ret = PIL_THREADING_JoinThread(socketRet->m_ReceiveCallbackThreadHandle, NULL);
+        free(socketRet->m_ReceiveCallbackThreadHandle);
+        socketRet->m_ReceiveCallbackThreadHandle = NULL;
         free(socketRet->m_callbackThreadArg);
         socketRet->m_callbackThreadArg = NULL;
         if (ret != PIL_NO_ERROR)

@@ -18,8 +18,13 @@ extern "C" {
 
 namespace PIL
 {
-    Socket::Socket(std::unique_ptr<PIL_SOCKET> socket, std::string &ip, uint16_t port) :
-                m_CSocketHandle(std::move(socket)), m_IPAddress(ip), m_Port(port),
+    Socket::Socket(): m_IPAddress(""), m_Port(0),
+    m_TransportProtocol(TCP), m_InternetProtocol(IPv4), m_TimeoutInMS(0){
+
+    }
+
+    Socket::Socket(std::shared_ptr<PIL_SOCKET> &socket, std::string &ip, uint16_t port) :
+                m_CSocketHandle(socket), m_IPAddress(ip), m_Port(port),
                 m_TransportProtocol(TCP), m_InternetProtocol(IPv4), m_TimeoutInMS(0){
     }
 
@@ -40,7 +45,7 @@ namespace PIL
     }
 
     PIL_ERROR_CODE Socket::Disconnect(){
-        auto retCode = UnregisterCallbackFunction();
+        auto retCode = UnregisterAllCallbackFunctions();
         if(retCode != PIL_NO_ERROR){
 #ifdef PIL_EXCEPTION_HANDLING
             throw PIL::Exception(retCode, __FILENAME__, __LINE__);
@@ -164,7 +169,7 @@ namespace PIL
         return ret;
     }
 
-    std::string Socket::GetSenderIP(){
+    std::string Socket::GetSenderIPAddress(){
         const char *senderIP = PIL_SOCKET_GetSenderIP(m_CSocketHandle.get());
 #ifdef PIL_EXCEPTION_HANDLING
         if(!senderIP)
@@ -182,11 +187,15 @@ namespace PIL
 
         char ipAddr[MAX_IP_LEN];
 
+        std::unique_ptr<PIL::Socket> socketPtr = std::make_unique<PIL::Socket>();
         do {
             if(!arg->argC.socket->m_IsOpen){
                 return arg.get();
             }
-            std::unique_ptr<PIL_SOCKET> retHandle = std::make_unique<PIL_SOCKET>();
+            auto retHandle = std::make_shared<PIL_SOCKET>();
+            retHandle->m_IsOpen = TRUE;
+            retHandle->m_ReceiveCallback = FALSE;
+
             int ret = PIL_SOCKET_Accept(arg->argC.socket, ipAddr, retHandle.get());
             if(ret == PIL_INTERFACE_CLOSED)
                 return arg.get();
@@ -199,7 +208,11 @@ namespace PIL
             retHandle->m_IsOpen = TRUE;
             retHandle->m_IsConnected = TRUE;
             std::string ipStr = ipAddr;
-            std::unique_ptr<PIL::Socket> socketPtr = std::make_unique<PIL::Socket>(std::move(retHandle), ipStr, retHandle->m_port);
+
+            socketPtr->setSocketHandle(retHandle);
+            socketPtr->setIPAddress(ipStr);
+            socketPtr->setPort(retHandle->m_port);
+
             arg->acceptCallback(socketPtr);
         }while(arg->argC.socket->m_IsOpen);
         return arg.get();
@@ -235,7 +248,7 @@ namespace PIL
     }
 
     PIL_ERROR_CODE
-    Socket::ConnectToServer(std::string &ipAddr, int destPort, std::function<void(std::unique_ptr<Socket>& , std::string &)> &receiveCallback){
+    Socket::ConnectToServer(std::string &ipAddr, int destPort, std::function<void(std::shared_ptr<Socket>& , std::string &)> &receiveCallback){
         auto functionPtr = [](PIL_SOCKET* socket, uint8_t *buffer, uint32_t bufferLen, void* additionalArg){
             if(!additionalArg){
 #ifdef PIL_EXCEPTION_HANDLING
@@ -244,16 +257,30 @@ namespace PIL
                 return;
             }
             std::string ip = socket->m_IPAddress;
-            std::unique_ptr<PIL_SOCKET> s = std::unique_ptr<PIL_SOCKET>(socket);
-            std::unique_ptr<PIL::Socket> socketCXX = std::make_unique<PIL::Socket>(std::move(s), ip, socket->m_port);
+
+            // Create new socket object now managed by shared_ptr
+            auto sock = new PIL_SOCKET;
+            *sock = *socket;
+
+            std::shared_ptr<PIL_SOCKET> s = std::shared_ptr<PIL_SOCKET>(sock);
+
+            // Set old socket to closed!
+            socket->m_IsOpen = FALSE;
+            socket->m_IsConnected = FALSE;
+
+            s->m_IsOpen = TRUE;
+            s->m_ReceiveCallback = FALSE;
+
+            auto socketCXX = std::make_shared<PIL::Socket>(s, ip, socket->m_port);
             std::string value = std::string((char *)buffer, bufferLen);
-            auto *arg = reinterpret_cast<ReceiveCallbackArg*>(additionalArg);
-            arg->m_ReceiveCallback(socketCXX, value);
+            auto *callbackFunction = reinterpret_cast<std::unique_ptr<ReceiveCallbackArg>*>(additionalArg);
+            (*callbackFunction)->m_ReceiveCallback(socketCXX, value);
         };
 
+        m_ReceiveCallback = std::move(std::make_unique<ReceiveCallbackArg>(receiveCallback));
         auto ret = PIL_SOCKET_ConnectToServer(m_CSocketHandle.get(), ipAddr.c_str(),
                                               m_Port, destPort, m_TimeoutInMS, functionPtr,
-                                              &receiveCallback);
+                                              &m_ReceiveCallback);
 #ifdef PIL_EXCEPTION_HANDLING
         if(ret != PIL_NO_ERROR)
             throw PIL::Exception(ret, __FILENAME__, __LINE__);
@@ -268,8 +295,8 @@ namespace PIL
             std::string ip = socket->m_IPAddress;
             std::string value = std::string((char *)buffer, bufferLen);
             auto *arg = reinterpret_cast<ReceiveCallbackArg*>(additionalArg);
-            auto s = std::unique_ptr<PIL_SOCKET>(socket);
-            arg->m_Socket = std::make_unique<PIL::Socket>(std::move(s), ip, socket->m_port);
+            auto s = std::shared_ptr<PIL_SOCKET>(socket);
+            arg->m_Socket = std::make_shared<PIL::Socket>(s, ip, socket->m_port);
             arg->m_ReceiveCallback(arg->m_Socket, value);
         };
 
@@ -281,10 +308,10 @@ namespace PIL
         return ret;
     }
 
-    PIL_ERROR_CODE Socket::UnregisterCallbackFunction(){
+    PIL_ERROR_CODE Socket::UnregisterAllCallbackFunctions(){
         if(m_CSocketHandle == nullptr)
             return PIL_NO_ERROR;
-        auto ret = PIL_SOCKET_UnregisterCallbackFunction(m_CSocketHandle.get());
+        auto ret = PIL_SOCKET_UnregisterReceiveCallbackFunction(m_CSocketHandle.get());
 #ifdef PIL_EXCEPTION_HANDLING
         if(ret != PIL_NO_ERROR)
             throw PIL::Exception(ret, __FILENAME__, __LINE__);
@@ -300,6 +327,21 @@ namespace PIL
             throw PIL::Exception(ret, __FILENAME__, __LINE__);
 #endif // PIL_EXCEPTION_HANDLING
         return ret;
+    }
+
+    void Socket::setPort(uint16_t mPort)
+    {
+        m_Port = mPort;
+    }
+
+    void Socket::setIPAddress(const std::string &mIpAddress)
+    {
+        m_IPAddress = mIpAddress;
+    }
+
+    void Socket::setSocketHandle(const std::shared_ptr<PIL_SOCKET> &mCSocketHandle)
+    {
+        m_CSocketHandle = mCSocketHandle;
     }
 
 }
