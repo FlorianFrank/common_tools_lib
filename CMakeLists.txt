@@ -20,7 +20,7 @@ if (DEFINED PIL_ALL)
     option(PIL_TIMING               "Enable exception handling in C++ version"   ON)
     option(PIL_CSV                  "Enable CSV file support"                    ON)
 
-    option(PIL_BUILD_DOCUMENTATION "Build doxygen code documentation"            ON)
+    option(PIL_BUILD_DOCUMENTATION "Build doxygen code documentation"            OFF)
 
     if (CMAKE_BUILD_TYPE EQUAL "DEBUG")
         option(PIL_UNIT_TESTING     "Enable Unit testing"                        ON)
@@ -107,11 +107,11 @@ if (PIL_UNIT_TESTING)
     enable_testing()
     include(GoogleTest)
 
-    add_subdirectory(UnitTesting)
+    include(UnitTesting/build_unittest.cmake)
 endif () # PIL_UNIT_TESTING
 
 
-if(DEFINED PIL_BUILD_DOCUMENTATION)
+if(PIL_BUILD_DOCUMENTATION)
     include(cmake/build_documentation.cmake)
     pil_build_documentation()
 endif() # DEFINED BUILD_DOCUMENTATION
