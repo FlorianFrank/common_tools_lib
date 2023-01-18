@@ -39,7 +39,7 @@ jobs:
 
     - name: Configure CMake
       working-directory: ${{runner.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=${{matrix.config.build_type}} -DPIL_ALL=1
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=${{matrix.config.build_type}} -DPIL_ALL=1 -DPIL_UNIT_TESTING=1
 
     - name: Build Project
       working-directory: ${{runner.workspace}}/build

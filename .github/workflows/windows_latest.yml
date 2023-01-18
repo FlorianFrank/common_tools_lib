@@ -46,7 +46,7 @@ jobs:
     - name: Configure CMake
       working-directory: ${{runner.workspace}}/build
       shell: pwsh
-      run: cmake ../common_tools_lib -GNinja -DCMAKE_BUILD_TYPE=${{matrix.config.build_type}} -DPIL_ALL=1 -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc
+      run: cmake ../common_tools_lib -GNinja -DCMAKE_BUILD_TYPE=${{matrix.config.build_type}} -DPIL_ALL=1 -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc -DPIL_UNIT_TESTING=1
 
     - name: Build Project
       working-directory: ${{runner.workspace}}/build
