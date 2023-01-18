@@ -41,7 +41,7 @@ jobs:
 
     - name: Copy Windows DLLs
       working-directory: ${{runner.workspace}}/common_tools_lib
-      run: cp libs/windows/* ${{runner.workspace}}/build
+      run: cp libs/windows/* ${{runner.workspace}}/build/UnitTesting
 
     - name: Configure CMake
       working-directory: ${{runner.workspace}}/build
@@ -54,11 +54,11 @@ jobs:
       run: cmake --build . --config ${{ matrix.config.build_type }} --target all
 
     - name: Run UnitTests
-      working-directory: ${{runner.workspace}}/build
-      run: .\SocketUnitTest.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V;
-           .\ExceptionUnitTest.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V;
-           .\FileHandlingUnitTest.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V
-           .\ThreadingUnitTest.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V
+      working-directory: ${{runner.workspace}}/build/
+      run: .\UnitTesting\SocketUnitTest.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V;
+           .\UnitTesting\ExceptionUnitTest.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V;
+           .\UnitTesting\FileHandlingUnitTest.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V
+           .\UnitTesting\ThreadingUnitTest.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V
 
 
     - name: Upload artifacts
