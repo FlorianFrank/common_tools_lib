@@ -115,3 +115,8 @@ if(PIL_BUILD_DOCUMENTATION)
     include(cmake/build_documentation.cmake)
     pil_build_documentation()
 endif() # DEFINED BUILD_DOCUMENTATION
+
+if(PIL_BUILD_DEB)
+    include(cmake/installers/build_deb.cmake)
+    build_deb()
+endif() # PIL_BUILD_DEB
