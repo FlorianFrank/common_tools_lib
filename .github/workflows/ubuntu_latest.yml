@@ -39,7 +39,7 @@ jobs:
 
     - name: Configure CMake
       working-directory: ${{runner.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=${{matrix.config.build_type}} -DPIL_ALL=1 -DPIL_UNIT_TESTING=1
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=${{matrix.config.build_type}} -DPIL_ALL=1 -DPIL_UNIT_TESTING=1 -DPIL_BUILD_DEB=1
 
     - name: Build Project
       working-directory: ${{runner.workspace}}/build
@@ -50,11 +50,17 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       run: GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V
 
+    - name: Generate DEB
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      run: cpack -D CPACK_INCLUDE_TOPLEVEL_DIRECTORY=0 -G DEB
+
     - name: Upload Artifacts
       uses: actions/upload-artifact@v3
       with:
         name: common_tools_lib_ubuntu_x64
         path: |
+          ${{ runner.workspace }}/build/*.deb
           ${{ runner.workspace }}/build/*.so
           ${{ runner.workspace }}/build/*.a
           ${{ runner.workspace }}/build/SOCKET_UNIT_TEST
