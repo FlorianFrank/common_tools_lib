@@ -39,7 +39,7 @@ jobs:
 
     - name: Configure CMake
       working-directory: ${{runner.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DPIL_ALL=1 -DPIL_UNIT_TESTING=1
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DPIL_ALL=1 -DPIL_UNIT_TESTING=1 -DPIL_BUILD_BUNDLE=1
 
     - name: Build Project
       working-directory: ${{runner.workspace}}/build
@@ -50,12 +50,24 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       run: GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V
 
+    - name: Generate Bundle
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      run: cpack -D CPACK_INCLUDE_TOPLEVEL_DIRECTORY=0 -G Bundle
+
     - name: Upload Artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: common_tools_lib_mac_os_x64
+        name: common_tools_lib_mac_os_x64.zip
         path: |
           ${{ runner.workspace }}/build/*.dylib
           ${{ runner.workspace }}/build/*.a
           ${{ runner.workspace }}/build/SOCKET_UNIT_TEST
           ${{runner.workspace}}/build/test-results/**/*.xml
+
+    - name: Upload MAC Bundle
+      uses: actions/upload-artifact@v3
+      with:
+        name: common_tools_lib-1.0.0-Darwin.dmg
+        path: ${{ runner.workspace }}/build/*.dmg
+
