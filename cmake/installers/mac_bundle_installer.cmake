@@ -1,18 +1,17 @@
 
 function(build_mac_bundle)
-    # set(INSTALL_DIR "/usr")
     if (DEFINED PIL_STATIC)
         install(TARGETS common_tools_lib_static
-                LIBRARY DESTINATION "${INSTALL_DIR}/lib"
-                PUBLIC_HEADER DESTINATION "${INSTALL_DIR}/include")
+                LIBRARY DESTINATION "lib"
+                PUBLIC_HEADER DESTINATION "include")
     endif () # PIL_STATIC
 
 
     if (DEFINED PIL_SHARED)
         install(TARGETS common_tools_lib
-                LIBRARY DESTINATION "${INSTALL_DIR}/lib"
-                PUBLIC_HEADER DESTINATION "${INSTALL_DIR}/include")
-    endif () # PIL_STATIC
+                LIBRARY DESTINATION "lib"
+                PUBLIC_HEADER DESTINATION "include")
+    endif () # PIL_SHARED
 
     set(CPACK_BUNDLE_NAME "common_tools_lib")
 
