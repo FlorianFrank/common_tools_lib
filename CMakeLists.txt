@@ -120,3 +120,8 @@ if(PIL_BUILD_DEB)
     include(cmake/installers/deb_installer.cmake)
     build_deb()
 endif() # PIL_BUILD_DEB
+
+if(PIL_BUILD_BUNDLE)
+    include(cmake/installers/mac_bundle_installer.cmake)
+    build_mac_bundle()
+endif() # PIL_BUILD_BUNDLE
