@@ -19,9 +19,11 @@ function(build_nsis_installer)
         set(CPACK_GENERATOR "ZIP")
     endif(USE_NSIS)
 
+    # CPACK Config
     set(CPACK_PACKAGE_NAME "common_tools_lib")
-    set(CPACK_PACKAGE_VERSION "1.0.0")
-    set(CPACK_PACKAGE_VERSION_PATCH "0")
+    set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Platform Independent Lib for common programing tasks")
+
+    set(CPACK_PACKAGE_INSTALL_DIRECTORY ${INSTALL_DIR})
     set(CPACK_PACKAGE_VENDOR "University of Passau - Faculty for computer science and mathematics")
     #set(CPACK_PACKAGE_INSTALL_REGISTRY_KEY ${APP_NAME})
     #set(CPACK_IGNORE_FILES "\\.psd$;/CVS/;/\\.svn/;/\\.git/;\\.swp$;/CMakeLists.txt.user;\\.#;/#;\\.tar.gz$;/CMakeFiles/;CMakeCache.txt;\\.qm$;/build/;\\.diff$;.DS_Store'")
