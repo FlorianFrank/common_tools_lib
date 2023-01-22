@@ -46,7 +46,7 @@ jobs:
     - name: Configure CMake
       working-directory: ${{runner.workspace}}/build
       shell: pwsh
-      run: cmake ../common_tools_lib -GNinja -DCMAKE_BUILD_TYPE=${{matrix.config.build_type}} -DPIL_ALL=1 -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc -DPIL_UNIT_TESTING=1
+      run: cmake ../common_tools_lib -GNinja -DCMAKE_BUILD_TYPE=${{matrix.config.build_type}} -DPIL_ALL=1 -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc -DPIL_UNIT_TESTING=1 -DPIL_NSIS_BUILD=1
 
     - name: Build Project
       working-directory: ${{runner.workspace}}/build
@@ -60,6 +60,10 @@ jobs:
            .\FileHandlingUnitTest.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V
            .\ThreadingUnitTest.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V
 
+    - name: Generate NSIS installer
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      run: cpack -D CPACK_INCLUDE_TOPLEVEL_DIRECTORY=0 -G NSIS
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
@@ -70,3 +74,9 @@ jobs:
           ${{ runner.workspace }}/build/*.exe
           ${{ runner.workspace }}/build/*.a
           ${{runner.workspace}}/build/test-results/**/*.xml
+
+    - name: Upload Windows Installer
+      uses: actions/upload-artifact@v3
+      with:
+        name: common_tools_lib-installer.zip
+        path: ${{ runner.workspace }}/build/common_tools_lib-1.0.0-win64.exe
