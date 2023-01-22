@@ -23,6 +23,10 @@ function(build_nsis_installer)
     set(CPACK_PACKAGE_NAME "common_tools_lib")
     set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Platform Independent Lib for common programing tasks")
 
+    set(CPACK_PACKAGE_VERSION_MAJOR 1)
+    set(CPACK_PACKAGE_VERSION_MINOR 0)
+    set(CPACK_PACKAGE_VERSION_PATCH 0)
+
     set(CPACK_PACKAGE_INSTALL_DIRECTORY ${INSTALL_DIR})
     set(CPACK_PACKAGE_VENDOR "University of Passau - Faculty for computer science and mathematics")
     set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
