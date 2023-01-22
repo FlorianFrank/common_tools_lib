@@ -78,5 +78,5 @@ jobs:
     - name: Upload Windows Installer
       uses: actions/upload-artifact@v3
       with:
-        name: common_tools_lib-1.0.0-win64.exe
+        name: common_tools_lib-installer.zip
         path: ${{ runner.workspace }}/build/common_tools_lib-1.0.0-win64.exe
