@@ -125,3 +125,8 @@ if(PIL_BUILD_BUNDLE)
     include(cmake/installers/mac_bundle_installer.cmake)
     build_mac_bundle()
 endif() # PIL_BUILD_BUNDLE
+
+if(PIL_NSIS_BUILD)
+    include(cmake/installers/windows_nsis_installer.cmake)
+    build_nsis_installer()
+endif() # PIL_NSIS_BUILD
