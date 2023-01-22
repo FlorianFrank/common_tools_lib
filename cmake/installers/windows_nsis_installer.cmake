@@ -32,6 +32,8 @@ function(build_nsis_installer)
     #set(CPACK_NSIS_HELP_LINK ${APP_URL})
     #set(CPACK_NSIS_URL_INFO_ABOUT ${APP_URL})
     set(CPACK_NSIS_CONTACT "Florian.Frank@uni-passau.de")
+
+    include(CPack)
 endfunction() # build_nsis_installer
 
 
