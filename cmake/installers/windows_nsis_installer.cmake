@@ -33,8 +33,8 @@ function(build_nsis_installer)
     set(CPACK_SOURCE_GENERATOR "TGZ")
     set(CPACK_SOURCE_PACKAGE_FILE_NAME "common_tools_lib_1.0.0")
 
-    set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_LIST_DIR}/nsis_bundle/logo.ico")
-    set(CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_LIST_DIR}/nsis_bundle/logo.ico")
+    set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_LIST_DIR}/cmake/installers/nsis_bundle/logo.ico")
+    set(CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_LIST_DIR}/cmake/installers/nsis_bundle/logo.ico")
     set(CPACK_NSIS_URL_INFO_ABOUT "https://florianfrank.github.io/")
     set(CPACK_NSIS_CONTACT "Florian.Frank@uni-passau.de")
 
