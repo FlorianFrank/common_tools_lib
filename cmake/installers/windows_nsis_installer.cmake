@@ -19,7 +19,7 @@ function(build_nsis_installer)
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/libs/windows/libgcc_s_seh-1.dll
                   ${CMAKE_CURRENT_SOURCE_DIR}/libs/windows/libstdc++-6.dll
                   ${CMAKE_CURRENT_SOURCE_DIR}/libs/windows/libwinpthread-1.dll
-            DESTINATION include)
+            DESTINATION lib)
 
     # Custom target for packaging.
     if(USE_NSIS)
