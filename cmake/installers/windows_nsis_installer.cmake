@@ -21,14 +21,6 @@ function(build_nsis_installer)
                   ${CMAKE_CURRENT_SOURCE_DIR}/libs/windows/libwinpthread-1.dll
             DESTINATION lib)
 
-    # Custom target for packaging.
-    if(USE_NSIS)
-        set(CPACK_GENERATOR "NSIS")
-    else(USE_NSIS)
-        set(CPACK_GENERATOR "ZIP")
-    endif(USE_NSIS)
-
-    # CPACK Config
     set(CPACK_PACKAGE_NAME "common_tools_lib")
     set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Platform Independent Lib for common programing tasks")
 
