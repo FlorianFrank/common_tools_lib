@@ -1,18 +1,18 @@
 function(build_nsis_installer)
     if (DEFINED PIL_STATIC)
         install(TARGETS common_tools_lib_static
-                LIBRARY DESTINATION "lib"
-                ARCHIVE "lib"
-                RESOURCE "lib"
+                LIBRARY DESTINATION       "lib"
+                ARCHIVE DESTINATION       "lib"
+                RESOURCE DESTINATION      "lib"
                 PUBLIC_HEADER DESTINATION "include")
     endif () # PIL_STATIC
 
 
     if (DEFINED PIL_SHARED)
         install(TARGETS common_tools_lib
-                LIBRARY DESTINATION "lib"
-                ARCHIVE DESTINATION "lib"
-                RESOURCE DESTINATION "lib"
+                LIBRARY DESTINATION       "lib"
+                ARCHIVE DESTINATION       "lib"
+                RESOURCE DESTINATION      "lib"
                 PUBLIC_HEADER DESTINATION "include")
     endif () # PIL_SHARED
 
