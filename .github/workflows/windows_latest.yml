@@ -60,6 +60,10 @@ jobs:
            .\FileHandlingUnitTest.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V
            .\ThreadingUnitTest.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V
 
+    - name: Generate NSIS installer
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      run: cpack -D CPACK_INCLUDE_TOPLEVEL_DIRECTORY=0 -G NSIS
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
@@ -70,3 +74,9 @@ jobs:
           ${{ runner.workspace }}/build/*.exe
           ${{ runner.workspace }}/build/*.a
           ${{runner.workspace}}/build/test-results/**/*.xml
+
+    - name: Upload NSIS installer
+      uses: actions/upload-artifact@v3
+      with:
+        name: common_tools_lib_1_0_0.zip
+        path: ${{ runner.workspace }}/build/*.exe
