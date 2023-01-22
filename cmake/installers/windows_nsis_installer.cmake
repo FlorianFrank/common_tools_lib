@@ -2,6 +2,8 @@ function(build_nsis_installer)
     if (DEFINED PIL_STATIC)
         install(TARGETS common_tools_lib_static
                 LIBRARY DESTINATION "lib"
+                ARCHIVE "lib"
+                RESOURCE "lib"
                 PUBLIC_HEADER DESTINATION "include")
     endif () # PIL_STATIC
 
@@ -9,8 +11,15 @@ function(build_nsis_installer)
     if (DEFINED PIL_SHARED)
         install(TARGETS common_tools_lib
                 LIBRARY DESTINATION "lib"
+                ARCHIVE "lib"
+                RESOURCE "lib"
                 PUBLIC_HEADER DESTINATION "include")
     endif () # PIL_SHARED
+
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/libs/windows/libgcc_s_seh-1.dll
+                  ${CMAKE_CURRENT_SOURCE_DIR}/libs/windows/libstdc++-6.dll
+                  ${CMAKE_CURRENT_SOURCE_DIR}/libs/windows/libwinpthread-1.dll
+            DESTINATION include)
 
     # Custom target for packaging.
     if(USE_NSIS)
