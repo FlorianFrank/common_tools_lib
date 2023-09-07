@@ -6,19 +6,24 @@
 #include <stdlib.h>
 #include <errno.h> // errno
 #include <stdio.h>
-#include <sys/time.h>
 
 #include "ctlib/Logging.h"
 #include "ctlib/ThreadingDefines.h"
-#include <pthread.h> // mutex
 
-#ifdef __WIN32__
+#if defined(__WIN32__) || defined(_MSC_VER)
 #include <windows.h>
+#else 
+#include <pthread.h> // mutex
+#include <sys/time.h>
 #endif // __WIN32__
 
 
 /** Mutex to provide mutual exclution when log function is called by different threads. */
+#ifdef _MSC_VER 
+HANDLE logMutex;
+#else
 pthread_mutex_t logMutex;
+#endif
 
 #ifdef __linux
 // Color codes for different log levels
@@ -72,6 +77,11 @@ PIL_ERROR_CODE InitializeLogging(const Level level, const char *file)
     if(pthread_mutex_init(&logMutex, NULL) != 0)
         printf("Error could not initialize logMutex\n");
 #endif // __linux__
+#ifdef _MSC_VER
+    logMutex = CreateMutex(NULL, FALSE,NULL); 
+    if(!logMutex)
+        printf("Error while calling CreateMutex\n");
+#endif
     return PIL_NO_ERROR;
 }
 
@@ -99,9 +109,12 @@ if(logFileStream == NULL)
     return;
 }
  //   Threading::AutoMutex am(&mutex);
-#if defined( __linux__) || defined(__WIN32__)
+#if defined( __linux__) || defined(__WIN32__) || !defined(_MSC_VER)
     if(pthread_mutex_lock(&logMutex) != 0)
         printf("Error while calling pthread_mutex_lock\n");
+#elif defined(_MSC_VER)
+    WaitForSingleObject(logMutex, INFINITE);
+    // TODO add error handling
 #endif // __linux__
 
 
@@ -141,9 +154,12 @@ if(logFileStream == NULL)
 
         }
     }
-#if defined(__linux__) || defined(__WIN32__)
+#if defined(__linux__) || defined(__WIN32__) || !defined(_MSC_VER)
     if(pthread_mutex_unlock(&logMutex) != 0)
         printf("Error while calling pthread_mutex_unlock\n");
+#elif defined(_MSC_VER)
+    if(!ReleaseMutex(logMutex))
+        printf("Error while calling ReleaseMutex\n");
 #endif // __linux__
 }
 
