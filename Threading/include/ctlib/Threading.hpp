@@ -3,12 +3,6 @@
  * @author Florian Frank
  */
 #pragma once
-#ifdef _WIN32 // Add dummy defines support in MSVC
-#define unused NULL
-#define __attribute__() 
-#endif 
-
-
 #include "ctlib/ErrorHandler.hpp"
 #include "ctlib/ThreadArg.hpp"
 #include "ctlib/Exception.h"
@@ -29,7 +23,7 @@ namespace PIL
 
         PIL_ERROR_CODE Run(bool loop = FALSE);
 
-        __attribute__((unused)) PIL_ERROR_CODE Detach();
+        PIL_ERROR_CODE Detach();
 
         PIL_ERROR_CODE Join();
 
@@ -100,8 +94,7 @@ PIL_ERROR_CODE PIL::Threading<T>::Abort()
 
 }
 
-template <typename T>
-__attribute__((unused)) PIL_ERROR_CODE PIL::Threading<T>::Detach()
+template <typename T> PIL_ERROR_CODE PIL::Threading<T>::Detach()
 {
     auto errCode = PIL_THREADING_Detach(m_ThreadHandle.get());
 #ifdef PIL_EXCEPTION_HANDLING
