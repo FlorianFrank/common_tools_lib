@@ -2,7 +2,8 @@
  * @copyright University of Passau - Chair of Computer Engineering
  * @author Florian Frank
  */
-#ifdef __WIN32__
+#if defined(__WIN32__) || defined(_WIN32)
+#include <ws2tcpip.h>
 #include <winsock2.h>
 #include <wspiapi.h>
 # else // __linux__
@@ -16,7 +17,12 @@
 #endif // __linux__
 #endif
 #include <string.h> // memset
+
+#if defined(_MSC_VER)
+#include <io.h> // close
+#else
 #include <unistd.h> // close
+#endif 
 
 #include "ctlib/Socket.h"
 #if PIL_THREADING
@@ -34,7 +40,7 @@
 #include <lwip/igmp.h>
 #endif // embedded
 
-#if __WIN32__
+#if defined(__WIN32__) || defined(_WIN32)
     struct WSAData wsa;
 #endif
 
@@ -66,7 +72,7 @@ PIL_ERROR_CODE
 PIL_SOCKET_Create(PIL_SOCKET *socketRet, TransportProtocol protocol, InternetProtocol ipVersion, const char *ipAddress,
                   uint16_t port)
 {
-#ifdef __WIN32__
+#if defined(__WIN32__) || defined(_WIN32)
     if(WSAStartup(MAKEWORD(2,2), &wsa) != 0)
         printf("HALLO");
 #endif
@@ -97,7 +103,7 @@ PIL_SOCKET_Create(PIL_SOCKET *socketRet, TransportProtocol protocol, InternetPro
     if (socketRet->m_socket == -1)
     {
         socketRet->m_IsOpen = FALSE;
-#ifdef __WIN32__
+#if defined(__WIN32__) || defined(_WIN32)
         socketRet->m_ErrorHandle.m_ErrnoCode = WSAGetLastError();
 #else
         socketRet->m_ErrorHandle.m_ErrnoCode = errno;
@@ -133,7 +139,7 @@ PIL_ERROR_CODE PIL_SOCKET_Close(PIL_SOCKET *socketRet)
     if (socketRet->m_IsOpen)
     {
         socketRet->m_IsOpen = FALSE;
-#ifndef __WIN32__
+#if !defined(__WIN32__) || !defined(_WIN32)
         if (close(socketRet->m_socket) != 0)
 #else // __linux__ || __APPLE__
         if (closesocket(socketRet->m_socket) != 0)
@@ -291,7 +297,7 @@ PIL_ERROR_CODE PIL_SOCKET_Connect(PIL_SOCKET *socket, const char *ipAddr, uint16
     struct sockaddr_in address;
     address.sin_family = socket->m_IPVersion;
     address.sin_port = htons(port);
-#if __WIN32__
+#if defined(__WIN32__) || defined(_WIN32)
     address.sin_addr.s_addr = inet_addr(ipAddr);
 #else
     inet_aton(ipAddr, &address.sin_addr);
@@ -299,7 +305,7 @@ PIL_ERROR_CODE PIL_SOCKET_Connect(PIL_SOCKET *socket, const char *ipAddr, uint16
     fd_set fdSet;
     struct timeval tv;
 
-#ifndef __WIN32__
+#if !defined(__WIN32__) && !defined(_WIN32)
     if(timeoutInMs > 0)
     {
         // Setting a timeout requires to set the socket in non-blocking mode
@@ -318,7 +324,7 @@ PIL_ERROR_CODE PIL_SOCKET_Connect(PIL_SOCKET *socket, const char *ipAddr, uint16
 #ifdef __APPLE__
     if(connectRet == -1 && errno != 36) { // Connection in process TODO
 #endif
-#ifdef __WIN32__
+#if defined(__WIN32__) || defined(_WIN32)
         if(connectRet != 0){
         socket->m_ErrorHandle.m_ErrnoCode = WSAGetLastError();
 #else
@@ -336,7 +342,7 @@ PIL_ERROR_CODE PIL_SOCKET_Connect(PIL_SOCKET *socket, const char *ipAddr, uint16
         int selectRet = select(socket->m_socket + 1, NULL, &fdSet, NULL, &tv);
         if (selectRet == 1)
         {
-#if __WIN32__
+#if defined(__WIN32__) || defined(_WIN32)
             char so_error;
 #else
             int so_error;
@@ -411,7 +417,7 @@ PIL_ERROR_CODE PIL_SOCKET_Receive(PIL_SOCKET *socketRet, uint8_t *buffer, uint32
             return retWaitForData;
     }
 
-#if __WIN32__
+#if defined(__WIN32__) || defined(_WIN32)
     uint32_t ret = recv(socketRet->m_socket, (char*)buffer, *bufferLen, 0);
 #else
     ssize_t ret = recv(socketRet->m_socket, buffer, *bufferLen, 0);

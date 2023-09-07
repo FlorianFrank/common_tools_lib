@@ -6,9 +6,7 @@
 #define PLATFORMINDEPENDENTLIB_SOCKETDEFINES_H
 
 #include <stdint.h>
-#ifdef __WIN32__
-
-#else
+#if !defined(__WIN32__) && !defined(_WIN32)
 #include <zconf.h>
 #endif // __WIN32__
 
@@ -18,9 +16,9 @@
 #include <sys/socket.h>
 #endif // __linux
 
-#ifdef __WIN32__
+#if defined(__WIN32__) || defined(_WIN32)
 #include <winsock.h>
-#undef ERROR // Satisfy mingwo on windows due to macro redefinition
+#undef ERROR // Satisfy mingw on windows due to macro redefinition
 #endif // __WIN32__
 
 #else // LWIP
