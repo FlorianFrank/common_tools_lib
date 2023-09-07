@@ -1,4 +1,4 @@
-#ifndef __WIN32__
+#if !defined(__WIN32__) &&  !defined(_WIN32) // Currently no windows support
 #pragma once
 #if defined(__linux__) || defined(__APPLE__)
 #include <ctime>
