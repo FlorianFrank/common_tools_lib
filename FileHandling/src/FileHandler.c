@@ -3,8 +3,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
-#ifdef _MSC_VER
-#elif 
+#ifndef _MSC_VER
 #include "dirent.h"
 #endif
 
