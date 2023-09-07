@@ -44,7 +44,7 @@ jobs:
     - name: Configure CMake
       working-directory: ${{runner.workspace}}/build
       shell: pwsh
-      run: cmake ../common_tools_lib -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=${{matrix.config.build_type}} -DPIL_ALL=1 -DPIL_UNIT_TESTING=1 -DPIL_NSIS_BUILD=1
+      run: cmake ../common_tools_lib -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=${{matrix.config.build_type}} -DPIL_ALL=1 -DPIL_UNIT_TESTING=1 -DPIL_NSIS_BUILD=1
 
     - name: Build Project
       working-directory: ${{runner.workspace}}/build
