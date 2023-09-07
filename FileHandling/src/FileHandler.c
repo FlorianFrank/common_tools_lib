@@ -3,7 +3,10 @@
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
+#ifdef _MSC_VER
+#elif 
 #include "dirent.h"
+#endif
 
 
 /**
@@ -181,7 +184,7 @@ PIL_ERROR_CODE PIL_ReadDataFromFile(const char* fileName, uint8_t* buffer, uint3
 PIL_ERROR_CODE
 PIL_ListFilesInDirectory(const char *path, uint8_t filter, PIL_FileListElem *listOfFiles, PIL_BOOL recursive)
 {
-#ifndef __WIN32__
+#if !defined(__WIN32__) && !defined(_WIN32)
     if(!path || !listOfFiles)
         return PIL_INVALID_ARGUMENTS;
 
