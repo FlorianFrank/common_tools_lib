@@ -1,10 +1,10 @@
 //
 // Created by frank55 on 10.11.2020.
 //
-#ifdef __WIN32__ // TODO no Win32 support yet
-#include <fileapi.h>
-#include "windows.h"
-#include <winbase.h>
+#if defined(__WIN32__) || defined(_WIN32)// TODO no Win32 support yet
+//#include <fileapi.h>
+//#include "windows.h"
+//#include <winbase.h>
 #else
 #include "ctlib/UARTInterface.h"
 #include "ctlib/ErrorHandler.h"

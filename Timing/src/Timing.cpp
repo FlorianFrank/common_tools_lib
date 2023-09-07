@@ -1,5 +1,5 @@
 #include "ctlib/Timing.hpp"
-#ifndef __WIN32__
+#if  !defined(__WIN32__) && !defined(_WIN32)
 #if defined(__linux__) || defined(__APPLE__)
 #include <iostream>
 #include <numeric>
