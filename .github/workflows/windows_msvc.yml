@@ -1,0 +1,81 @@
+name: windows_latest_msvc
+
+on: [push]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+        fail-fast: false
+        matrix:
+            config:
+            - {
+                name: "Windows Latest MSVC",
+                os: windows-latest,
+                artifact: "windows_msvc.7z",
+                msvc_arch: x64_x86,
+                build_type: "Release",
+                CC: cl,
+                CXX: cl,
+                archiver: "7z a",
+                generators: "Ninja"
+              }
+
+    steps:
+    - uses: actions/setup-node@v2
+      with:
+          node-version: ${{ matrix.node }}
+
+    - name: Checkout Repository and Submodules
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{runner.workspace}}/build
+
+    - name: Copy Windows DLLs
+      working-directory: ${{runner.workspace}}/common_tools_lib
+      run: cp libs/windows/* ${{runner.workspace}}/build
+
+    - name: Configure CMake
+      working-directory: ${{runner.workspace}}/build
+      shell: pwsh
+      run: cmake ../common_tools_lib -GNinja -DCMAKE_BUILD_TYPE=${{matrix.config.build_type}} -DPIL_ALL=1 -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc -DPIL_UNIT_TESTING=1 -DPIL_NSIS_BUILD=1
+
+    - name: Build Project
+      working-directory: ${{runner.workspace}}/build
+      shell: pwsh
+      run: cmake --build . --config ${{ matrix.config.build_type }} --target all
+
+    - name: Run UnitTests
+      working-directory: ${{runner.workspace}}/build
+      run: .\SocketUnitTest.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V;
+           .\ExceptionUnitTest.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V;
+           .\FileHandlingUnitTest.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V
+           .\ThreadingUnitTest.exe GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V
+
+    - name: Generate NSIS installer
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      run: cpack -D CPACK_INCLUDE_TOPLEVEL_DIRECTORY=0 -G NSIS
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: common_tools_lib_windows_msvc_x64
+        path: |
+          ${{ runner.workspace }}/build/*.dll
+          ${{ runner.workspace }}/build/*.exe
+          ${{ runner.workspace }}/build/*.a
+          ${{runner.workspace}}/build/test-results/**/*.xml
+
+    - name: Upload Windows Installer
+      uses: actions/upload-artifact@v3
+      with:
+        name: common_tools_lib-installer.zip
+        path: ${{ runner.workspace }}/build/common_tools_lib-1.0.0-win64.exe
