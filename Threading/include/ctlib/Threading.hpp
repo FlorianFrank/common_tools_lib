@@ -3,6 +3,11 @@
  * @author Florian Frank
  */
 #pragma once
+#ifdef _WIN32 // Add dummy defines support in MSVC
+#define unused NULL
+#define __attribute__() 
+#endif 
+
 
 #include "ctlib/ErrorHandler.hpp"
 #include "ctlib/ThreadArg.hpp"
