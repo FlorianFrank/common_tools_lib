@@ -1,6 +1,25 @@
 cmake_minimum_required(VERSION 3.0)
 
-set(CMAKE_C_FLAGS "-Wall -pedantic -Werror -g3 ${CMAKE_C_FLAGS}")
+#TODO REMOVE
+# Set general CXX options
+set(CMAKE_CXX_STANDARD 17)
+add_definitions(-DPIL_CXX=1)
+
+# Definitions for the platform independent abstraction layer.
+option(PIL_COMMUNICATION        "Enable PIL Sockets"                    ON)
+option(PIL_THREADING            "Enable PIL Threads"                    ON)
+option(PIL_FILE_HANDLING        "Enable file handling"                  ON)
+option(PIL_LOGGING              "Enable Logging support"                ON)
+option(PIL_SHARED               "BUILD PIL as shared library"          OFF)
+option(PIL_STATIC               "BUILD PIL as static library"           ON)
+option(PIL_CXX                  "Enable PIL C++ support"                ON)
+option(PIL_UNIT_TESTING         "Enable PIL Unit Testing"               ON)
+option(PIL_EXCEPTION_HANDLING   "Enable Exceptions in common_tools_lib" ON)
+
+option(BLOCKING_RECEIVE "If ON blocking receive functions are used otherwise use asynchronous callback function" OFF)
+
+
+#set(CMAKE_C_FLAGS "-Wall -pedantic -Werror -g3 ${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
