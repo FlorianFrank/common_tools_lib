@@ -13,7 +13,11 @@
 int lastThreadCtr = 0;
 
 
+#if defined(_MSC_VER)
+DWORD WINAPI ThreadFunction(void *threadArgs)
+#else
 void* ThreadFunction(void *threadArgs)
+#endif // _MSC_VER
 {
     PIL_ThreadArgument *pilThreadArgument = (PIL_ThreadArgument*)threadArgs;
     do{
@@ -53,7 +57,7 @@ PIL_ERROR_CODE PIL_THREADING_RunThread(ThreadHandle *threadHandle, PIL_BOOL loop
         PIL_SetLastErrorMsg(&threadHandle->m_ErrorHandle, PIL_THREAD_NOT_FOUND,
             "Error while calling CreateThread().");
 #else
-    int ret = pthread_create(&threadHandle->m_Handle, NULL, ThreadFunction, &threadHandle->m_ThreadArgument);
+        int ret = pthread_create(&threadHandle->m_Handle, NULL, ThreadFunction, &threadHandle->m_ThreadArgument);
     if (ret != 0)
     {
         switch (ret)
